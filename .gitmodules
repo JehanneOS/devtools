@@ -1,3 +1,4 @@
 [submodule "third_party/src/github.com/lionkov/ninep"]
 	path = third_party/src/github.com/lionkov/ninep
 	url = https://github.com/JehanneOS/devtools-ninep.git
+	branch = master
