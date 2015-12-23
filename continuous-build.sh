@@ -2,12 +2,15 @@
 set -e
 
 if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
-	export JEHANNE=`git rev-parse --show-toplevel|sed 's/\/hacking//g'`
+	cd `dirname $0`
+	export JEHANNE=`pwd`
 	export PATH="$JEHANNE/hacking/bin:$PATH"
 	export SH=`which rc`
 	export ARCH=amd64
 	git clean -x -d -f
-	(cd $JEHANNE && ./hacking/buildtools.sh)
+	if [ ! -f "$JEHANNE/hacking/bin/ufs" ]; then
+		./hacking/buildtools.sh
+	fi
 
 	echo
 	echo "Vendorized code verification..."
