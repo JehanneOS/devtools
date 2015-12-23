@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
+if [ "${COVERITY_SCAN_BRANCH}" == "1" ]; then
 	if [ -z "$JEHANNE" ]; then
 		export JEHANNE=`git rev-parse --show-toplevel|sed 's/\/hacking//g'`
 		export PATH="$JEHANNE/hacking/bin:$PATH"
