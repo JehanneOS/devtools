@@ -17,7 +17,7 @@ fi
 
 cd $JEHANNE/arch/$ARCH/kern/
 read -r cmd <<EOF
-$kvmdo qemu-system-x86_64 -s -cpu Opteron_G1 -smp 1 -m 2048 $kvmflag \
+$kvmdo qemu-system-x86_64 -s -cpu Haswell -smp 2 -m 2048 $kvmflag \
 -serial stdio \
 --machine $machineflag \
 -net nic,model=rtl8139 \
