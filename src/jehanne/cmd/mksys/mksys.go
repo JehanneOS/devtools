@@ -258,7 +258,7 @@ const(
 #include "mem.h"
 #include "dat.h"
 #include "fns.h"
-#include "../../libc/9syscall/sys.h"
+#include <9syscall/sys.h>
 
 {{ range . }}extern void {{ .Sysname }}(Ar0*, ...);
 {{ end }}
