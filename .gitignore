@@ -2,3 +2,4 @@ third_party/pkg/
 third_party/src/github.com/kr/
 third_party/src/golang.org/
 sample-*.img
+disk-setup/bios/

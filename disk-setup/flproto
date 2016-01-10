@@ -1,5 +1,6 @@
 srv -p fscons
 srv fossil
-fsys main config /dev/sdF0/fossil
+fsys main config /dev/sdE1/fossil
 fsys main open -AWP
 fsys main
+
