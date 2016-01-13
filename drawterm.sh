@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$JEHANNE" == "" ]; then
+if [ "$JEHANNE" = "" ]; then
 	echo ./hacking/drawterm.sh requires the shell started by ./hacking/devshell.sh
 	exit 1
 fi

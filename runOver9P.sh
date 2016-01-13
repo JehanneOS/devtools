@@ -1,7 +1,7 @@
 #!/bin/sh
 
-if [ "$JEHANNE" == "" ]; then
-        echo ./hacking/newdisk.sh requires the shell started by ./hacking/devshell.sh
+if [ "$JEHANNE" = "" ]; then
+        echo ./hacking/runOver9P.sh newdisk.sh requires the shell started by ./hacking/devshell.sh
         exit 1
 fi
 
