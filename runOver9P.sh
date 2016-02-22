@@ -27,7 +27,8 @@ fi
 
 cd $JEHANNE/arch/$ARCH/kern/
 read -r cmd <<EOF
-$kvmdo qemu-system-x86_64 -s -cpu Haswell -smp 2 -m 2048 $kvmflag \
+$kvmdo qemu-system-x86_64 -s -cpu Haswell -smp 1 -m 2048 $kvmflag \
+-no-reboot -D $JEHANNE/../qemu.log -d int,cpu_reset \
 -serial stdio \
 --machine $machineflag \
 $bootDisk $dataDisk \
@@ -40,6 +41,8 @@ $bootDisk $dataDisk \
 -append "nobootprompt=tcp maxcores=1024 fs=10.0.2.2 auth=10.0.2.2 nvram=/boot/nvram nvrlen=512 nvroff=0" \
 -kernel jehanne.32bit $*
 EOF
+
+#-no-reboot -D $JEHANNE/../qemu.log -d int,cpu_reset,in_asm \
 
 echo $cmd
 eval $cmd
