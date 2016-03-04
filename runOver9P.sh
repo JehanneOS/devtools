@@ -28,7 +28,6 @@ fi
 cd $JEHANNE/arch/$ARCH/kern/
 read -r cmd <<EOF
 $kvmdo qemu-system-x86_64 -s -cpu Haswell -smp 1 -m 2048 $kvmflag \
--no-reboot -D $JEHANNE/../qemu.log -d int,cpu_reset \
 -serial stdio \
 --machine $machineflag \
 $bootDisk $dataDisk \
@@ -42,7 +41,14 @@ $bootDisk $dataDisk \
 -kernel jehanne.32bit $*
 EOF
 
+# To enable qemu log:
 #-no-reboot -D $JEHANNE/../qemu.log -d int,cpu_reset,in_asm \
+
+# To wait for a gdb connection prepend to -append "waitgdb"
+# then from gdb:
+#     (gdb) target remote :1234
+#     (gdb) p at=1
+# now you can set your breakpoints and continue
 
 echo $cmd
 eval $cmd
