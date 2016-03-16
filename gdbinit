@@ -1,11 +1,20 @@
+set pagination off
 set logging file ../qemu-gdb.log
 set logging overwrite on
 set logging on
 
+define log_mach_proc
+	if up != 0 
+		printf "%s %d ", up->text, up->pid
+	end
+	if m != 0
+		printf "(mach %d) ", m->machno
+	end
+end
+
 define log_syscall
-	p up->pid
-	p up->text
-	info locals
+	log_mach_proc
+	printf "\n"
 	c
 end
 
@@ -217,6 +226,6 @@ define log_syscalls
 
 end
 
-log_syscalls
+#log_syscalls
 
 
