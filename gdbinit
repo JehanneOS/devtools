@@ -141,8 +141,9 @@ define log_syscalls
 	end
 
 	# sysawake
-	b ../port/sysproc.c:673
+	b ../port/sysproc.c:682
 	commands
+	printf "sys->ticks %lld ms %lld \n", sys->ticks, ms
 	log_syscall
 	end
 
@@ -171,56 +172,114 @@ define log_syscalls
 	end
 
 	# sysexits
-	b ../port/sysproc.c:691
+	b ../port/sysproc.c:702
 	commands
+	if status != 0
+		printf "status: %s", status
+	else
+		printf "status: (nil)"
+	end
 	log_syscall
 	end
 
 	# sysnoted
-	b ../port/sysproc.c:829
+	b ../port/sysproc.c:840
 	commands
 	log_syscall
 	end
 
 	# sysrendezvous
-	b ../port/sysproc.c:851
+	b ../port/sysproc.c:861
 	commands
+	printf "tag %llu rendval %llu\n", tag, rendval
+	printf "sys->ticks %lld lastWakeup %lld pendingWakeup %lld \n", sys->ticks, up->lastWakeup, up->pendingWakeup
 	log_syscall
 	end
 
 	# sysnotify
-	b ../port/sysproc.c:809
+	b ../port/sysproc.c:820
 	commands
 	log_syscall
 	end
 
 	# sysnsec
-	b ../port/sysproc.c:1215
+	b ../port/sysproc.c:1233
 	commands
 	log_syscall
 	end
 
 	# syssemacquire
-	b ../port/sysproc.c:1150
+	b ../port/sysproc.c:1167
 	commands
 	log_syscall
 	end
 
 	# syssemrelease
-	b ../port/sysproc.c:1204
+	b ../port/sysproc.c:1222
 	commands
 	log_syscall
 	end
 
 	# syssleep
-	b ../port/sysproc.c:629
+	b ../port/sysproc.c:640
 	commands
+	printf "ms %lld\n", ms
 	log_syscall
 	end
 
 	# systsemacquire
-	b ../port/sysproc.c:1177
+	b ../port/sysproc.c:1193
 	commands
+	log_syscall
+	end
+
+end
+
+define debug_awake
+	# awakekproc
+	b ../port/awake.c:139
+	commands
+		printf "%s %d ", p->text, p->pid
+		printf "p->state %d p->lastWakeup %lld toAwake->time %d \n", p->state, p->lastWakeup, toAwake->time
+		c
+	end
+
+	# sysawake
+	b ../port/sysproc.c:682
+	commands
+	printf "sys->ticks %lld ms %lld \n", sys->ticks, ms
+	log_syscall
+	end
+
+	# sysrendezvous
+	b ../port/sysproc.c:861
+	commands
+	printf "ENTER: \n tag %llu rendval %llu\n", tag, rendval
+	printf "sys->ticks %lld lastWakeup %lld pendingWakeup %lld \n", sys->ticks, up->lastWakeup, up->pendingWakeup
+	log_syscall
+	end
+
+	# sysrendezvous
+	b ../port/sysproc.c:879
+	commands
+	printf "EXIT on match: \n tag %llu rendval %llu\n", tag, rendval
+	printf "sys->ticks %lld lastWakeup %lld pendingWakeup %lld \n", sys->ticks, up->lastWakeup, up->pendingWakeup
+	log_syscall
+	end
+
+	# sysrendezvous
+	b ../port/sysproc.c:886
+	commands
+	printf "EXIT on awaken: \n tag %llu rendval %llu\n", tag, rendval
+	printf "sys->ticks %lld lastWakeup %lld pendingWakeup %lld \n", sys->ticks, up->lastWakeup, up->pendingWakeup
+	log_syscall
+	end
+
+	# sysrendezvous
+	b ../port/sysproc.c:902
+	commands
+	printf "EXIT after wait: \n tag %llu rendval %llu\n", tag, rendval
+	printf "sys->ticks %lld lastWakeup %lld pendingWakeup %lld \n", sys->ticks, up->lastWakeup, up->pendingWakeup
 	log_syscall
 	end
 
