@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export SDL_VIDEO_X11_DGAMOUSE=0 # see https://wiki.archlinux.org/index.php/QEMU#Mouse_cursor_is_jittery_or_erratic
+
 if [ "$JEHANNE" = "" ]; then
         echo ./hacking/runOver9P.sh newdisk.sh requires the shell started by ./hacking/devshell.sh
         exit 1
