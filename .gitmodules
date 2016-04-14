@@ -5,6 +5,3 @@
 [submodule "third_party/src/github.com/0intro/drawterm"]
 	path = third_party/src/github.com/0intro/drawterm
 	url = https://github.com/JehanneOS/devtools-drawterm.git
-[submodule "third_party/src/github.com/JehanneOS/devtools-kencc"]
-	path = third_party/src/github.com/JehanneOS/devtools-kencc
-	url = https://github.com/JehanneOS/devtools-kencc.git
