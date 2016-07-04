@@ -39,12 +39,16 @@ EOF
 	/sbin/mkdosfs $BOOT
 	syslinux $BOOT
 
+if [ -d $JEHANNE/hacking/disk-setup/bios/ ]; then
 	rm $JEHANNE/hacking/disk-setup/bios/*
+else
+	mkdir $JEHANNE/hacking/disk-setup/bios/
+fi
 	cp $SYSLINUXBIOS/lib* $JEHANNE/hacking/disk-setup/bios/
 	cp $SYSLINUXBIOS/elf.c32 $JEHANNE/hacking/disk-setup/bios/
 	cp $SYSLINUXBIOS/mboot.c32 $JEHANNE/hacking/disk-setup/bios/
 
-	 cat << EOF | runqemu
+	cat << EOF | runqemu
 dossrv -f /dev/sdE0/data
 mkdir dos/
 mount -ac '#s/dos' dos/
@@ -82,25 +86,13 @@ if [ ! -f $DISK ]; then
     q     #quit
 EOF
 
-exit 1
 	# install everything
 	cat << EOF | runqemu
 disk/fdisk -aw /dev/sdE1/data
 disk/fdisk -p /dev/sdE1/data
 disk/prep -w -a nvram -a fs /dev/sdE1/plan9
-disk/prep -p /dev/sdE1/plan9 >/dev/sdE0/ctl >[2]/dev/null
 hjfs -n hjfs -Srf /dev/sdE1/fs
-{
-	echo echo on
-	echo create /dist sys sys 775 d
-	echo create /usr sys sys 775 d
-	echo newuser glenda
-	echo newuser adm +glenda
-	echo newuser sys +glenda
-	echo newuser upas +glenda
-	echo echo off
-	sleep 2
-} >>/srv/hjfs.cmd
+/hacking/disk-setup/configure-hjfs >>/srv/hjfs.cmd
 mount -c /srv/hjfs /n/newfs
 cd /n/newfs
 mkdir arch
@@ -127,6 +119,7 @@ dircp /root/sys/include include/
 dircp /root/sys/src src/
 mkdir log
 cd /n/newfs
+lc
 EOF
 
 else

@@ -22,6 +22,9 @@ if [ "$(uname)" = "Linux" ] && [ -e /dev/kvm ]; then
         fi
 fi
 
+export NVRAM=/boot/nvram
+export FS="nobootprompt=tcp fs=10.0.2.2 auth=10.0.2.2"
+
 if [ "$BOOT" = "" ]; then
 	export BOOT=$JEHANNE/hacking/sample-boot.img
 fi
@@ -34,6 +37,8 @@ if [ -f $BOOT ]; then
 fi
 if [ -f $DISK ]; then
 	dataDisk="-device ahci,id=ahci2 -drive id=disk,file=$DISK,index=1,cache=writeback,if=none -device ide-drive,drive=disk,bus=ahci.1"
+	NVRAM="#S/sdE1/nvram"
+	FS="nobootprompt=local!#S/sdE1"
 fi
 
 cd $JEHANNE/arch/$ARCH/kern/
@@ -48,7 +53,7 @@ $bootDisk $dataDisk \
 -redir tcp:9999::9 \
 -redir tcp:17010::17010 \
 -redir tcp:17013::17013 \
--append "nobootprompt=tcp maxcores=1024 fs=10.0.2.2 auth=10.0.2.2 nvram=/boot/nvram nvrlen=512 nvroff=0" \
+-append "maxcores=1024 nvram=$NVRAM nvrlen=512 nvroff=0 $FS" \
 -kernel jehanne.32bit $*
 EOF
 
