@@ -120,6 +120,10 @@ dircp /root/sys/src src/
 mkdir log
 cd /n/newfs
 lc
+unmount /n/newfs
+echo df >> /srv/hjfs.cmd
+echo sync >> /srv/hjfs.cmd
+echo halt >> /srv/hjfs.cmd
 EOF
 
 else
