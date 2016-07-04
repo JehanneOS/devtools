@@ -7,12 +7,16 @@ fi
 
 # Create the boot disk
 if [ "$BOOT" == "" ]; then
-	BOOT=$JEHANNE/hacking/sample-boot.img
+	export BOOT=$JEHANNE/hacking/sample-boot.img
 fi
 
-SYSLINUXBIOS=/usr/lib/syslinux/modules/bios/ # GNU/Linux Debian way
+
+if [ "$SYSLINUXBIOS" == "" ]; then
+	export SYSLINUXBIOS=/usr/lib/syslinux/modules/bios/ # GNU/Linux Debian way
+fi
 if [ ! -d "$SYSLINUXBIOS" ]; then
-	echo "Missing $SYSLINUXBIOS" # TODO make me configurable
+	echo 'Missing $SYSLINUXBIOS: install syslinux-utils or set it to the proper path.'
+	exit 1
 fi
 
 if [ ! -f $BOOT ]; then
@@ -52,10 +56,15 @@ unmount dos/
 rm -r dos/
 EOF
 
+else
+	echo Boot disk already exists: $BOOT
 fi
 
 # Create the data disk
-DISK=$JEHANNE/hacking/sample-disk.img
+if [ "$DISK" == "" ]; then
+	export DISK=$JEHANNE/hacking/sample-disk.img
+fi
+
 if [ ! -f $DISK ]; then
 	qemu-img create $DISK 3G
 
@@ -73,40 +82,43 @@ if [ ! -f $DISK ]; then
     q     #quit
 EOF
 
+exit 1
 	# install everything
 	cat << EOF | runqemu
 disk/fdisk -aw /dev/sdE1/data
-disk/prep -w -a^(nvram fossil arenas bloom isect) /dev/sdE1/plan9
-venti/fmtarenas arenas0 /dev/sdE1/arenas
-venti/fmtisect isect0 /dev/sdE1/isect
-venti/fmtindex /hacking/disk-setup/venti.conf
-venti/conf -w /dev/sdE1/arenas < /hacking/disk-setup/venti.conf
-venti/venti -c /dev/sdE1/arenas
-venti=127.0.0.1
-fossil/flfmt /dev/sdE1/fossil
-echo status \$status
-fossil/conf -w /dev/sdE1/fossil /hacking/disk-setup/flproto
-echo status \$status
-fossil/fossil -f /dev/sdE1/fossil
-fossil/fossil -c 'fsys main config /dev/sdE1/fossil' -c 'fsys main open -AWP' -c 'fsys main create /active/adm adm sys d775' -c 'fsys main create /active/adm/users adm sys 664' -c 'users -w'
-mount -c /srv/fossil /n/fossil
-cd /n/fossil
+disk/fdisk -p /dev/sdE1/data
+disk/prep -w -a nvram -a fs /dev/sdE1/plan9
+disk/prep -p /dev/sdE1/plan9 >/dev/sdE0/ctl >[2]/dev/null
+hjfs -n hjfs -Srf /dev/sdE1/fs
+{
+	echo echo on
+	echo create /dist sys sys 775 d
+	echo create /usr sys sys 775 d
+	echo newuser glenda
+	echo newuser adm +glenda
+	echo newuser sys +glenda
+	echo newuser upas +glenda
+	echo echo off
+	sleep 2
+} >>/srv/hjfs.cmd
+mount -c /srv/hjfs /n/newfs
+cd /n/newfs
 mkdir arch
 cd arch
 dircp /root/arch .
-cd /n/fossil
+cd /n/newfs
 mkdir lib
 cd lib
 dircp /root/lib .
-cd /n/fossil
+cd /n/newfs
 mkdir mnt
 cd mnt
 dircp /root/mnt .
-cd /n/fossil
+cd /n/newfs
 mkdir usr
 cd usr
 dircp /root/usr .
-cd /n/fossil
+cd /n/newfs
 mkdir sys
 cd sys
 mkdir include
@@ -114,12 +126,10 @@ mkdir src
 dircp /root/sys/include include/
 dircp /root/sys/src src/
 mkdir log
-cd /n/fossil
-mkdir rc
-cd rc
-dircp /root/rc .
-fossil/fossil -c 'fsys main config /dev/sdE1/fossil' -c 'fsys main open -AWP' -c 'fsys main snap -a'
+cd /n/newfs
 EOF
 
+else
+	echo Root disk already exists: $DISK
 fi
 
