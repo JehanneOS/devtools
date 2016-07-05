@@ -93,6 +93,7 @@ disk/fdisk -aw /dev/sdE1/data
 disk/fdisk -p /dev/sdE1/data >> /dev/sdE1/ctl
 cat /dev/sdE1/ctl
 disk/prep -w -a 9fat -a nvram -a fs /dev/sdE1/plan9
+dd -if /hacking/nvram -of /dev/sdE1/nvram
 disk/prep -p /dev/sdE1/plan9 >> /dev/sdE1/ctl
 cat /dev/sdE1/ctl
 hjfs -n hjfs -Srf /dev/sdE1/fs
