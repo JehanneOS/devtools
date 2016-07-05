@@ -70,7 +70,7 @@ if [ "$DISK" == "" ]; then
 fi
 
 if [ ! -f $DISK ]; then
-	qemu-img create $DISK 3G
+	qemu-img create $DISK 4G
 
 	sed -e 's/^\s*\([\+0-9a-zA-Z]*\)[ ].*/\1/' << EOF | /sbin/fdisk $DISK
     o     #clear partition table
@@ -88,10 +88,14 @@ EOF
 
 	# install everything
 	cat << EOF | runqemu
+cat /dev/sdE1/ctl
 disk/fdisk -aw /dev/sdE1/data
-disk/fdisk -p /dev/sdE1/data
+disk/fdisk -p /dev/sdE1/data >> /dev/sdE1/ctl
+cat /dev/sdE1/ctl
 disk/prep -w -a nvram -a fs /dev/sdE1/plan9
-hjfs -n hjfs -Srf /dev/sdE1/fs
+disk/prep -p /dev/sdE1/plan9 >> /dev/sdE1/ctl
+cat /dev/sdE1/ctl
+hjfs -n hjfs -f /dev/sdE1/fs
 /hacking/disk-setup/configure-hjfs >>/srv/hjfs.cmd
 mount -c /srv/hjfs /n/newfs
 cd /n/newfs
@@ -105,7 +109,10 @@ dircp /root/lib .
 cd /n/newfs
 mkdir mnt
 cd mnt
-dircp /root/mnt .
+mkdir temp
+mkdir term
+mkdir acme
+mkdir wsys
 cd /n/newfs
 mkdir usr
 cd usr
@@ -116,7 +123,6 @@ cd sys
 mkdir include
 mkdir src
 dircp /root/sys/include include/
-dircp /root/sys/src src/
 mkdir log
 cd /n/newfs
 lc
@@ -125,6 +131,7 @@ echo df >> /srv/hjfs.cmd
 echo sync >> /srv/hjfs.cmd
 echo halt >> /srv/hjfs.cmd
 EOF
+#dircp /root/sys/src src/
 
 else
 	echo Root disk already exists: $DISK
