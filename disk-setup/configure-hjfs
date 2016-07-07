@@ -7,6 +7,8 @@ echo newuser glenda
 echo newuser adm +glenda
 echo newuser sys +glenda
 echo newuser upas +glenda
+echo sync
 echo echo off
+echo halt
 sleep 2
 

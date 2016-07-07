@@ -5,12 +5,6 @@ if [ "$JEHANNE" = "" ]; then
 	exit 1
 fi
 
-# Create the boot disk
-if [ "$BOOT" == "" ]; then
-	export BOOT=$JEHANNE/hacking/sample-boot.img
-fi
-
-
 if [ "$SYSLINUXBIOS" == "" ]; then
 	export SYSLINUXBIOS=/usr/lib/syslinux/modules/bios/ # GNU/Linux Debian way
 fi
@@ -19,50 +13,14 @@ if [ ! -d "$SYSLINUXBIOS" ]; then
 	exit 1
 fi
 
-if [ ! -f $BOOT ]; then
-	qemu-img create $BOOT 40M
-
-	sed -e 's/^\s*\([\+0-9a-zA-Z]*\)[ ].*/\1/' << EOF | /sbin/fdisk $BOOT
-    o     #clear partition table
-    n     #new partition
-    p     #primary partition
-    1     #partition 1
-          #start at beginning of disk
-          #end at the end of disk
-    t     #change type
-    c     #W95 FAT32 (LBA)
-    a     #make it bootable
-    p     #print partition table
-    w     #write partition table
-    q     #quit
-EOF
-	/sbin/mkdosfs $BOOT
-	syslinux $BOOT
-
 if [ -d $JEHANNE/hacking/disk-setup/bios/ ]; then
 	rm $JEHANNE/hacking/disk-setup/bios/*
 else
 	mkdir $JEHANNE/hacking/disk-setup/bios/
 fi
-	cp $SYSLINUXBIOS/lib* $JEHANNE/hacking/disk-setup/bios/
-	cp $SYSLINUXBIOS/elf.c32 $JEHANNE/hacking/disk-setup/bios/
-	cp $SYSLINUXBIOS/mboot.c32 $JEHANNE/hacking/disk-setup/bios/
-
-	cat << EOF | runqemu
-dossrv -f /dev/sdE0/data
-mkdir dos/
-mount -ac '#s/dos' dos/
-cp /arch/amd64/kern/jehanne.32bit dos/
-cp /hacking/disk-setup/syslinux.cfg dos/
-cp /hacking/disk-setup/bios/* dos/
-du dos/
-unmount dos/
-rm -r dos/
-EOF
-
-else
-	echo Boot disk already exists: $BOOT
-fi
+cp $SYSLINUXBIOS/lib* $JEHANNE/hacking/disk-setup/bios/
+cp $SYSLINUXBIOS/elf.c32 $JEHANNE/hacking/disk-setup/bios/
+cp $SYSLINUXBIOS/mboot.c32 $JEHANNE/hacking/disk-setup/bios/
 
 # Create the data disk
 if [ "$DISK" == "" ]; then
@@ -78,8 +36,17 @@ if [ ! -f $DISK ]; then
     p     #primary partition
     1     #partition 1
           #start at beginning of disk
+    +40M  #reserve 40 megabytes
+    t     #change type
+    c     #W95 FAT32 (LBA)
+    a     #make it bootable
+    n     #new partition
+    p     #primary partition
+    2     #partition 2
+          #start at first free sector
           #end at the end of disk
     t     #change type
+    2     #partition 2
     39    #Plan 9
     p     #print partition table
     w     #write partition table
@@ -88,17 +55,22 @@ EOF
 
 	# install everything
 	cat << EOF | runqemu
-cat /dev/sdE1/ctl
-disk/fdisk -aw /dev/sdE1/data
-disk/fdisk -p /dev/sdE1/data >> /dev/sdE1/ctl
-cat /dev/sdE1/ctl
-disk/prep -w -a 9fat -a nvram -a fs /dev/sdE1/plan9
-dd -if /hacking/nvram -of /dev/sdE1/nvram
-disk/prep -p /dev/sdE1/plan9 >> /dev/sdE1/ctl
-cat /dev/sdE1/ctl
-hjfs -n hjfs -Srf /dev/sdE1/fs
+disk/fdisk -p /dev/sdE0/data >> /dev/sdE0/ctl
+disk/prep -w -a nvram -a fs /dev/sdE0/plan9
+disk/prep -p /dev/sdE0/plan9 >> /dev/sdE0/ctl
+cat /dev/sdE0/ctl
+
+disk/format -d /dev/sdE0/dos /hacking/disk-setup/syslinux.cfg /arch/amd64/kern/jehanne.32bit /hacking/disk-setup/bios/*
+
+dd -if /hacking/nvram -of /dev/sdE0/nvram
+
+hjfs -n hjfs -Srf /dev/sdE0/fs
 /hacking/disk-setup/configure-hjfs >>/srv/hjfs.cmd
+hjfs -n hjfs -Sf /dev/sdE0/fs
 mount -c /srv/hjfs /n/newfs
+cd /n/newfs
+cd cfg
+dircp /root/cfg .
 cd /n/newfs
 mkdir arch
 cd arch
@@ -135,7 +107,8 @@ sleep 60
 echo halt >> /srv/hjfs.cmd
 sleep 20
 EOF
-
+	syslinux --offset $((2048*512)) $DISK
+	dd bs=440 count=1 conv=notrunc if=/usr/lib/syslinux/mbr/mbr.bin of=$DISK
 else
 	echo Root disk already exists: $DISK
 fi

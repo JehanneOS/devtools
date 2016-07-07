@@ -20,18 +20,12 @@ if [ "$(uname)" = "Linux" ] && [ -e /dev/kvm ]; then
         fi
 fi
 
-if [ "$BOOT" = "" ]; then
-	export BOOT=$JEHANNE/hacking/sample-boot.img
-fi
 if [ "$DISK" = "" ]; then
 	export DISK=$JEHANNE/hacking/sample-disk.img
 fi
 
-if [ -f $BOOT ]; then
-	bootDisk="-device ahci,id=ahci -drive id=boot,file=$BOOT,index=0,cache=writeback,if=none -device ide-drive,drive=boot,bus=ahci.0"
-fi
 if [ -f $DISK ]; then
-	dataDisk="-device ahci,id=ahci2 -drive id=disk,file=$DISK,index=1,cache=writeback,if=none -device ide-drive,drive=disk,bus=ahci.1"
+	bootDisk="-device ahci,id=ahci -drive id=boot,file=$DISK,index=0,cache=writeback,if=none -device ide-drive,drive=boot,bus=ahci.0"
 fi
 
 cd $JEHANNE/arch/$ARCH/kern/
@@ -41,7 +35,7 @@ $kvmdo qemu-system-x86_64 -s -cpu Opteron_G1 -smp 1 -m 2048 $kvmflag \
 --nographic \
 --monitor /dev/null \
 --machine $machineflag \
-$bootDisk $dataDisk \
+$bootDisk \
 -net nic,model=rtl8139 \
 -net user,hostfwd=tcp::5555-:1522 \
 -net dump,file=/tmp/vm0.pcap \

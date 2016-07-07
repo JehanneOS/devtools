@@ -3,14 +3,11 @@
 export SDL_VIDEO_X11_DGAMOUSE=0 # see https://wiki.archlinux.org/index.php/QEMU#Mouse_cursor_is_jittery_or_erratic
 
 if [ "$JEHANNE" = "" ]; then
-        echo ./hacking/runOver9P.sh newdisk.sh requires the shell started by ./hacking/devshell.sh
+        echo $0 newdisk.sh requires the shell started by ./hacking/devshell.sh
         exit 1
 fi
 
 trap : 2
-
-$JEHANNE/hacking/bin/ufs -root=$JEHANNE &
-ufspid=$!
 
 export machineflag=pc
 if [ "$(uname)" = "Linux" ] && [ -e /dev/kvm ]; then
@@ -22,18 +19,23 @@ if [ "$(uname)" = "Linux" ] && [ -e /dev/kvm ]; then
         fi
 fi
 
-export NVRAM=/boot/nvram
-export FS="nobootprompt=tcp fs=10.0.2.2 auth=10.0.2.2"
-
-if [ "$DISK" = "" ]; then
-	export DISK=$JEHANNE/hacking/sample-disk.img
+if [ "$1" = "" ]; then
+	if [ "$DISK" = "" ]; then
+		if [ -f $JEHANNE/hacking/sample-disk.img ]; then
+			export DISK=$JEHANNE/hacking/sample-disk.img
+		else
+			echo No disk image provided: usage: $0 path/to/disk
+			exit 1
+		fi
+	else
+		echo No disk image provided: usage: $0 path/to/disk
+		exit 1
+	fi
+else
+	export DISK="$1"
 fi
 
-if [ -f $DISK ]; then
-	bootDisk="-device ahci,id=ahci -drive id=boot,file=$DISK,index=0,cache=writeback,if=none -device ide-drive,drive=boot,bus=ahci.0"
-	NVRAM="#S/sdE0/nvram"
-#	FS="nobootprompt=local!#S/sdE0" # if you want to boot from disk use runDisk.sh
-fi
+bootDisk="-device ahci,id=ahci -drive id=boot,file=$DISK,index=0,cache=writeback,if=none -device ide-drive,drive=boot,bus=ahci.0"
 
 cd $JEHANNE/arch/$ARCH/kern/
 read -r cmd <<EOF
@@ -46,9 +48,7 @@ $bootDisk \
 -net dump,file=/tmp/vm0.pcap \
 -redir tcp:9999::9 \
 -redir tcp:17010::17010 \
--redir tcp:17013::17013 \
--append "maxcores=1024 nvram=$NVRAM nvrlen=512 nvroff=0 $FS" \
--kernel jehanne.32bit $*
+-redir tcp:17013::17013 $*
 EOF
 
 # To enable qemu log:
@@ -62,7 +62,4 @@ EOF
 
 echo $cmd
 eval $cmd
-
-kill $ufspid
-wait
 
