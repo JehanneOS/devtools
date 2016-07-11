@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$JEHANNE" = "" ]; then
-	echo ./hacking/disk-create.sh requires the shell started by ./hacking/devshell.sh
+	echo $0 requires the shell started by ./hacking/devshell.sh
 	exit 1
 fi
 
@@ -98,6 +98,9 @@ mkdir src
 dircp /root/sys/src src/
 dircp /root/sys/include include/
 mkdir log
+cd /n/newfs
+mkdir qa
+dircp /root/qa .
 cd /n/newfs
 lc
 unmount /n/newfs
