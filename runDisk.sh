@@ -3,7 +3,7 @@
 export SDL_VIDEO_X11_DGAMOUSE=0 # see https://wiki.archlinux.org/index.php/QEMU#Mouse_cursor_is_jittery_or_erratic
 
 if [ "$JEHANNE" = "" ]; then
-        echo $0 newdisk.sh requires the shell started by ./hacking/devshell.sh
+        echo $0 requires the shell started by ./hacking/devshell.sh
         exit 1
 fi
 
@@ -36,10 +36,11 @@ else
 fi
 
 bootDisk="-device ahci,id=ahci -drive id=boot,file=$DISK,index=0,cache=writeback,if=none -device ide-drive,drive=boot,bus=ahci.0"
+#bootDisk="-usb -usbdevice disk:$DISK -boot menu=on"
 
 cd $JEHANNE/arch/$ARCH/kern/
 read -r cmd <<EOF
-$kvmdo qemu-system-x86_64 -s -cpu Haswell -smp 1 -m 2048 $kvmflag \
+$kvmdo qemu-system-x86_64 -s -cpu Haswell -smp 2 -m 2048 $kvmflag \
 -serial stdio \
 --machine $machineflag \
 $bootDisk \

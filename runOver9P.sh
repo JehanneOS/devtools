@@ -3,7 +3,7 @@
 export SDL_VIDEO_X11_DGAMOUSE=0 # see https://wiki.archlinux.org/index.php/QEMU#Mouse_cursor_is_jittery_or_erratic
 
 if [ "$JEHANNE" = "" ]; then
-        echo ./hacking/runOver9P.sh newdisk.sh requires the shell started by ./hacking/devshell.sh
+        echo $0 requires the shell started by ./hacking/devshell.sh
         exit 1
 fi
 
@@ -35,10 +35,15 @@ if [ -f $DISK ]; then
 #	FS="nobootprompt=local!#S/sdE0" # if you want to boot from disk use runDisk.sh
 fi
 
+#usbDev="-usb -usbdevice host:0781:557d"
+#usbDev="-usb -usbdevice disk:$JEHANNE/hacking/sample-disk.img"
+
+export NVRAM=/boot/nvram
+export FS="nobootprompt=tcp fs=10.0.2.2 auth=10.0.2.2"
+
 cd $JEHANNE/arch/$ARCH/kern/
 read -r cmd <<EOF
 $kvmdo qemu-system-x86_64 -s -cpu Haswell -smp 1 -m 2048 $kvmflag \
--serial stdio \
 --machine $machineflag \
 $bootDisk \
 -net nic,model=rtl8139 \
@@ -47,6 +52,7 @@ $bootDisk \
 -redir tcp:9999::9 \
 -redir tcp:17010::17010 \
 -redir tcp:17013::17013 \
+$usbDev \
 -append "maxcores=1024 nvram=$NVRAM nvrlen=512 nvroff=0 $FS" \
 -kernel jehanne.32bit $*
 EOF
