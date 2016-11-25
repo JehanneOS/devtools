@@ -2,3 +2,6 @@
 	path = third_party/src/github.com/lionkov/ninep
 	url = https://github.com/JehanneOS/devtools-ninep.git
 	branch = master
+[submodule "third_party/src/github.com/0intro/drawterm"]
+	path = third_party/src/github.com/0intro/drawterm
+	url = https://github.com/JehanneOS/devtools-drawterm.git
