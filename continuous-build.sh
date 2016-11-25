@@ -13,6 +13,10 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 		echo "Cannot find build tools in $JEHANNE/hacking/bin"
 		$JEHANNE/hacking/buildtools.sh
 	fi
+	if [ ! -f "$JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-gcc" ]; then
+		echo "Creating cross-compiling toolchain..."
+		(cd $JEHANNE/hacking/cross/; ./init.sh)
+	fi
 
 	echo
 	echo "Vendorized code verification..."
