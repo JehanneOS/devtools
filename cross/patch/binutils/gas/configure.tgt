@@ -1,0 +1,3 @@
+  i386-*-jehanne*)			fmt=elf em=gnu ;;
+
+

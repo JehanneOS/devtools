@@ -29,6 +29,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -43,6 +44,7 @@ type kernconfig struct {
 }
 
 type kernel struct {
+	CodeFile string
 	Systab   string
 	Config   kernconfig
 	Ramfiles map[string]string
@@ -89,9 +91,9 @@ func (bf *buildfile) UnmarshalJSON(s []byte) error {
 		b.Projects = adjust(b.Projects)
 		b.Libs = adjust(b.Libs)
 		b.Cflags = adjust(b.Cflags)
-		b.SourceFiles = adjust(b.SourceFiles)
-		b.SourceFilesCmd = adjust(b.SourceFilesCmd)
-		b.ObjectFiles = adjust(b.ObjectFiles)
+		b.SourceFiles = b.SourceFiles
+		b.SourceFilesCmd = b.SourceFilesCmd
+		b.ObjectFiles = b.ObjectFiles
 		b.Include = adjust(b.Include)
 		b.Install = fromRoot(b.Install)
 		for i, e := range b.Env {
@@ -138,11 +140,32 @@ func failOn(err error) {
 	}
 }
 
+func isValueInList(value string, list []string) bool {
+	for _, v := range list {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
+
 func adjust(s []string) []string {
 	for i, v := range s {
 		s[i] = fromRoot(v)
 	}
 	return s
+}
+
+func buildEnv(b *build) func(string) string{
+	return func(v string) string {
+		search := v + "="
+		for _, s := range b.Env {
+			if strings.Index(s, search) == 0 {
+				return strings.Replace(s, search, "", 1)
+			}
+		}
+		return os.Getenv(v)
+	}
 }
 
 // return the given absolute path as an absolute path rooted at the jehanne tree.
@@ -179,6 +202,40 @@ func sh(cmd *exec.Cmd) {
 	failOn(shell.Run())
 }
 
+func mergeKernel(k *kernel, defaults *kernel) *kernel {
+	if k == nil {
+		return defaults
+	}
+	if defaults == nil {
+		return k
+	}
+
+	// The custom kernel Code will be added after the default from includes
+	// so that it has a chance to change de default behaviour.
+	k.Config.Code = append(defaults.Config.Code, k.Config.Code...)
+
+	k.Config.Dev = append(k.Config.Dev, defaults.Config.Dev...)
+	k.Config.Ip = append(k.Config.Ip, defaults.Config.Ip...)
+	k.Config.Link = append(k.Config.Link, defaults.Config.Link...)
+	k.Config.Sd = append(k.Config.Sd, defaults.Config.Sd...)
+	k.Config.Uart = append(k.Config.Uart, defaults.Config.Uart...)
+	k.Config.VGA = append(k.Config.VGA, defaults.Config.VGA...)
+
+	if k.CodeFile == "" {
+		k.CodeFile = defaults.CodeFile
+	}
+	if k.Systab == "" {
+		k.Systab = defaults.Systab
+	}
+	for name, path := range defaults.Ramfiles {
+		if _, ok := k.Ramfiles[name]; ok == false {
+			k.Ramfiles[name] = path
+		}
+	}
+
+	return k
+}
+
 func include(f string, b *build) {
 	if b.jsons[f] {
 		return
@@ -203,6 +260,7 @@ func include(f string, b *build) {
 		b.SourceFilesCmd = append(b.SourceFilesCmd, build.SourceFilesCmd...)
 		b.Program += build.Program
 		b.Library += build.Library
+		b.Kernel = mergeKernel(b.Kernel, build.Kernel)
 		if build.Install != "" {
 			if b.Install != "" {
 				log.Fatalf("In file %s (target %s) included by %s (target %s): redefined Install.", f, n, build.path, build.name)
@@ -244,7 +302,16 @@ func process(f string, r []*regexp.Regexp) []build {
 	d, err := ioutil.ReadFile(f)
 	failOn(err)
 	failOn(json.Unmarshal(d, &builds))
-	for n, build := range builds {
+
+	// Sort keys alphabetically (GoLang does not preserve the JSON order)
+	var keys []string
+	for n := range builds {
+		keys = append(keys, n)
+	}
+	sort.Strings(keys)
+
+	for _, n := range keys {
+		build := builds[n]
 		build.name = n
 		build.jsons = make(map[string]bool)
 		skip := true
@@ -281,8 +348,15 @@ func buildkernel(b *build) {
 	if b.Kernel == nil {
 		return
 	}
+	envFunc := buildEnv(b)
+	for name, path := range b.Kernel.Ramfiles {
+		b.Kernel.Ramfiles[name] = os.Expand(path, envFunc);
+	}
 	codebuf := confcode(b.path, b.Kernel)
-	failOn(ioutil.WriteFile(b.name+".c", codebuf, 0666))
+	if b.Kernel.CodeFile == "" {
+		log.Fatalf("Missing Kernel.CodeFile in %v\n", b.path)
+	}
+	failOn(ioutil.WriteFile(b.Kernel.CodeFile, codebuf, 0666))
 }
 
 func wrapInQuote(args []string) []string {
@@ -297,24 +371,57 @@ func wrapInQuote(args []string) []string {
 	return res
 }
 
+func convertLibPathsToArgs(b *build) []string {
+	libLocations := make([]string, 0)
+	args := make([]string, 0)
+	defaultLibLocation := fromRoot("/arch/$ARCH/lib")
+	for _, lib := range b.Libs {
+		ldir := filepath.Dir(lib)
+		if ldir != defaultLibLocation {
+			if !isValueInList(ldir, libLocations) {
+				libLocations = append(libLocations, ldir)
+				args = append(args, "-L", ldir)
+			}
+		}
+		lib = strings.Replace(lib, ldir + "/lib", "-l", 1)
+		lib = strings.Replace(lib, ".a", "", 1)
+		args = append(args, lib)
+	}
+	return args
+}
+
 func compile(b *build) {
 	log.Printf("Building %s\n", b.name)
 	// N.B. Plan 9 has a very well defined include structure, just three things:
 	// /amd64/include, /sys/include, .
-	args := b.Cflags
+	args := b.SourceFiles
+	args = append(args, b.Cflags...)
+	if !isValueInList("-c", b.Cflags) {
+		args = append(args, convertLibPathsToArgs(b)...)
+		args = append(args, b.Oflags...)
+	}
 	if len(b.SourceFilesCmd) > 0 {
 		for _, i := range b.SourceFilesCmd {
-			cmd := exec.Command(tools["cc"], append(args, i)...)
+			largs := make([]string, 3)
+			largs[0] = i
+			largs[1] = "-o"
+			largs[2] = strings.Replace(filepath.Base(i), filepath.Ext(i), "", 1)
+			cmd := exec.Command(tools["cc"], append(largs, args...)...)
 			run(b, *shellhack, cmd)
 		}
 		return
 	}
-	args = append(args, b.SourceFiles...)
+	if !isValueInList("-c", b.Cflags) {
+		args = append(args, "-o", b.Program)
+	}
 	cmd := exec.Command(tools["cc"], args...)
 	run(b, *shellhack, cmd)
 }
 
 func link(b *build) {
+	if !isValueInList("-c", b.Cflags) {
+		return
+	}
 	log.Printf("Linking %s\n", b.name)
 	if len(b.SourceFilesCmd) > 0 {
 		for _, n := range b.SourceFilesCmd {
@@ -329,7 +436,6 @@ func link(b *build) {
 			o := f[:len(f)] + ".o"
 			args := []string{"-o", n, o}
 			args = append(args, b.Oflags...)
-			args = append(args, "-L", fromRoot("/arch/$ARCH/lib"))
 			args = append(args, b.Libs...)
 			run(b, *shellhack, exec.Command(tools["ld"], args...))
 		}
@@ -338,7 +444,6 @@ func link(b *build) {
 	args := []string{"-o", b.Program}
 	args = append(args, b.ObjectFiles...)
 	args = append(args, b.Oflags...)
-	args = append(args, "-L", fromRoot("/arch/$ARCH/lib"))
 	args = append(args, b.Libs...)
 	run(b, *shellhack, exec.Command(tools["ld"], args...))
 }
@@ -412,12 +517,12 @@ func projects(b *build, r []*regexp.Regexp) {
 	for _, v := range b.Projects {
 		f, _ := findBuildfile(v)
 		log.Printf("Doing %s\n", f)
-		project(f, r)
+		project(f, r, b)
 	}
 }
 
 // assumes we are in the wd of the project.
-func project(bf string, which []*regexp.Regexp) {
+func project(bf string, which []*regexp.Regexp, container *build) {
 	cwd, err := os.Getwd()
 	failOn(err)
 	debug("Start new project cwd is %v", cwd)
@@ -430,10 +535,24 @@ func project(bf string, which []*regexp.Regexp) {
 	debug("Processing %v: %d target", root, len(builds))
 	for _, b := range builds {
 		debug("Processing %v: %v", b.name, b)
+		if container != nil {
+			b.Env = append(container.Env, b.Env...)
+		}
 		projects(&b, regexpAll)
 		for _, c := range b.Pre {
 			// this is a hack: we just pass the command through as an exec.Cmd
 			run(&b, true, exec.Command(c))
+		}
+		envFunc := buildEnv(&b);
+		b.Program = os.Expand(b.Program, envFunc)
+		for i, s := range b.SourceFiles {
+			b.SourceFiles[i] = fromRoot(os.Expand(s, envFunc));
+		}
+		for i, s := range b.SourceFilesCmd {
+			b.SourceFilesCmd[i] = fromRoot(os.Expand(s, envFunc));
+		}
+		for i, s := range b.ObjectFiles {
+			b.ObjectFiles[i] = fromRoot(os.Expand(s, envFunc));
 		}
 		buildkernel(&b)
 		if len(b.SourceFiles) > 0 || len(b.SourceFilesCmd) > 0 {
@@ -511,7 +630,7 @@ func main() {
 			re = append(re, rx)
 		}
 	}
-	project(bf, re)
+	project(bf, re, nil)
 }
 
 func findTools(toolprefix string) {
@@ -520,7 +639,10 @@ func findTools(toolprefix string) {
 		if x := os.Getenv(strings.ToUpper(k)); x != "" {
 			v = x
 		}
-		v, err = exec.LookPath(toolprefix + v)
+		if v != "sh" {
+			v = toolprefix + v;
+		}
+		v, err = exec.LookPath(v)
 		failOn(err)
 		tools[k] = v
 	}

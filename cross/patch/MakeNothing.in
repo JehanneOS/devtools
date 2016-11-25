@@ -1,0 +1,4 @@
+all:
+	echo "make all does nothing HERE"
+install:
+	echo "make install does nothing HERE"

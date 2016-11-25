@@ -98,20 +98,6 @@ VGAcur* vgacur[] = {
 	nil,
 };
 
-Physseg physseg[8] = {
-	{
-		.attr = SG_SHARED,
-		.name = "shared",
-		.size = SEGMAXPG,
-	},
-	{
-		.attr = SG_BSS,
-		.name = "memory",
-		.size = SEGMAXPG,
-	},
-};
-int nphysseg = 8;
-
 {{ range .Config.Code }}{{ . }}
 {{ end }}
 

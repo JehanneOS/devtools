@@ -1,0 +1,62 @@
+{
+	"autoconf" : {
+		"Upstream":"https://ftp.gnu.org/gnu/autoconf/autoconf-2.64.tar.bz2",
+		"Digest": {
+			"sha256":"872f4cadf12e7e7c8a2414e047fdff26b517c7f1a977d72433c124d0d3acaa85"
+		},
+		"Compress":"bzip2",
+		"RemovePrefix": true,
+		"Exclude": [
+		]
+	},
+	"m4": {
+		"Upstream":"https://ftp.gnu.org/gnu/m4/m4-1.4.14.tar.bz2",
+		"Digest": {
+			"sha256":"0885ffa93256353a96b1cf0bcbc4d639ed09953b687e6cc412c4048e656f4dd2"
+		},
+		"Compress":"bzip2",
+		"RemovePrefix": true,
+		"Exclude": [
+		]
+	},
+	"automake": {
+		"Upstream":"https://ftp.gnu.org/gnu/automake/automake-1.11.1.tar.bz2",
+		"Digest": {
+			"sha256":"5b159d3c0e0a1f87de71b68bcb9f1a1c49e9e71749c9b723f17e2e1e0295c7ae"
+		},
+		"Compress":"bzip2",
+		"RemovePrefix": true,
+		"Exclude": [
+		]
+	},
+	"libtool": {
+		"Upstream":"https://ftp.gnu.org/gnu/libtool/libtool-2.4.tar.gz",
+		"Digest": {
+			"sha256":"13df57ab63a94e196c5d6e95d64e53262834fe780d5e82c28f177f9f71ddf62e"
+		},
+		"Compress":"gzip",
+		"RemovePrefix": true,
+		"Exclude": [
+		]
+	},
+	"binutils": {
+		"Upstream":"https://ftp.gnu.org/gnu/binutils/binutils-2.26.tar.bz2",
+		"Digest": {
+			"sha256":"c2ace41809542f5237afc7e3b8f32bb92bc7bc53c6232a84463c423b0714ecd9"
+		},
+		"Compress":"bzip2",
+		"RemovePrefix": true,
+		"Exclude": [
+		]
+	},
+	"gcc": {
+		"Upstream":"https://ftp.gnu.org/gnu/gcc/gcc-4.9.4/gcc-4.9.4.tar.bz2",
+		"Digest": {
+			"sha256":"6c11d292cd01b294f9f84c9a59c230d80e9e4a47e5c6355f046bb36d4f358092"
+		},
+		"Compress":"bzip2",
+		"RemovePrefix": true,
+		"Exclude": [
+		]
+	}
+}

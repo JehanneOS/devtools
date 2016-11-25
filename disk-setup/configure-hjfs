@@ -1,0 +1,15 @@
+#!/cmd/rc
+
+echo echo on
+echo create /dist sys sys 775 d
+echo create /tmp sys sys 775 d
+echo create /usr sys sys 775 d
+echo newuser glenda
+echo newuser adm +glenda
+echo newuser sys +glenda
+echo newuser upas +glenda
+echo sync
+echo echo off
+echo halt
+sleep 2
+

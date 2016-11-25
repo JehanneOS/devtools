@@ -1,0 +1,25 @@
+diff --git a/src/binutils/ld/configure.tgt b/src/binutils/ld/configure.tgt
+index 6b6bbf2..29b5f30 100644
+--- a/src/binutils/ld/configure.tgt
++++ b/src/binutils/ld/configure.tgt
+@@ -383,6 +383,9 @@ x86_64-*-nacl*)		targ_emul=elf32_x86_64_nacl
+ 			targ_extra_libpath=$targ_extra_emuls
+ 			tdir_elf_i386_nacl=`echo ${targ_alias} | sed -e 's/x86_64/i386/'`
+ 			;;
++x86_64*-jehanne*)	targ_emul=elf_x86_64_jehanne
++			targ_extra_emuls="elf_i386_jehanne elf_x86_64 elf_i386"
++			;;
+ i860-*-coff)		targ_emul=coff_i860 ;;
+ i860-stardent-sysv4* | i860-stardent-elf*)
+ 			targ_emul=elf32_i860
+@@ -852,6 +855,10 @@ ia64-*-aix*)
+   NATIVE_LIB_DIRS='/usr/local/lib /usr/lib/ia64l64 /lib /usr/lib'
+   ;;
+ 
++x86_64-*-jehanne*)
++  NATIVE_LIB_DIRS='/arch/amd64/lib'
++  ;;
++
+ sparc*-*-solaris2*)
+   NATIVE_LIB_DIRS='/usr/local/lib /usr/ccs/lib /lib /usr/lib'
+   ;;
