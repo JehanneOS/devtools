@@ -21,6 +21,9 @@ if [ "$JEHANNE" = "" ]; then
         exit 1
 fi
 
+# setup Jehanne's headers
+usyscalls header $JEHANNE/sys/src/sysconf.json > $JEHANNE/arch/amd64/include/syscalls.h
+
 #
 # WELLCOME TO HELL ! ! !
 #
