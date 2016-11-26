@@ -30,8 +30,6 @@ if [ "$1" != "prepare" ]; then
 	export TOOLPREFIX=x86_64-jehanne-
 	export CC=x86_64-jehanne-gcc
 	build all
-else
-	cov-configure --gcc --comptype gcc --compiler $JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-gcc
 fi
 
 if [ "$TRAVIS_BUILD_DIR" != "" ]; then
