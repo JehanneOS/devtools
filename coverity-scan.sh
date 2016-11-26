@@ -24,12 +24,11 @@ if [ ! -f "$JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-gcc" ]; then
 	fi
 fi
 
-export TOOLPREFIX=x86_64-jehanne-
-export CC=gcc
-
 echo
 
 if [ "$1" != "prepare" ]; then
+	export TOOLPREFIX=x86_64-jehanne-
+	export CC=x86_64-jehanne-gcc
 	build all
 fi
 
