@@ -10,7 +10,6 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 	export SH=`which rc`
 	export ARCH=amd64
 	git clean -xdf .
-	(cd $JEHANNE/hacking; git clean -xdf .)
 	if [ ! -f "$JEHANNE/hacking/bin/ufs" ]; then
 		echo "Cannot find build tools in $JEHANNE/hacking/bin"
 		$JEHANNE/hacking/buildtools.sh
@@ -19,6 +18,9 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 		echo "Creating cross-compiling toolchain..."
 		(cd $JEHANNE/hacking/cross/; ./init.sh)
 	fi
+
+	export TOOLPREFIX=x86_64-jehanne-
+	export CC=gcc
 
 	echo
 	echo "Vendorized code verification..."
