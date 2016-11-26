@@ -149,7 +149,7 @@ if [ ! -f toolchain/bin/x86_64-jehanne-ar ]; then
 	(grep 'eelf_x86_64_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_64_EMULATION_SOURCES = \\.*/&\n\teelf_x86_64_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
 	cd src/binutils/ld && automake && cd ../ &&
 	cd $BINUTILS_BUILD_DIR &&
-	$CROSS_DIR/src/binutils/configure --disable-shared --enable-static --prefix=$JEHANNE/hacking/cross/toolchain --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
+	$CROSS_DIR/src/binutils/configure --prefix=$JEHANNE/hacking/cross/toolchain --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
 	cp $CROSS_DIR/patch/MakeNothing.in $CROSS_DIR/src/binutils/bfd/doc/Makefile &&
 	cp $CROSS_DIR/patch/MakeNothing.in $CROSS_DIR/src/binutils/bfd/po/Makefile &&
 	cp $CROSS_DIR/patch/MakeNothing.in $CROSS_DIR/src/binutils/gas/doc/Makefile &&
@@ -182,7 +182,7 @@ fi
 	) &&
 	dynpatch 'gcc/fixincludes/mkfixinc.sh' 'i\?86-\*-cygwin\*' &&
 	cd $GCC_BUILD_DIR &&
-	$CROSS_DIR/src/gcc/configure --disable-shared --enable-static --target=x86_64-jehanne --prefix=$JEHANNE/hacking/cross/toolchain --with-sysroot=$JEHANNE --enable-languages=c,c++ &&
+	$CROSS_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=$JEHANNE/hacking/cross/toolchain --with-sysroot=$JEHANNE --enable-languages=c,c++ &&
 	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-gcc all-target-libgcc && 
 	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-gcc install-target-libgcc
 #	 &&
