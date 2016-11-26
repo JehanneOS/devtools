@@ -7,7 +7,6 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 	export JEHANNE=`pwd`
 	export PATH="$JEHANNE/hacking/bin:$PATH"
 	export PATH="$JEHANNE/hacking/cross/toolchain/bin:$PATH"
-	export SH=`which rc`
 	export ARCH=amd64
 	git clean -xdf .
 	if [ ! -f "$JEHANNE/hacking/bin/ufs" ]; then
