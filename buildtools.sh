@@ -29,13 +29,24 @@ if [ "$BUILD_GO_TOOLS$BUILD_DRAWTERM" = "truetrue" ]; then
 	git clean -x -d -f $UTILITIES/bin
 fi
 if [ "$BUILD_GO_TOOLS" = "true" ]; then
-	echo -n Building development tools...
+	echo -n Building development tools.
+	(
+		# Inside parentheses, and therefore a subshell . . .
+		while [ 1 ]   # Endless loop.
+		do
+		  echo -n "."
+		  sleep 3
+		done
+	) &
+	dotter=$!
 	(
 		GOBIN="$UTILITIES/bin" GOPATH="$UTILITIES/third_party:$UTILITIES" go get -d jehanne/cmd/... &&
 		GOBIN="$UTILITIES/bin" GOPATH="$UTILITIES/third_party:$UTILITIES" go install jehanne/cmd/... &&
 		GOBIN="$UTILITIES/bin" GOPATH="$UTILITIES/third_party:$UTILITIES" go install github.com/lionkov/ninep/srv/examples/ufs
 	)
 	STATUS="$?"
+	kill $dotter
+	wait $dotter 2>/dev/null
 	if [ ! $STATUS -eq "0" ]
 	then
 		echo "FAIL"
@@ -46,7 +57,16 @@ if [ "$BUILD_GO_TOOLS" = "true" ]; then
 fi
 
 if [ "$BUILD_DRAWTERM" = "true" ]; then
-	echo -n Building drawterm...
+	echo -n Building drawterm.
+	(
+		# Inside parentheses, and therefore a subshell . . .
+		while [ 1 ]   # Endless loop.
+		do
+		  echo -n "."
+		  sleep 3
+		done
+	) &
+	dotter=$!
 	(
 		cd $UTILITIES/third_party/src/github.com/0intro/drawterm/ && 
 		git clean -xdf > ../drawterm.build.log 2>&1 &&
@@ -54,6 +74,8 @@ if [ "$BUILD_DRAWTERM" = "true" ]; then
 		mv drawterm $UTILITIES/bin
 	)
 	STATUS="$?"
+	kill $dotter
+	wait $dotter 2>/dev/null
 	if [ $STATUS -eq "0" ]
 	then
 		rm $UTILITIES/third_party/src/github.com/0intro/drawterm.build.log

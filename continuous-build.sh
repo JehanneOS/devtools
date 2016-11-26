@@ -8,7 +8,8 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 	export PATH="$JEHANNE/hacking/bin:$PATH"
 	export SH=`which rc`
 	export ARCH=amd64
-	git clean -x -d -f
+	git clean -xdf .
+	(cd $JEHANNE/hacking; git clean -xdf .)
 	if [ ! -f "$JEHANNE/hacking/bin/ufs" ]; then
 		echo "Cannot find build tools in $JEHANNE/hacking/bin"
 		$JEHANNE/hacking/buildtools.sh
