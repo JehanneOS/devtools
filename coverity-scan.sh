@@ -7,10 +7,11 @@ export JEHANNE=`pwd`
 export PATH="$JEHANNE/hacking/bin:$PATH"
 export PATH="$JEHANNE/hacking/cross/toolchain/bin:$PATH"
 export ARCH=amd64
+
 git clean -xdf arch/ sys/ qa/ usr/
 if [ ! -f "$JEHANNE/hacking/bin/ufs" ]; then
 	echo "Cannot find build tools in $JEHANNE/hacking/bin"
-	$JEHANNE/hacking/buildtools.sh
+	$JEHANNE/hacking/buildtools.sh --no-drawterm
 fi
 if [ ! -f "$JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-gcc" ]; then
 	echo "Cannot find cross-compiling toolchain in $JEHANNE/hacking/bin"
@@ -28,7 +29,9 @@ export CC=gcc
 
 echo
 
-build all
+if [ "$1" != "prepare" ]; then
+	build all
+fi
 
 if [ "$TRAVIS_BUILD_DIR" != "" ]; then
 	echo "Move cross-compiling toolchain to $JEHANNE/tmp/toolchain for Travis caches"
