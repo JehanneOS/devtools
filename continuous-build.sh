@@ -14,8 +14,14 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 		$JEHANNE/hacking/buildtools.sh
 	fi
 	if [ ! -f "$JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-gcc" ]; then
-		echo "Creating cross-compiling toolchain..."
-		(cd $JEHANNE/hacking/cross/; ./init.sh)
+		echo "Cannot find cross-compiling toolchain in $JEHANNE/hacking/bin"
+		if [ -f "$JEHANNE/tmp/toolchain/bin/x86_64-jehanne-gcc" ]; then
+			echo "Found cross-compiling toolchain in $JEHANNE/tmp/toolchain/"
+			mv $JEHANNE/tmp/toolchain/ $JEHANNE/hacking/cross/toolchain
+		else
+			echo "Creating cross-compiling toolchain..."
+			(cd $JEHANNE/hacking/cross/; ./init.sh)
+		fi
 	fi
 
 	export TOOLPREFIX=x86_64-jehanne-
@@ -31,4 +37,9 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 	echo
 
 	build all
+
+	if [ "$TRAVIS_BUILD_DIR" != "" ]; then
+		echo "Move cross-compiling toolchain to $JEHANNE/tmp/toolchain for Travis caches"
+		mv $JEHANNE/hacking/cross/toolchain $JEHANNE/tmp/toolchain/
+	fi
 fi
