@@ -25,7 +25,7 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 	fi
 
 	export TOOLPREFIX=x86_64-jehanne-
-	export CC=gcc
+	export CC=x86_64-jehanne-gcc
 
 	echo
 	echo "Vendorized code verification..."

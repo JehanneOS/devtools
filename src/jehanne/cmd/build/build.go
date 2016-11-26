@@ -639,7 +639,7 @@ func findTools(toolprefix string) {
 		if x := os.Getenv(strings.ToUpper(k)); x != "" {
 			v = x
 		}
-		if v != "sh" {
+		if toolprefix != "" && v != "sh" && !strings.Contains(v, toolprefix) {
 			v = toolprefix + v;
 		}
 		v, err = exec.LookPath(v)
