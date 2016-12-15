@@ -34,10 +34,13 @@ fi
 if [ "$KERNEL" = "" ]; then
 	KERNEL=jehanne.32bit
 fi
+if [ "$NCPU" = "" ]; then
+	NCPU=1
+fi
 
 cd $KERNDIR
 read -r cmd <<EOF
-$kvmdo qemu-system-x86_64 -s -cpu Opteron_G1 -smp 1 -m 2048 $kvmflag \
+$kvmdo qemu-system-x86_64 -s -cpu Opteron_G1 -smp $NCPU -m 2048 $kvmflag \
 -serial stdio \
 --nographic \
 --monitor /dev/null \
