@@ -38,6 +38,7 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 
 	build all
 
+	if [ "$CHECK_QA" != "" ]; then
 	if [ "$TRAVIS_BUILD_DIR" != "" ]; then
 		echo "Run QA checks"
 		echo /qa/check | NCPU=2 KERNEL=workhorse.32bit KERNDIR=$JEHANNE/hacking/bin/ runqemu
@@ -47,5 +48,6 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 			mkdir $JEHANNE/tmp/toolchain
 		fi
 		mv $JEHANNE/hacking/cross/toolchain/* $JEHANNE/tmp/toolchain/
+	fi
 	fi
 fi
