@@ -1,0 +1,11 @@
+# This file is part of Jehanne.
+#
+# Copyright (C) 2016-2017 Giacomo Tesio <giacomo@tesio.it>
+
+source ./hacking/_gdb/env
+source ./hacking/_gdb/functions
+
+printf "\nThank you for debugging Jehanne!\n\n"
+printf "TIP: You can find some useful functions typing jh<TAB>\n"
+printf "TIP: Setup your own gdbinit at $JEHANNE_DEVELOPER_DIR\n\n"
+

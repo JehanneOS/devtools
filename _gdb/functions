@@ -1,0 +1,112 @@
+# This file is part of Jehanne.
+#
+# Copyright (C) 2016-2017 Giacomo Tesio <giacomo@tesio.it>
+
+set $__pendingUserBreak = 0
+
+define jhn-print-with-context
+	if up != 0 
+		printf "%s %d ", up->text, up->pid
+	end
+	if m != 0
+		printf "(mach %d) ", m->machno
+	end
+	if $argc == 1
+		p $arg0
+	end
+	if $argc == 2
+		printf $arg0, $arg1
+	end
+	if $argc == 3
+		printf $arg0, $arg1, $arg2
+	end
+	if $argc == 4
+		printf $arg0, $arg1, $arg2, $arg3
+	end
+	printf "\n"
+end
+
+define jhn-log-syscalls
+	b syscall
+	commands
+		jhn-print-with-context " pc = 0x%x " ureg->ip
+		c
+	end
+end
+
+define jhn-break-errors
+	b errorl
+	commands
+		jhn-print-with-context
+		bt 4
+		c
+	end
+end
+
+define jhn-break-cmd 
+	if $argc < 2 || $argc > 3
+		printf "usage: jhn-break-cmd symbol/path \"programName\" [address]\n"
+	else 
+		if $__pendingUserBreak > 0
+			printf "jhn-break-cmd: cannot set a new breakpoint in user space until the previous one is recorded at\n  "
+			info line *$__breakAddr
+		else
+			add-symbol-file $arg0 0x4000c0
+			set __onExecFaultBreakForCMD = $arg1
+			set $__breakAddr = (uintptr_t)0x4000c0
+			set $__breakPageStart = (uintptr_t)0x400000
+			set $__breakPageEnd = (uintptr_t)0x401000
+			if $argc == 3
+				set $__breakAddr = (uintptr_t)$arg2
+				set $__breakPageStart = (uintptr_t)($__breakAddr & ~(0x1000-1))
+				set $__breakPageEnd = (uintptr_t)($__breakAddr + 0x1000)
+			end
+			b *peekAtExecFaults+114 if addr >= $__breakPageStart && addr < $__breakPageEnd
+			set $__pendingUserBreak = $bpnum
+			commands
+				d $__pendingUserBreak
+				set $__pendingUserBreak = 0
+				b *$__breakAddr
+				c
+			end
+		end
+	end
+end
+
+define jhn-break-pid
+	if $argc < 2 || $argc > 3
+		printf "usage: jhn-break-pid symbol/path pid [address]\n"
+	else
+		if $__pendingUserBreak > 0
+			printf "jhn-break-pid: cannot set a new breakpoint in user space until the previous one is recorded at\n  "
+			info line *$__breakAddr
+		else
+			add-symbol-file $arg0 0x4000c0
+			set __onExecFaultBreakForPID = $arg1
+			set $__breakAddr = (uintptr_t)0x4000c0
+			set $__breakPageStart = (uintptr_t)0x400000
+			set $__breakPageEnd = (uintptr_t)0x401000
+			if $argc == 3
+				set $__breakAddr = (uintptr_t)$arg2
+				set $__breakPageStart = (uintptr_t)($__breakAddr & ~(0x1000-1))
+				set $__breakPageEnd = (uintptr_t)($__breakAddr + 0x1000)
+			end
+			b *peekAtExecFaults+64 if addr >= $__breakPageStart && addr < $__breakPageEnd
+			set $__pendingUserBreak = $bpnum
+			commands
+				d $__pendingUserBreak
+				set $__pendingUserBreak = 0
+				b *$__breakAddr
+				c
+			end
+		end
+	end
+end
+
+define jhn-connect
+	target remote :1234
+	printf "connected to QEMU\n"
+	if $pc == waitdebugger+22
+		set var c = 1
+	end
+end
