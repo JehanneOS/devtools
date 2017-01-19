@@ -6,9 +6,6 @@ if [ "$JEHANNE" = "" ]; then
         echo $0 requires the shell started by ./hacking/devshell.sh
         exit 1
 fi
-if [ "$KERNEL" = "" ]; then
-	KERNEL="jehanne.32bit"
-fi
 
 trap : 2
 
@@ -37,9 +34,19 @@ if [ -f $DISK ]; then
 	usbDev="-drive if=none,id=usbstick,file=$DISK -usb -readconfig /usr/share/doc/qemu-system-x86/common/ich9-ehci-uhci.cfg -device usb-host,bus=usb-bus.0,hostbus=3,hostport=1 -device usb-host,bus=usb-bus.0,hostbus=3,hostport=1 -device usb-storage,bus=ehci.0,drive=usbstick "
 fi
 
-cd $JEHANNE/arch/$ARCH/kern/
+if [ "$KERNDIR" = "" ]; then
+	KERNDIR=$JEHANNE/arch/$ARCH/kern/
+fi
+if [ "$KERNEL" = "" ]; then
+	KERNEL="jehanne.32bit"
+fi
+if [ "$NCPU" = "" ]; then
+	NCPU=4
+fi
+
+cd $KERNDIR
 read -r cmd <<EOF
-$kvmdo qemu-system-x86_64 -s -cpu Haswell -smp 4 -m 2048 $kvmflag \
+$kvmdo qemu-system-x86_64 -s -cpu Haswell -smp $NCPU -m 2048 $kvmflag \
 -no-reboot -serial mon:stdio \
 --machine $machineflag \
 $bootDisk \
@@ -57,12 +64,6 @@ EOF
 
 # To enable qemu log:
 #-D $JEHANNE/../qemu.log -d int,cpu_reset,in_asm \
-
-# To wait for a gdb connection prepend to -append "waitgdb"
-# then from gdb:
-#     (gdb) target remote :1234
-#     (gdb) p at=1
-# now you can set your breakpoints and continue
 
 echo $cmd
 eval $cmd

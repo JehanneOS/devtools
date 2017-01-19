@@ -27,9 +27,6 @@ if [ "$1" = "" ]; then
 			echo No disk image provided: usage: $0 path/to/disk
 			exit 1
 		fi
-	else
-		echo No disk image provided: usage: $0 path/to/disk
-		exit 1
 	fi
 else
 	export DISK="$1"
@@ -46,10 +43,14 @@ esac
 #bootDisk="-device ahci,id=ahci -drive id=boot,file=$DISK,index=0,cache=writeback,if=none -device ide-drive,drive=boot,bus=ahci.0"
 bootDisk="-global ide-drive.physical_block_size=4096 -drive file=$DISK,if=ide,index=0,media=disk"
 
+if [ "$NCPU" = "" ]; then
+	NCPU=2
+fi
+
 cd $JEHANNE/arch/$ARCH/kern/
 read -r cmd <<EOF
-$kvmdo qemu-system-x86_64 -s -cpu Haswell -smp 2 -m 2048 $kvmflag \
--serial stdio \
+$kvmdo qemu-system-x86_64 -s -cpu Haswell -smp $NCPU -m 2048 $kvmflag \
+-no-reboot -serial mon:stdio \
 --machine $machineflag \
 $bootDisk \
 -net nic,model=rtl8139 \
@@ -61,13 +62,7 @@ $bootDisk \
 EOF
 
 # To enable qemu log:
-#-no-reboot -D $JEHANNE/../qemu.log -d int,cpu_reset,in_asm \
-
-# To wait for a gdb connection prepend to -append "waitgdb"
-# then from gdb:
-#     (gdb) target remote :1234
-#     (gdb) p at=1
-# now you can set your breakpoints and continue
+#-D $JEHANNE/../qemu.log -d int,cpu_reset,in_asm \
 
 echo $cmd
 eval $cmd
