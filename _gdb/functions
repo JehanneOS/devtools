@@ -34,7 +34,7 @@ define jhn-log-syscalls
 	end
 end
 
-define jhn-break-errors
+define jhn-log-errors
 	b errorl
 	commands
 		jhn-print-with-context
@@ -104,7 +104,11 @@ define jhn-break-pid
 end
 
 define jhn-connect
-	target remote :1234
+	if $argc == 1
+		target remote $arg0
+	else
+		target remote :1234
+	end
 	printf "connected to QEMU\n"
 	if $pc == waitdebugger+22
 		set var c = 1

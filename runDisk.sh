@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# This file is part of Jehanne.
+#
+# Copyright (C) 2016-2017 Giacomo Tesio <giacomo@tesio.it>
+
 export SDL_VIDEO_X11_DGAMOUSE=0 # see https://wiki.archlinux.org/index.php/QEMU#Mouse_cursor_is_jittery_or_erratic
 
 if [ "$JEHANNE" = "" ]; then

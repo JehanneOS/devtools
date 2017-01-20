@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# This file is part of Jehanne.
+#
+# Copyright (C) 2016-2017 Giacomo Tesio <giacomo@tesio.it>
+
 set -e
 
 cd `dirname $0`
