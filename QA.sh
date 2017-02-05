@@ -24,14 +24,6 @@ if [ "$(uname)" = "Linux" ] && [ -e /dev/kvm ]; then
         fi
 fi
 
-if [ "$DISK" = "" ]; then
-	export DISK=$JEHANNE/hacking/sample-disk.img
-fi
-
-if [ -a $DISK ]; then
-	bootDisk="-device ahci,id=ahci -drive id=boot,file=$DISK,index=0,cache=writeback,if=none -device ide-drive,drive=boot,bus=ahci.0"
-fi
-
 if [ "$KERNDIR" = "" ]; then
 	KERNDIR=$JEHANNE/arch/$ARCH/kern/
 fi
@@ -41,10 +33,32 @@ fi
 if [ "$NCPU" = "" ]; then
 	NCPU=1
 fi
+if [ "$CPU_MODEL" = "" ]; then
+	CPU_MODEL=Opteron_G1
+fi
+
+appendLine="nobootprompt=tcp maxcores=1024 fs=10.0.2.2 auth=10.0.2.2 nvram=/boot/nvram nvrlen=512 nvroff=0 $KAPPEND"
+appendLine="-append '$appendLine'"
+kernelLine="-kernel $KERNEL $*"
+if [ "$DISK" = "" ]; then
+	if [ "$QA_DISK" != "" ]; then
+		# disk to run QA checks
+		export DISK=$QA_DISK
+		# will boot from disk, no need for kernel and so on
+		appendLine=""
+		kernelLine=""
+	else
+		export DISK=$JEHANNE/hacking/sample-disk.img
+	fi
+fi
+
+if [ -a $DISK ]; then
+	bootDisk="-device ahci,id=ahci -drive id=boot,file=$DISK,index=0,cache=writeback,if=none -device ide-drive,drive=boot,bus=ahci.0"
+fi
 
 cd $KERNDIR
 read -r cmd <<EOF
-$kvmdo qemu-system-x86_64 -s -cpu Opteron_G1 -smp $NCPU -m 2048 $kvmflag \
+$kvmdo qemu-system-x86_64 -s -cpu $CPU_MODEL -smp $NCPU -m 2048 $kvmflag \
 -serial stdio \
 --nographic \
 --monitor /dev/null \
@@ -56,8 +70,7 @@ $bootDisk \
 -redir tcp:9999::9 \
 -redir tcp:17010::17010 \
 -redir tcp:17013::17013 \
--append "nobootprompt=tcp maxcores=1024 fs=10.0.2.2 auth=10.0.2.2 nvram=/boot/nvram nvrlen=512 nvroff=0 $KAPPEND" \
--kernel $KERNEL $*
+$appendLine $kernelLine
 EOF
 
 #-no-reboot -D $JEHANNE/../qemu.log -d int,cpu_reset,in_asm \

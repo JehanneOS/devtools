@@ -62,6 +62,13 @@ EOF
 export KERNEL=$JEHANNE/hacking/bin/workhorse.32bit
 export KERNDIR=$JEHANNE/hacking/bin/
 
+if [ "$DISK_KERNEL" = "" ]; then
+	export DISK_KERNEL=/arch/$ARCH/kern/jehanne.32bit
+fi
+if [ "$DISK_INITRD" = "" ]; then
+	export DISK_INITRD=/arch/amd64/kern/initrd
+fi
+
 	# install everything
 	cat << EOF | runqemu
 disk/fdisk -p /dev/sdE0/data >> /dev/sdE0/ctl
@@ -69,7 +76,7 @@ disk/prep -w -a nvram -a fs /dev/sdE0/plan9
 disk/prep -p /dev/sdE0/plan9 >> /dev/sdE0/ctl
 cat /dev/sdE0/ctl
 
-disk/format -d /dev/sdE0/dos /hacking/disk-setup/syslinux.cfg /hacking/disk-setup/bios/* /arch/amd64/kern/initrd /arch/amd64/kern/jehanne.32bit
+disk/format -d /dev/sdE0/dos /hacking/disk-setup/syslinux.cfg /hacking/disk-setup/bios/* $DISK_INITRD $DISK_KERNEL
 
 dd -if /hacking/nvram -of /dev/sdE0/nvram
 
@@ -113,6 +120,7 @@ cd qa
 dircp /root/qa .
 cd /n/newfs
 lc
+$AFTER_DISK_FILL
 unmount /n/newfs
 echo df >> /srv/hjfs.cmd
 echo sync >> /srv/hjfs.cmd

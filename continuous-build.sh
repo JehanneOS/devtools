@@ -47,6 +47,15 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 		if [ "$QA_CHECKS" != "" ]; then
 			echo "Run QA checks"
 			echo /qa/check | NCPU=2 KERNEL=workhorse.32bit KERNDIR=$JEHANNE/hacking/bin/ runqemu
+
+			echo "Create disk image to run QA checks"
+			sed -i -e 's/menu.c32/FromAHCI/g' -e 's/nobootprompt/console=comconsole nobootprompt/g' $JEHANNE/hacking/disk-setup/syslinux.cfg
+			$JEHANNE/hacking/disk-create.sh
+			(cd $JEHANNE/hacking/; git checkout disk-setup/syslinux.cfg)
+
+			echo "Run QA checks in sample disk"
+			export QA_DISK=$JEHANNE/hacking/sample-disk.img
+			echo /qa/check | NCPU=1 runqemu -p 'jehanne#'
 		fi
 
 		echo "Move cross-compiling toolchain to $JEHANNE/tmp/toolchain for Travis caches"
