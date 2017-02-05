@@ -6,6 +6,14 @@
 
 set -e
 
+function finish {
+	# ensure that we preserve the toolchain on broken build/test
+	if [ -f "$JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-gcc" ]; then
+		mv $JEHANNE/hacking/cross/toolchain/* $JEHANNE/tmp/toolchain/
+	fi
+}
+trap finish EXIT
+
 if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 	cd `dirname $0`
 	cd ..
@@ -62,6 +70,5 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 		if [ ! -d "$JEHANNE/tmp/toolchain" ]; then
 			mkdir $JEHANNE/tmp/toolchain
 		fi
-		mv $JEHANNE/hacking/cross/toolchain/* $JEHANNE/tmp/toolchain/
 	fi
 fi
