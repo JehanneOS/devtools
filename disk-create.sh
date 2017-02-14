@@ -9,6 +9,9 @@ if [ "$JEHANNE" = "" ]; then
 	exit 1
 fi
 
+if [ "$SYSLINUXMBR" == "" ]; then
+	export SYSLINUXMBR=/usr/lib/syslinux/mbr/mbr.bin # GNU/Linux Debian way
+fi
 if [ "$SYSLINUXBIOS" == "" ]; then
 	export SYSLINUXBIOS=/usr/lib/syslinux/modules/bios/ # GNU/Linux Debian way
 fi
@@ -129,7 +132,7 @@ echo halt >> /srv/hjfs.cmd
 sleep 20
 EOF
 	syslinux --offset $((2048*512)) $DISK
-	dd bs=440 count=1 conv=notrunc if=/usr/lib/syslinux/mbr/mbr.bin of=$DISK
+	dd bs=440 count=1 conv=notrunc if=$SYSLINUXMBR of=$DISK
 else
 	echo Root disk already exists: $DISK
 fi
