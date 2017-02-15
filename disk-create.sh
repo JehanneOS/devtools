@@ -26,9 +26,9 @@ if [ "$TRAVIS_BUILD_DIR" != "" ]; then
 	syslinux --help
 	ls $SYSLINUXBIOS
 	ls $SYSLINUXMBR
-	echo "Fdisk's version, supported options"
-	/sbin/fdisk --version
-	/sbin/fdisk --help
+	echo "Fdisk's version, supported options, help"
+	/sbin/fdisk -v
+	/sbin/fdisk -h
 fi
 
 
@@ -60,7 +60,6 @@ if [ ! -f $DISK ]; then
     +40M  #reserve 40 megabytes
     t     #change type
     c     #W95 FAT32 (LBA)
-    a     #make it bootable
     n     #new partition
     p     #primary partition
     2     #partition 2
@@ -69,6 +68,8 @@ if [ ! -f $DISK ]; then
     t     #change type
     2     #partition 2
     39    #Plan 9
+    a     #set bootable partition
+    1     #partition 1
     p     #print partition table
     w     #write partition table
     q     #quit
@@ -143,7 +144,7 @@ sleep 60
 echo halt >> /srv/hjfs.cmd
 sleep 20
 EOF
-	OFFSETSECTOR=`echo p |/sbin/fdisk $DISK|grep 40M|awk '{print $3}'`
+	OFFSETSECTOR=`echo p |/sbin/fdisk $DISK|grep img1|awk '{print $3}'`
 	syslinux --offset $(($OFFSETSECTOR*512)) $DISK
 	dd bs=440 count=1 conv=notrunc if=$SYSLINUXMBR of=$DISK
 else
