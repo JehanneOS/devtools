@@ -20,6 +20,18 @@ if [ ! -d "$SYSLINUXBIOS" ]; then
 	exit 1
 fi
 
+if [ "$TRAVIS_BUILD_DIR" != "" ]; then
+	echo "Syslinux's version, supported options and file list"
+	syslinux --version
+	syslinux --help
+	ls $SYSLINUXBIOS
+	ls $SYSLINUXMBR
+	echo "Fdisk's version, supported options"
+	/sbin/fdisk --version
+	/sbin/fdisk --help
+fi
+
+
 if [ -d $JEHANNE/hacking/disk-setup/bios/ ]; then
 	rm $JEHANNE/hacking/disk-setup/bios/*
 else
@@ -39,7 +51,7 @@ fi
 if [ ! -f $DISK ]; then
 	qemu-img create $DISK 4G
 
-	sed -e 's/^\s*\([\+0-9a-zA-Z]*\)[ ].*/\1/' << EOF | /sbin/fdisk $DISK
+	sed -e 's/^\s*\([\+0-9a-zA-Z]*\)[ ].*/\1/' << EOF | perl -MTime::HiRes=usleep -pe '$|=1;usleep(1000000)' | /sbin/fdisk $DISK
     o     #clear partition table
     n     #new partition
     p     #primary partition
@@ -131,7 +143,8 @@ sleep 60
 echo halt >> /srv/hjfs.cmd
 sleep 20
 EOF
-	syslinux --offset $((2048*512)) $DISK
+	OFFSETSECTOR=`echo p |/sbin/fdisk $DISK|grep 40M|awk '{print $3}'`
+	syslinux --offset $(($OFFSETSECTOR*512)) $DISK
 	dd bs=440 count=1 conv=notrunc if=$SYSLINUXMBR of=$DISK
 else
 	echo Root disk already exists: $DISK
