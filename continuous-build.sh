@@ -7,10 +7,13 @@
 set -e
 
 function finish {
+	if [ "$TRAVIS_BUILD_DIR" != "" ]; then
 	# ensure that we preserve the toolchain on broken build/test
 	if [ -f "$JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-gcc" ]; then
 		mv $JEHANNE/hacking/cross/toolchain/* $JEHANNE/tmp/toolchain/
 	fi
+	fi
+	(cd $JEHANNE/hacking; git clean -xdf disk-setup/; git checkout disk-setup/syslinux.cfg)
 }
 trap finish EXIT
 
@@ -33,7 +36,7 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 			mv $JEHANNE/tmp/toolchain/* $JEHANNE/hacking/cross/toolchain/
 		else
 			echo "Creating cross-compiling toolchain..."
-			(cd $JEHANNE/hacking/cross/; ./init.sh)
+			(cd $JEHANNE/hacking/cross/; ./init.sh; git clean -xdf $JEHANNE/hacking/cross/tmp $JEHANNE/hacking/cross/src/)
 		fi
 	fi
 
