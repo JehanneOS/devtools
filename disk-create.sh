@@ -51,7 +51,7 @@ fi
 if [ ! -f $DISK ]; then
 	qemu-img create $DISK 4G
 
-	sed -e 's/^\s*\([\+0-9a-zA-Z]*\)[ ].*/\1/' << EOF | perl -MTime::HiRes=usleep -pe '$|=1;usleep(1000000)' | /sbin/fdisk $DISK
+	sed -e 's/^\s*\([\+0-9a-zA-Z]*\)[ ].*/\1/' << EOF | /sbin/fdisk $DISK
     o     #clear partition table
     n     #new partition
     p     #primary partition
