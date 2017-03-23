@@ -79,7 +79,7 @@ if [ ! -f tmp/bin/autoconf ]; then
 )
 failOnError $? "building autoconf"
 fi
-# build automake 1.11.1
+# build automake 1.11.6
 # - autoreconf to avoid conflicts with installed automake
 # - automake; configure; make (that will fail) and then automake again
 #   to workaround this hell
