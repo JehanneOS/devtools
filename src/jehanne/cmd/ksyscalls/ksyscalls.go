@@ -97,18 +97,18 @@ func sysret(t string) string {
 func formatArg(i int, t string) string{
 	switch(t){
 	case "int", "int32_t":
-		return fmt.Sprintf("\tfmtprint(fmt, \" %%d\", a%d);\n", i)
+		return fmt.Sprintf("\tjehanne_fmtprint(fmt, \" %%d\", a%d);\n", i)
 	case "unsigned int", "uint32_t":
 		/* unsigned int is reserved for flags */
-		return fmt.Sprintf("\tfmtprint(fmt, \" %%#ux\", a%d);\n", i)
+		return fmt.Sprintf("\tjehanne_fmtprint(fmt, \" %%#ux\", a%d);\n", i)
 	case "long", "int64_t":
-		return fmt.Sprintf("\tfmtprint(fmt, \" %%lld\", a%d);\n", i)
+		return fmt.Sprintf("\tjehanne_fmtprint(fmt, \" %%lld\", a%d);\n", i)
 	case "unsigned long", "uint64_t":
-		return fmt.Sprintf("\tfmtprint(fmt, \" %%#lud\", a%d);\n", i)
+		return fmt.Sprintf("\tjehanne_fmtprint(fmt, \" %%#lud\", a%d);\n", i)
 	case "void*", "uint8_t*", "const void*", "const uint8_t*":
-		return fmt.Sprintf("\tfmtprint(fmt, \" %%#p\", a%d);\n", i)
+		return fmt.Sprintf("\tjehanne_fmtprint(fmt, \" %%#p\", a%d);\n", i)
 	case "int32_t*", "int*", "const int32_t*", "const int*":
-		return fmt.Sprintf("\tfmtprint(fmt, \" %%#p(%%d)\", a%d, a%d);\n", i, i)
+		return fmt.Sprintf("\tjehanne_fmtprint(fmt, \" %%#p(%%d)\", a%d, a%d);\n", i, i)
 	case "const char*", "char*":
 		return fmt.Sprintf("\tfmtuserstring(fmt, a%d);\n", i)
 	case "const char**", "char**":
@@ -120,18 +120,18 @@ func formatArg(i int, t string) string{
 func formatRet(t string) string{
 	switch(t){
 	case "int", "int32_t":
-		return fmt.Sprintf("\tfmtprint(fmt, \" %%d\", ret->%s);\n", sysret(t))
+		return fmt.Sprintf("\tjehanne_fmtprint(fmt, \" %%d\", ret->%s);\n", sysret(t))
 	case "unsigned int", "uint32_t":
 		/* unsigned int is reserved for flags */
-		return fmt.Sprintf("\tfmtprint(fmt, \" %%#ux\", ret->%s);\n", sysret(t))
+		return fmt.Sprintf("\tjehanne_fmtprint(fmt, \" %%#ux\", ret->%s);\n", sysret(t))
 	case "long", "int64_t":
-		return fmt.Sprintf("\tfmtprint(fmt, \" %%lld\", ret->%s);\n", sysret(t))
+		return fmt.Sprintf("\tjehanne_fmtprint(fmt, \" %%lld\", ret->%s);\n", sysret(t))
 	case "unsigned long", "uint64_t", "void":
-		return fmt.Sprintf("\tfmtprint(fmt, \" %%#llud\", ret->%s);\n", sysret(t))
+		return fmt.Sprintf("\tjehanne_fmtprint(fmt, \" %%#llud\", ret->%s);\n", sysret(t))
 	case "void*", "uintptr_t", "const void*", "const uintptr_t":
-		return fmt.Sprintf("\tfmtprint(fmt, \" %%#p\", ret->%s);\n", sysret(t))
+		return fmt.Sprintf("\tjehanne_fmtprint(fmt, \" %%#p\", ret->%s);\n", sysret(t))
 	case "int32_t*", "int*",  "const int32_t*", "const int*":
-		return fmt.Sprintf("\tfmtprint(fmt, \" %%#p(%%d)\", ret->%s, *ret->%s);\n", sysret(t), sysret(t))
+		return fmt.Sprintf("\tjehanne_fmtprint(fmt, \" %%#p(%%d)\", ret->%s, *ret->%s);\n", sysret(t), sysret(t))
 	}
 	return " [?? " + t + "]"
 }
@@ -285,7 +285,7 @@ enter_{{ .Name }}(Fmt* fmt, Ureg* ureg)
 	{{ range .Vars }}{{.}}
 	{{ end }}
 {{ .CommonCode }}
-	fmtprint(fmt, "{{ .Name }} %#p > ", ureg->ip);
+	jehanne_fmtprint(fmt, "{{ .Name }} %#p > ", ureg->ip);
 {{ .EntryPrint }}
 }
 {{ end }}
@@ -294,8 +294,8 @@ char*
 syscallfmt(int syscall, Ureg* ureg)
 {
 	Fmt fmt;
-	fmtstrinit(&fmt);
-	fmtprint(&fmt, "%d %s ", up->pid, up->text);
+	jehanne_fmtstrinit(&fmt);
+	jehanne_fmtprint(&fmt, "%d %s ", up->pid, up->text);
 
 	switch(syscall){
 	{{ range .Wrappers }}case {{ .Id }}:
@@ -306,14 +306,14 @@ syscallfmt(int syscall, Ureg* ureg)
 		panic("syscallfmt: bad sys call number %d pc %#p\n", syscall, ureg->ip);
 	}
 
-	return fmtstrflush(&fmt);
+	return jehanne_fmtstrflush(&fmt);
 }
 
 {{ range .Wrappers }}
 static void
 exit_{{ .Name }}(Fmt* fmt, Ureg* ureg, ScRet* ret)
 {
-	fmtprint(fmt, "{{ .Name }} %#p < ", ureg->ip);
+	jehanne_fmtprint(fmt, "{{ .Name }} %#p < ", ureg->ip);
 {{ .ExitPrint }}
 }
 {{ end }}
@@ -322,8 +322,8 @@ char*
 sysretfmt(int syscall, Ureg* ureg, ScRet* ret, uint64_t start, uint64_t stop)
 {
 	Fmt fmt;
-	fmtstrinit(&fmt);
-	fmtprint(&fmt, "%d %s ", up->pid, up->text);
+	jehanne_fmtstrinit(&fmt);
+	jehanne_fmtprint(&fmt, "%d %s ", up->pid, up->text);
 
 	switch(syscall){
 	{{ range .Wrappers }}case {{ .Id }}:
@@ -335,12 +335,12 @@ sysretfmt(int syscall, Ureg* ureg, ScRet* ret, uint64_t start, uint64_t stop)
 	}
 
 	if(0 > ret->vl){
-		fmtprint(&fmt, " %s %#llud %#llud\n", up->syserrstr, start, stop-start);
+		jehanne_fmtprint(&fmt, " %s %#llud %#llud\n", up->syserrstr, start, stop-start);
 	} else {
-		fmtprint(&fmt, " \"\" %#llud %#llud\n", start, stop-start);
+		jehanne_fmtprint(&fmt, " \"\" %#llud %#llud\n", start, stop-start);
 	}
 
-	return fmtstrflush(&fmt);
+	return jehanne_fmtstrflush(&fmt);
 }
 
 `)
