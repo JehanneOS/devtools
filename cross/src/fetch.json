@@ -20,11 +20,11 @@
 		]
 	},
 	"automake": {
-		"Upstream":"https://ftp.gnu.org/gnu/automake/automake-1.11.6.tar.gz",
+		"Upstream":"https://ftp.gnu.org/gnu/automake/automake-1.11.1.tar.bz2",
 		"Digest": {
-			"sha256":"53dbf1945401c43f4ce19c1971baecdbf8bc32e0f37fa3f49fe7b6992d0d2030"
+			"sha256":"5b159d3c0e0a1f87de71b68bcb9f1a1c49e9e71749c9b723f17e2e1e0295c7ae"
 		},
-		"Compress":"gzip",
+		"Compress":"bzip2",
 		"RemovePrefix": true,
 		"Exclude": [
 		]
