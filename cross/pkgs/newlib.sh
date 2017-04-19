@@ -33,3 +33,19 @@ function failOnError {
 	fi
 }
 
+export PATH=$JEHANNE/hacking/cross/tmp/bin:$PATH
+export CROSS_DIR=$JEHANNE/hacking/cross
+export NEWLIB=$CROSS_DIR/pkgs/newlib/
+export NEWLIB_SRC=$NEWLIB/src/
+export NEWLIB_BUILD=$NEWLIB/build/
+export NEWLIB_PREFIX=$NEWLIB/output/
+
+(
+	mkdir $NEWLIB_BUILD &&
+	mkdir $NEWLIB_PREFIX &&
+	cd $NEWLIB_BUILD &&
+	$NEWLIB_SRC/configure --prefix=$NEWLIB_PREFIX --target=x86_64-jehanne &&
+	make all && make install &&
+	mv $NEWLIB_PREFIX/x86_64-jehanne/include/* $JEHANNE/sys/posix/newlib/ &&
+	mv $NEWLIB_PREFIX/x86_64-jehanne/lib/ $JEHANNE/arch/amd64/lib/newlib/
+)
