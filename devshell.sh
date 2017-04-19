@@ -7,6 +7,7 @@
 export JEHANNE=`git rev-parse --show-toplevel`
 export PATH="$JEHANNE/hacking/bin:$PATH"
 export PATH="$JEHANNE/hacking/cross/toolchain/bin:$PATH"
+export CPATH="$JEHANNE/hacking/cross/toolchain/lib/gcc/x86_64-jehanne/4.9.4/include:$JEHANNE/hacking/cross/toolchain/lib/gcc/x86_64-jehanne/4.9.4/include-fixed"
 export ARCH=amd64
 
 export TOOLPREFIX=x86_64-jehanne-
