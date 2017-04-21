@@ -16,13 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with Jehanne.  If not, see <http://www.gnu.org/licenses/>.
 
+set -e
+
 if [ "$JEHANNE" = "" ]; then
         echo $0 requires the shell started by ./hacking/devshell.sh
         exit 1
 fi
 
-# To create a Jehanne version of GCC, we need specific OUTDATED versions
+# To create a Jehanne version of newlib, we need specific OUTDATED versions
 # of Autotools that won't compile easily in a modern Linux distro.
+export PATH=$JEHANNE/hacking/cross/tmp/bin:$PATH
 
 function failOnError {
 	# $1 -> exit status on a previous command
@@ -33,19 +36,33 @@ function failOnError {
 	fi
 }
 
-export PATH=$JEHANNE/hacking/cross/tmp/bin:$PATH
 export CROSS_DIR=$JEHANNE/hacking/cross
 export NEWLIB=$CROSS_DIR/pkgs/newlib/
 export NEWLIB_SRC=$NEWLIB/src/
 export NEWLIB_BUILD=$NEWLIB/build/
 export NEWLIB_PREFIX=$NEWLIB/output/
 
+if [ "$NEWLIB_OPTIMIZATION" = "" ]; then
+	NEWLIB_OPTIMIZATION=2
+fi
+
+# NOTE: we use -O0 because apparently vsprintf functions do not
+#       work with -O2.
+export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION"
+
 (
+	rm -fr $NEWLIB_BUILD &&
+	rm -fr $NEWLIB_PREFIX &&
 	mkdir $NEWLIB_BUILD &&
 	mkdir $NEWLIB_PREFIX &&
 	cd $NEWLIB_BUILD &&
 	$NEWLIB_SRC/configure --prefix=$NEWLIB_PREFIX --target=x86_64-jehanne &&
 	make all && make install &&
-	mv $NEWLIB_PREFIX/x86_64-jehanne/include/* $JEHANNE/sys/posix/newlib/ &&
-	mv $NEWLIB_PREFIX/x86_64-jehanne/lib/ $JEHANNE/arch/amd64/lib/newlib/
+	rm -fr $JEHANNE/sys/posix/newlib &&
+	rm -fr $JEHANNE/arch/amd64/lib/newlib &&
+	mv $NEWLIB_PREFIX/x86_64-jehanne/include/ $JEHANNE/sys/posix/newlib &&
+	echo "Newlib headers installed at $JEHANNE/sys/posix/newlib/" &&
+	mv $NEWLIB_PREFIX/x86_64-jehanne/lib/ $JEHANNE/arch/amd64/lib/newlib/ &&
+	echo "Newlib libraries installed at $JEHANNE/arch/amd64/lib/newlib/"
 )
+failOnError $? "building newlib"

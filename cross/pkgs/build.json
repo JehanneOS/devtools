@@ -1,0 +1,7 @@
+{
+	"CrossCompiledPackages": {
+		"Pre": [
+			"./newlib.sh"
+		]
+	}
+}
