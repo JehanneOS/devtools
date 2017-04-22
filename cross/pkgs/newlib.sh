@@ -27,20 +27,24 @@ fi
 # of Autotools that won't compile easily in a modern Linux distro.
 export PATH=$JEHANNE/hacking/cross/tmp/bin:$PATH
 
-function failOnError {
-	# $1 -> exit status on a previous command
-	# $2 -> task description
-	if [ $1 -ne 0 ]; then
-		echo "ERROR $2"
-		exit $1
-	fi
-}
-
 export CROSS_DIR=$JEHANNE/hacking/cross
 export NEWLIB=$CROSS_DIR/pkgs/newlib/
 export NEWLIB_SRC=$NEWLIB/src/
 export NEWLIB_BUILD=$NEWLIB/build/
 export NEWLIB_PREFIX=$NEWLIB/output/
+
+function failOnError {
+	# $1 -> exit status on a previous command
+	# $2 -> task description
+	if [ $1 -ne 0 ]; then
+		echo "ERROR $2"
+		echo
+		echo "CONFIG.LOG @ $NEWLIB_BUILD/config.log"
+		echo
+		cat $NEWLIB_BUILD/config.log
+		exit $1
+	fi
+}
 
 if [ "$NEWLIB_OPTIMIZATION" = "" ]; then
 	NEWLIB_OPTIMIZATION=2
