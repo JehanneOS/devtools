@@ -36,10 +36,12 @@ function failOnError {
 	# $2 -> task description
 	if [ $1 -ne 0 ]; then
 		echo "ERROR $2"
-		echo
-		echo "CONFIG.LOG @ $NEWLIB_BUILD/config.log"
-		echo
-		cat $NEWLIB_BUILD/config.log
+		if [ "$TRAVIS_BUILD_DIR" != "" ]; then
+			echo
+			echo "CONFIG.LOG @ $NEWLIB_BUILD/config.log"
+			echo
+			cat $NEWLIB_BUILD/config.log
+		fi
 		exit $1
 	fi
 }
@@ -58,7 +60,7 @@ export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION"
 	mkdir $NEWLIB_BUILD &&
 	mkdir $NEWLIB_PREFIX &&
 	cd $NEWLIB_BUILD &&
-	$NEWLIB_SRC/configure --prefix=$NEWLIB_PREFIX --build=x86_64-pc-linux-gnu --host=x86_64-pc-linux-gnu --target=x86_64-jehanne &&
+	$NEWLIB_SRC/configure --prefix=$NEWLIB_PREFIX --target=x86_64-jehanne &&
 	make all && make install &&
 	rm -fr $JEHANNE/sys/posix/newlib &&
 	rm -fr $JEHANNE/arch/amd64/lib/newlib &&
