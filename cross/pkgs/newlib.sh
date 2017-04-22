@@ -31,10 +31,6 @@ export NEWLIB_SRC=$NEWLIB/src/
 export NEWLIB_BUILD=$NEWLIB/build/
 export NEWLIB_PREFIX=$NEWLIB/output/
 
-# since our cross compiler is inside the system root, we need this too
-export CPATH=$CROSS_DIR/toolchain/lib/gcc/x86_64-jehanne/4.9.4/include:$CROSS_DIR/toolchain/lib/gcc/x86_64-jehanne/4.9.4/include-fixed
-
-
 function failOnError {
 	# $1 -> exit status on a previous command
 	# $2 -> task description

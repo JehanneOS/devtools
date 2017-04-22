@@ -21,9 +21,15 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 	cd `dirname $0`
 	cd ..
 	export JEHANNE=`pwd`
+	CROSS_TOOLCHAIN=$JEHANNE/hacking/cross/toolchain
 	export PATH="$JEHANNE/hacking/bin:$PATH"
-	export PATH="$JEHANNE/hacking/cross/toolchain/bin:$PATH"
+	export PATH="$CROSS_TOOLCHAIN/bin:$PATH"
 	export ARCH=amd64
+
+	# since our cross compiler is inside the system root, we need this too
+	# as it can't find it's own headers
+	export CPATH=$CROSS_TOOLCHAIN/lib/gcc/x86_64-jehanne/4.9.4/include:$CROSS_TOOLCHAIN/lib/gcc/x86_64-jehanne/4.9.4/include-fixed
+
 	git clean -xdf arch/ sys/ qa/ usr/
 	if [ ! -f "$JEHANNE/hacking/bin/ufs" ]; then
 		echo "Cannot find build tools in $JEHANNE/hacking/bin"
