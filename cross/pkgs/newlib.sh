@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Jehanne.  If not, see <http://www.gnu.org/licenses/>.
 
-set -e
-
 if [ "$JEHANNE" = "" ]; then
         echo $0 requires the shell started by ./hacking/devshell.sh
         exit 1
