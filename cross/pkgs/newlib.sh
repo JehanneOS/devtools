@@ -58,7 +58,7 @@ if [ "$TRAVIS_BUILD_DIR" != "" ]; then
 	# I can't understand why...
 	export CC=gcc
 fi
-export CC=gcc
+
 # NOTE: we use -O0 because apparently vsprintf functions do not
 #       work with -O2.
 export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION"
