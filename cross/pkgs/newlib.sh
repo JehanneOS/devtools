@@ -51,8 +51,6 @@ if [ "$NEWLIB_OPTIMIZATION" = "" ]; then
 fi
 
 export CC=gcc
-export CPATH=$CROSS_DIR/lib/gcc/x86_64-jehanne/4.9.4/include:$CROSS_DIR/lib/gcc/x86_64-jehanne/4.9.4/include-fixed
-
 
 # NOTE: we use -O0 because apparently vsprintf functions do not
 #       work with -O2.
