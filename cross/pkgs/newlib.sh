@@ -62,7 +62,7 @@ export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION"
 	mkdir $NEWLIB_BUILD &&
 	mkdir $NEWLIB_PREFIX &&
 	cd $NEWLIB_BUILD &&
-	$NEWLIB_SRC/configure --prefix=$NEWLIB_PREFIX --target=x86_64-jehanne &&
+	$NEWLIB_SRC/configure --enable-newlib-mb --prefix=$NEWLIB_PREFIX --target=x86_64-jehanne &&
 	make all && make install &&
 	rm -fr $JEHANNE/sys/posix/newlib &&
 	rm -fr $JEHANNE/arch/amd64/lib/newlib &&
