@@ -50,14 +50,9 @@ if [ "$NEWLIB_OPTIMIZATION" = "" ]; then
 	NEWLIB_OPTIMIZATION=2
 fi
 
-if [ "$TRAVIS_BUILD_DIR" != "" ]; then
-	# something weird happens on Travis-CI so that newlib requires
-	# explicit set of the HOST compiler or it will use the
-	# Jehanne cross compiler and try to run the executable on linux
-	#
-	# I can't understand why...
-	export CC=gcc
-fi
+export CC=gcc
+export CPATH=$CROSS_DIR/lib/gcc/x86_64-jehanne/4.9.4/include:$CROSS_DIR/lib/gcc/x86_64-jehanne/4.9.4/include-fixed
+
 
 # NOTE: we use -O0 because apparently vsprintf functions do not
 #       work with -O2.
