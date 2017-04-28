@@ -185,6 +185,7 @@ func generateLibcCode(calls []SyscallConf){
 #include <u.h>
 
 {{ range .Wrappers }}
+#pragma weak {{ .Name }}
 {{ .RetType }}
 {{ .Name }}({{ .FuncArgs }})
 {
