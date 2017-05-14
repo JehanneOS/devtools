@@ -54,6 +54,7 @@ fi
 cd $JEHANNE/arch/$ARCH/kern/
 read -r cmd <<EOF
 $kvmdo qemu-system-x86_64 -s -cpu Haswell -smp $NCPU -m 2048 $kvmflag \
+-rtc clock=vm \
 -no-reboot -serial mon:stdio \
 --machine $machineflag \
 $bootDisk \
