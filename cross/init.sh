@@ -32,7 +32,7 @@ usyscalls header $JEHANNE/sys/src/sysconf.json > $JEHANNE/arch/amd64/include/sys
 # create a GCC crosscompiler in Debian without requiring root access or Tex.
 # And this despite the extreme quality of Debian GNU/Linux!
 
-echo -n Building cross toolchain.
+echo -n please wait.
 (
 	# Inside parentheses, and therefore a subshell . . .
 	while [ 1 ]   # Endless loop.
@@ -54,6 +54,9 @@ function failOnError {
 	# $1 -> exit status on a previous command
 	# $2 -> task description
 	if [ $1 -ne 0 ]; then
+		kill $dotter
+		wait $dotter 2>/dev/null
+
 		echo "ERROR $2"
 		echo
 		echo BUILD LOG:
@@ -211,4 +214,3 @@ ln -sf /bin/bash $JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-sh
 
 kill $dotter
 wait $dotter 2>/dev/null
-

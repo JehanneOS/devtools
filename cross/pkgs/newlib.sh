@@ -45,9 +45,10 @@ dotter=$!
 function failOnError {
 	# $1 -> exit status on a previous command
 	# $2 -> task description
-	kill $dotter
-	wait $dotter 2>/dev/null
 	if [ $1 -ne 0 ]; then
+		kill $dotter
+		wait $dotter 2>/dev/null
+
 		echo "ERROR $2"
 		if [ "$TRAVIS_BUILD_DIR" != "" ]; then
 			echo
