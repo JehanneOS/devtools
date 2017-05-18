@@ -85,8 +85,10 @@ export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION"
 	echo "Newlib headers installed at $JEHANNE/sys/posix/newlib/" &&
 	mv $NEWLIB_PREFIX/x86_64-jehanne/lib/ $JEHANNE/arch/amd64/lib/newlib/ &&
 	echo "Newlib libraries installed at $JEHANNE/arch/amd64/lib/newlib/"
-) >> newlib.build.log
+) >> newlib.build.log 2>&1
 failOnError $? "building newlib"
 
 kill $dotter
 wait $dotter 2>/dev/null
+
+exit 0;
