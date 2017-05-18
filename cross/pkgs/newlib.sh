@@ -31,9 +31,22 @@ export NEWLIB_SRC=$NEWLIB/src/
 export NEWLIB_BUILD=$NEWLIB/build/
 export NEWLIB_PREFIX=$NEWLIB/output/
 
+echo -n Building newlib.
+(
+	# Inside parentheses, and therefore a subshell . . .
+	while [ 1 ]   # Endless loop.
+	do
+	  echo -n "."
+	  sleep 3
+	done
+) &
+dotter=$!
+
 function failOnError {
 	# $1 -> exit status on a previous command
 	# $2 -> task description
+	kill $dotter
+	wait $dotter 2>/dev/null
 	if [ $1 -ne 0 ]; then
 		echo "ERROR $2"
 		if [ "$TRAVIS_BUILD_DIR" != "" ]; then
@@ -41,6 +54,7 @@ function failOnError {
 			echo "CONFIG.LOG @ $NEWLIB_BUILD/config.log"
 			echo
 			cat $NEWLIB_BUILD/config.log
+			cat newlib.build.log
 		fi
 		exit $1
 	fi
@@ -70,5 +84,8 @@ export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION"
 	echo "Newlib headers installed at $JEHANNE/sys/posix/newlib/" &&
 	mv $NEWLIB_PREFIX/x86_64-jehanne/lib/ $JEHANNE/arch/amd64/lib/newlib/ &&
 	echo "Newlib libraries installed at $JEHANNE/arch/amd64/lib/newlib/"
-)
+) >> newlib.build.log
 failOnError $? "building newlib"
+
+kill $dotter
+wait $dotter 2>/dev/null

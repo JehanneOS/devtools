@@ -32,8 +32,20 @@ usyscalls header $JEHANNE/sys/src/sysconf.json > $JEHANNE/arch/amd64/include/sys
 # create a GCC crosscompiler in Debian without requiring root access or Tex.
 # And this despite the extreme quality of Debian GNU/Linux!
 
+echo -n Building cross toolchain.
+(
+	# Inside parentheses, and therefore a subshell . . .
+	while [ 1 ]   # Endless loop.
+	do
+	  echo -n "."
+	  sleep 3
+	done
+) &
+dotter=$!
+date > cross-toolchain.build.log
+
 # fetch all sources
-(cd src && fetch)
+(cd src && fetch) >> cross-toolchain.build.log 2>&1
 
 # To create a Jehanne version of GCC, we need specific OUTDATED versions
 # of Autotools that won't compile easily in a modern Linux distro.
@@ -43,10 +55,13 @@ function failOnError {
 	# $2 -> task description
 	if [ $1 -ne 0 ]; then
 		echo "ERROR $2"
+		echo
+		echo BUILD LOG:
+		echo
+		cat cross-toolchain.build.log
 		exit $1
 	fi
 }
-
 
 # build m4 1.4.14
 # - workaround a bug in lib/stdio.in.h, see http://lists.gnu.org/archive/html/bug-m4/2012-08/msg00008.html
@@ -59,7 +74,7 @@ if [ ! -f tmp/bin/m4 ]; then
 	( grep -q '#include <sys/stat.h>'  src/m4.h || sed -i 's:.*\#include <sys/types\.h>.*:&\n#include <sys/stat.h>:g' src/m4.h ) &&
 	./configure --prefix=$JEHANNE/hacking/cross/tmp &&
 	make && make install
-)
+) >> cross-toolchain.build.log 2>&1
 failOnError $? "building m4"
 fi
 # build autoconf 2.64
@@ -76,7 +91,7 @@ if [ ! -f tmp/bin/autoconf ]; then
 	cp ../../patch/MakeNothing.in ../autoconf/doc/Makefile.in &&
 	cp ../../patch/MakeNothing.in ../autoconf/man/Makefile.in &&
 	make && make install
-)
+) >> cross-toolchain.build.log 2>&1
 failOnError $? "building autoconf"
 fi
 # build automake 1.11.1
@@ -96,7 +111,7 @@ if [ ! -f tmp/bin/automake ]; then
 	cp ../../patch/MakeNothing.in doc/Makefile.in &&
 	cp ../../patch/MakeNothing.in tests/Makefile.in &&
 	make && make install
-)
+) >> cross-toolchain.build.log 2>&1
 failOnError $? "building automake"
 fi
 # build libtool 2.4
@@ -105,7 +120,7 @@ if [ ! -f tmp/bin/libtool ]; then
 	cd src/libtool &&
 	./configure --prefix=$JEHANNE/hacking/cross/tmp &&
 	make && make install
-)
+) >> cross-toolchain.build.log 2>&1
 failOnError $? "building libtool"
 fi
 
@@ -156,7 +171,7 @@ if [ ! -f toolchain/bin/x86_64-jehanne-ar ]; then
 	cp $CROSS_DIR/patch/MakeNothing.in $CROSS_DIR/src/binutils/binutils/doc/Makefile &&
 	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true && 
 	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install
-)
+) >> cross-toolchain.build.log 2>&1
 failOnError $? "building binutils"
 fi
 
@@ -188,8 +203,12 @@ fi
 #	 &&
 #	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-target-libstdc++-v3 &&
 #	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-target-libstdc++-v3
-)
+) >> cross-toolchain.build.log 2>&1
 failOnError $? "building gcc"
 
 # add sh
 ln -sf /bin/bash $JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-sh
+
+kill $dotter
+wait $dotter 2>/dev/null
+
