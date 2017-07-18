@@ -62,7 +62,7 @@ $bootDisk \
 -redir tcp:17010::17010 \
 -redir tcp:17013::17013 \
 $usbDev \
--append "maxcores=1024 nvram=$NVRAM nvrlen=512 nvroff=0 $FS $KAPPEND" \
+-append "maxcores=1024 nvram=$NVRAM nvrlen=512 nvroff=0 *acpi= $FS $KAPPEND" \
 -initrd ./initrd \
 -kernel $KERNEL $*
 EOF
