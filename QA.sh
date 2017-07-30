@@ -37,7 +37,7 @@ if [ "$CPU_MODEL" = "" ]; then
 	CPU_MODEL=Opteron_G1
 fi
 
-appendLine="nobootprompt=tcp maxcores=1024 fs=10.0.2.2 auth=10.0.2.2 nvram=/boot/nvram nvrlen=512 nvroff=0 $KAPPEND"
+appendLine="console=0 nobootprompt=tcp maxcores=1024 fs=10.0.2.2 auth=10.0.2.2 nvram=/boot/nvram nvrlen=512 nvroff=0 $KAPPEND"
 appendLine="-append '$appendLine'"
 kernelLine="-kernel $KERNEL $*"
 if [ "$DISK" = "" ]; then

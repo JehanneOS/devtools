@@ -1,10 +1,11 @@
+
 #!/bin/sh
 
 # This file is part of Jehanne.
 #
 # Copyright (C) 2016-2017 Giacomo Tesio <giacomo@tesio.it>
 
-export SDL_VIDEO_X11_DGAMOUSE=0 # see https://wiki.archlinux.org/index.php/QEMU#Mouse_cursor_is_jittery_or_erratic
+#export SDL_VIDEO_X11_DGAMOUSE=0 # see https://wiki.archlinux.org/index.php/QEMU#Mouse_cursor_is_jittery_or_erratic
 
 if [ "$JEHANNE" = "" ]; then
         echo $0 requires the shell started by ./hacking/devshell.sh
@@ -62,7 +63,7 @@ $bootDisk \
 -redir tcp:17010::17010 \
 -redir tcp:17013::17013 \
 $usbDev \
--append "maxcores=1024 nvram=$NVRAM nvrlen=512 nvroff=0 *acpi= $FS $KAPPEND" \
+-append "maxcores=1024 nvram=$NVRAM nvrlen=512 nvroff=0 console=0 *acpi= $FS $KAPPEND" \
 -initrd ./initrd \
 -kernel $KERNEL $*
 EOF
