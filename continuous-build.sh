@@ -66,7 +66,7 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 			echo /qa/check | NCPU=2 KERNEL=workhorse.32bit KERNDIR=$JEHANNE/hacking/bin/ runqemu
 
 			echo "Create disk image to run QA checks"
-			sed -i -e 's/menu.c32/FromAHCI/g' -e 's/nobootprompt/console=comconsole nobootprompt/g' $JEHANNE/hacking/disk-setup/syslinux.cfg
+			sed -i -e 's/menu.c32/FromAHCI/g' -e 's/nobootprompt/bootconsole=comconsole nobootprompt/g' $JEHANNE/hacking/disk-setup/syslinux.cfg
 			$JEHANNE/hacking/disk-create.sh
 			(cd $JEHANNE/hacking/; git checkout disk-setup/syslinux.cfg)
 
