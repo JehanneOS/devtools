@@ -91,4 +91,5 @@ failOnError $? "building newlib"
 kill $dotter
 wait $dotter 2>/dev/null
 
+echo "done"
 exit 0;
