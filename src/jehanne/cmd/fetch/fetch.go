@@ -58,6 +58,7 @@ func do(f *Fetch, name string) error {
 	if err != nil {
 		return err
 	}
+	defer os.Remove(fname)
 
 	os.MkdirAll(name, dirPermissions)
 
