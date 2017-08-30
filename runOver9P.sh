@@ -49,6 +49,8 @@ if [ "$NCPU" = "" ]; then
 	NCPU=4
 fi
 
+QEMU_USER=`whoami`
+
 cd $KERNDIR
 read -r cmd <<EOF
 $kvmdo qemu-system-x86_64 -s -cpu Haswell -smp $NCPU -m 2048 $kvmflag \
@@ -63,7 +65,7 @@ $bootDisk \
 -redir tcp:17010::17010 \
 -redir tcp:17013::17013 \
 $usbDev \
--append "maxcores=1024 nvram=$NVRAM nvrlen=512 nvroff=0 console=0 *acpi= $FS $KAPPEND" \
+-append "maxcores=1024 nvram=$NVRAM nvrlen=512 nvroff=0 console=0 qemu-user=$QEMU_USER *acpi= $FS $KAPPEND" \
 -initrd ./initrd \
 -kernel $KERNEL $*
 EOF
