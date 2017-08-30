@@ -32,6 +32,9 @@ usyscalls header $JEHANNE/sys/src/sysconf.json > $JEHANNE/arch/amd64/include/sys
 # create a GCC crosscompiler in Debian without requiring root access or Tex.
 # And this despite the extreme quality of Debian GNU/Linux!
 
+# To create a Jehanne version of GCC, we need specific OUTDATED versions
+# of Autotools that won't compile easily in a modern Linux distro.
+
 echo -n please wait.
 (
 	# Inside parentheses, and therefore a subshell . . .
@@ -43,12 +46,6 @@ echo -n please wait.
 ) &
 dotter=$!
 date > cross-toolchain.build.log
-
-# fetch all sources
-(cd src && fetch) >> cross-toolchain.build.log 2>&1
-
-# To create a Jehanne version of GCC, we need specific OUTDATED versions
-# of Autotools that won't compile easily in a modern Linux distro.
 
 function failOnError {
 	# $1 -> exit status on a previous command
@@ -65,6 +62,10 @@ function failOnError {
 		exit $1
 	fi
 }
+
+# fetch all sources
+(cd src && fetch) >> cross-toolchain.build.log 2>&1
+failOnError $? "fetching sources"
 
 # build m4 1.4.14
 # - workaround a bug in lib/stdio.in.h, see http://lists.gnu.org/archive/html/bug-m4/2012-08/msg00008.html
