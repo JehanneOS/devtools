@@ -45,18 +45,14 @@ func main() {
 	}
 
 	for name, f := range(fetches) {
-		if _, err := os.Stat(name); err == nil {
-			log.Printf("Fetch: skip %v (already present)", name)
-		} else {
-			log.Printf("Fetch: %v from %v", name, f.Upstream)
-			if err := do(&f, name); err != nil {
-				log.Fatal(err)
-			}
+		log.Printf("Fetch: %v from %v", name, f.Upstream)
+		if err := do(f, name); err != nil {
+			log.Fatal(err)
 		}
 	}
 }
 
-func do(f *Fetch, name string) error {
+func do(f Fetch, name string) error {
 	fname := fetch(f)
 	s, err := os.Open(fname)
 	if err != nil {
@@ -128,7 +124,7 @@ func (m match) OK() bool {
 	return bytes.Equal(m.Good, m.Hash.Sum(nil))
 }
 
-func fetch(v *Fetch) string {
+func fetch(v Fetch) string {
 	if len(v.Digest) == 0 {
 		log.Fatal("no checksums specifed")
 	}
@@ -178,13 +174,14 @@ func fetch(v *Fetch) string {
 	}
 	w := io.MultiWriter(ws...)
 
-	if _, err := io.Copy(f, io.TeeReader(res.Body, w)); err != nil {
-		log.Fatal(err)
-	}
 	for _, h := range digests {
 		if !h.OK() {
 			log.Fatalf("mismatched %q hash\n\tWanted %x\n\tGot %x\n", h.Name, h.Good, h.Hash.Sum(nil))
 		}
+	}
+
+	if _, err := io.Copy(f, io.TeeReader(res.Body, w)); err != nil {
+		log.Fatal(err)
 	}
 	return f.Name()
 }
