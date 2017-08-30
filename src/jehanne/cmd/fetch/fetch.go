@@ -46,13 +46,13 @@ func main() {
 
 	for name, f := range(fetches) {
 		log.Printf("Fetch: %v from %v", name, f.Upstream)
-		if err := do(&f, name); err != nil {
+		if err := do(f, name); err != nil {
 			log.Fatal(err)
 		}
 	}
 }
 
-func do(f *Fetch, name string) error {
+func do(f Fetch, name string) error {
 	fname := fetch(f)
 	s, err := os.Open(fname)
 	if err != nil {
@@ -124,7 +124,7 @@ func (m match) OK() bool {
 	return bytes.Equal(m.Good, m.Hash.Sum(nil))
 }
 
-func fetch(v *Fetch) string {
+func fetch(v Fetch) string {
 	if len(v.Digest) == 0 {
 		log.Fatal("no checksums specifed")
 	}
