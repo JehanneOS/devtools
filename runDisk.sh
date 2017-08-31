@@ -61,9 +61,9 @@ $bootDisk \
 -net nic,model=rtl8139 \
 -net user,hostfwd=tcp::5555-:1522 \
 -net dump,file=/tmp/vm0.pcap \
--redir tcp:9999::9 \
--redir tcp:17010::17010 \
--redir tcp:17013::17013
+-netdev user,id=tcp9,hostfwd=tcp::9999-:9 \
+-netdev user,id=tcp17010,hostfwd=tcp::17010-:17010 \
+-netdev user,id=tcp17013,hostfwd=tcp::17013-:17013
 EOF
 
 # To enable qemu log:
