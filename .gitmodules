@@ -8,3 +8,6 @@
 [submodule "cross/pkgs/newlib/src"]
 	path = cross/pkgs/newlib/src
 	url = https://github.com/JehanneOS/newlib.git
+[submodule "cross/pkgs/mksh"]
+	path = cross/pkgs/mksh
+	url = https://github.com/JehanneOS/mksh.git
