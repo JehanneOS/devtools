@@ -31,6 +31,8 @@ export NEWLIB_SRC=$NEWLIB/src/
 export NEWLIB_BUILD=$NEWLIB/build/
 export NEWLIB_PREFIX=$NEWLIB/output/
 
+export LD_PRELOAD=
+
 echo -n Building newlib.
 (
 	# Inside parentheses, and therefore a subshell . . .
