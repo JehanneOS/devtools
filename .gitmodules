@@ -9,5 +9,5 @@
 	path = cross/pkgs/newlib/src
 	url = https://github.com/JehanneOS/newlib.git
 [submodule "cross/pkgs/mksh"]
-	path = cross/pkgs/mksh
+	path = cross/pkgs/mksh/src
 	url = https://github.com/JehanneOS/mksh.git
