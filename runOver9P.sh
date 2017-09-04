@@ -58,12 +58,8 @@ $kvmdo qemu-system-x86_64 -s -cpu Haswell -smp $NCPU -m 2048 $kvmflag \
 -no-reboot -serial mon:stdio \
 --machine $machineflag \
 $bootDisk \
--net nic,model=rtl8139 \
--net user,hostfwd=tcp::5555-:1522 \
--net dump,file=/tmp/vm0.pcap \
--netdev user,id=tcp9,hostfwd=tcp::9999-:9 \
--netdev user,id=tcp17010,hostfwd=tcp::17010-:17010 \
--netdev user,id=tcp17013,hostfwd=tcp::17013-:17013 \
+-netdev user,id=ethernet.0,hostfwd=tcp::5555-:1522,hostfwd=tcp::9999-:9,hostfwd=tcp::17010-:17010,hostfwd=tcp::17013-:17013 \
+-device rtl8139,netdev=ethernet.0 \
 $usbDev \
 -append "maxcores=1024 nvram=$NVRAM nvrlen=512 nvroff=0 console=0 qemu-user=$QEMU_USER *acpi= $FS $KAPPEND" \
 -initrd ./initrd \
@@ -72,6 +68,8 @@ EOF
 
 # To enable qemu log:
 #-D $JEHANNE/../qemu.log -d int,cpu_reset,in_asm \
+
+#-net dump,file=/tmp/vm0.pcap \
 
 echo $cmd
 eval $cmd
