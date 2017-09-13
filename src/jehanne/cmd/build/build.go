@@ -466,8 +466,14 @@ func install(b *build) {
 	case len(b.Program) > 0:
 		move(b.Program, b.Install)
 	case len(b.Library) > 0:
+		ofiles := []string{}
+		for _, o := range b.ObjectFiles {
+			run(b, *shellhack, exec.Command("mv", o, b.Library + "-" + o))
+			ofiles = append(ofiles, b.Library + "-" + o)
+		}
 		libpath := path.Join(b.Install, b.Library)
-		args := append([]string{"-rs", libpath}, b.ObjectFiles...)
+		
+		args := append([]string{"-rs", libpath}, ofiles...)
 		run(b, *shellhack, exec.Command(tools["ar"], args...))
 		run(b, *shellhack, exec.Command(tools["ranlib"], libpath))
 	}
