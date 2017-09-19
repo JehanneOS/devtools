@@ -468,7 +468,7 @@ func install(b *build) {
 	case len(b.Library) > 0:
 		ofiles := []string{}
 		for _, o := range b.ObjectFiles {
-			run(b, *shellhack, exec.Command("mv", o, b.Library + "-" + o))
+			os.Rename(o, b.Library + "-" + o)
 			ofiles = append(ofiles, b.Library + "-" + o)
 		}
 		libpath := path.Join(b.Install, b.Library)
