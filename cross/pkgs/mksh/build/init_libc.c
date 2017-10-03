@@ -22,5 +22,6 @@
 void
 __application_newlib_init(void)
 {
+	rfork(RFENVG);
 	libposix_emulate_SIGCHLD();
 }
