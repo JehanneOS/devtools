@@ -285,8 +285,9 @@ enter_{{ .Name }}(Fmt* fmt, Ureg* ureg)
 	{{ range .Vars }}{{.}}
 	{{ end }}
 {{ .CommonCode }}
-	jehanne_fmtprint(fmt, "{{ .Name }} %#p > ", ureg->ip);
+	jehanne_fmtprint(fmt, "{{ .Name }} %#p >", ureg->ip);
 {{ .EntryPrint }}
+	jehanne_fmtprint(fmt, "\n");
 }
 {{ end }}
 
@@ -313,7 +314,7 @@ syscallfmt(int syscall, Ureg* ureg)
 static void
 exit_{{ .Name }}(Fmt* fmt, Ureg* ureg, ScRet* ret)
 {
-	jehanne_fmtprint(fmt, "{{ .Name }} %#p < ", ureg->ip);
+	jehanne_fmtprint(fmt, "{{ .Name }} %#p <", ureg->ip);
 {{ .ExitPrint }}
 }
 {{ end }}
