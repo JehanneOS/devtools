@@ -187,6 +187,12 @@ func generateKernelCode(calls []SyscallConf){
 		wcall.ExitPrint += formatRet(call.Ret[0])
 		if call.Name == "pread"{
 			wcall.ExitPrint += fmt.Sprintf("\tfmtrwdata(fmt, (char*)ureg->%s, MIN(ureg->%s, 64));\n", uregArg(1), uregArg(2))
+		} else if call.Name == "fd2path"{
+			wcall.ExitPrint += fmt.Sprintf("\tfmtrwdata(fmt, (char*)ureg->%s, MIN(ureg->%s, 64));\n", uregArg(1), uregArg(2))
+		} else if call.Name == "await"{
+			wcall.ExitPrint += fmt.Sprintf("\tfmtrwdata(fmt, (char*)ureg->%s, MIN(ureg->%s, 64));\n", uregArg(0), uregArg(1))
+		} else if call.Name == "errstr"{
+			wcall.ExitPrint += fmt.Sprintf("\tfmtrwdata(fmt, (char*)ureg->%s, MIN(ureg->%s, 64));\n", uregArg(0), uregArg(1))
 		}
 
 		code.Wrappers = append(code.Wrappers, *wcall)
