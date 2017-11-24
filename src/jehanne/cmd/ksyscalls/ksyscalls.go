@@ -292,6 +292,8 @@ enter_{{ .Name }}(Fmt* fmt, Ureg* ureg)
 	{{ end }}
 {{ .CommonCode }}
 	jehanne_fmtprint(fmt, "{{ .Name }} %#p >", ureg->ip);
+	if(up->notified)
+		jehanne_fmtprint(fmt, "!");
 {{ .EntryPrint }}
 	jehanne_fmtprint(fmt, "\n");
 }
@@ -321,6 +323,8 @@ static void
 exit_{{ .Name }}(Fmt* fmt, Ureg* ureg, ScRet* ret)
 {
 	jehanne_fmtprint(fmt, "{{ .Name }} %#p <", ureg->ip);
+	if(up->notified)
+		jehanne_fmtprint(fmt, "!");
 {{ .ExitPrint }}
 }
 {{ end }}
