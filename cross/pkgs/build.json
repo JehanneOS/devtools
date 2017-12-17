@@ -1,7 +1,8 @@
 {
 	"CrossCompiledPackages": {
 		"Pre": [
-			"./newlib.sh"
+			"./newlib/build.sh",
+			"./mksh/build.sh"
 		]
 	}
 }

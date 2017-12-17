@@ -57,14 +57,14 @@ function failOnError {
 			echo "CONFIG.LOG @ $NEWLIB_BUILD/config.log"
 			echo
 			cat $NEWLIB_BUILD/config.log
-			cat newlib.build.log
+			cat $NEWLIB/newlib.build.log
 		fi
 		exit $1
 	fi
 }
 
 if [ "$NEWLIB_OPTIMIZATION" = "" ]; then
-	NEWLIB_OPTIMIZATION=0
+	NEWLIB_OPTIMIZATION=2
 fi
 
 export CC=gcc
@@ -87,7 +87,7 @@ export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION"
 	echo "Newlib headers installed at $JEHANNE/sys/posix/newlib/" &&
 	mv $NEWLIB_PREFIX/x86_64-jehanne/lib/ $JEHANNE/arch/amd64/lib/newlib/ &&
 	echo "Newlib libraries installed at $JEHANNE/arch/amd64/lib/newlib/"
-) >> newlib.build.log 2>&1
+) >> $NEWLIB/newlib.build.log 2>&1
 failOnError $? "building newlib"
 
 kill $dotter
