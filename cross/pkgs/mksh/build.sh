@@ -41,6 +41,7 @@ echo -n Building mksh.
 dotter=$!
 
 cd $MKSH
+rm -f $MKSH/mksh.build.log
 
 function failOnError {
 	# $1 -> exit status on a previous command
@@ -59,21 +60,17 @@ function failOnError {
 	fi
 }
 
-export TARGET_OS=Jehanne
-export CC=x86_64-jehanne-gcc
-export MKSHRC_PATH='~/lib/mkshrc'
-
 (
 	git clean -xdf . &&
 	mkdir $MKSH_BUILD &&
 	cd $MKSH_BUILD &&
-	sh ../src/Build.sh &&
+	TARGET_OS=Jehanne CC=x86_64-jehanne-gcc MKSHRC_PATH='~/lib/mkshrc' sh ../src/Build.sh &&
 	cp mksh $JEHANNE/arch/amd64/cmd/ &&
 	sed -e '3,$s/\bbin\b/cmd/g' ../src/dot.mkshrc > mkshrc &&
 	mkdir -p $JEHANNE/arch/mksh/lib &&
 	cp mkshrc $JEHANNE/arch/mksh/lib &&
 	cp mkshrc $JEHANNE/usr/glenda/lib
-) > $MKSH/mksh.build.log 2>&1
+) > mksh.build.log 2>&1
 failOnError $? "building mksh"
 
 
