@@ -41,7 +41,7 @@ case "$DISK" in
 		bootDisk="-usb -usbdevice host:$DISK"
 		;;
 	*)
-		bootDisk="-drive if=none,id=usbstick,file=$DISK -usb -readconfig /usr/share/doc/qemu-system-x86/common/ich9-ehci-uhci.cfg -device usb-host,bus=usb-bus.0,hostbus=3,hostport=1 -device usb-host,bus=usb-bus.0,hostbus=3,hostport=1 -device usb-storage,bus=ehci.0,drive=usbstick "
+		bootDisk="-readconfig /usr/share/doc/qemu-system-x86/common/ich9-ehci-uhci.cfg -drive if=none,id=usbstick,file=$DISK -usb -device usb-storage,bus=ehci.0,drive=usbstick "
 		;;
 esac
 #bootDisk="-device ahci,id=ahci -drive id=boot,file=$DISK,index=0,cache=writeback,if=none -device ide-drive,drive=boot,bus=ahci.0"
@@ -67,4 +67,3 @@ EOF
 
 echo $cmd
 eval $cmd
-

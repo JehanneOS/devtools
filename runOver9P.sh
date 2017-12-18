@@ -5,7 +5,7 @@
 #
 # Copyright (C) 2016-2017 Giacomo Tesio <giacomo@tesio.it>
 
-#export SDL_VIDEO_X11_DGAMOUSE=0 # see https://wiki.archlinux.org/index.php/QEMU#Mouse_cursor_is_jittery_or_erratic
+export SDL_VIDEO_X11_DGAMOUSE=0 # see https://wiki.archlinux.org/index.php/QEMU#Mouse_cursor_is_jittery_or_erratic
 
 if [ "$JEHANNE" = "" ]; then
         echo $0 requires the shell started by ./hacking/devshell.sh
@@ -36,7 +36,7 @@ fi
 
 if [ -f $DISK ]; then
 	usbDev="-drive if=none,id=usbstick,file=$DISK -usb -device nec-usb-xhci,id=xhci -device usb-storage,bus=xhci.0,drive=usbstick"
-	usbDev="-drive if=none,id=usbstick,file=$DISK -usb -readconfig /usr/share/doc/qemu-system-x86/common/ich9-ehci-uhci.cfg -device usb-host,bus=usb-bus.0,hostbus=3,hostport=1 -device usb-host,bus=usb-bus.0,hostbus=3,hostport=1 -device usb-storage,bus=ehci.0,drive=usbstick "
+	usbDev="-readconfig /usr/share/doc/qemu-system-x86/common/ich9-ehci-uhci.cfg -drive if=none,id=usbstick,file=$DISK -usb -device usb-storage,bus=ehci.0,drive=usbstick "
 fi
 
 if [ "$KERNDIR" = "" ]; then
@@ -76,4 +76,3 @@ eval $cmd
 
 kill $ufspid
 wait
-
