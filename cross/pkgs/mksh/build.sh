@@ -60,11 +60,10 @@ function failOnError {
 	fi
 }
 
+rm -f $MKSH/mksh.build.log
 (
-#	rm -f $MKSH/mksh.build.log &&
-	date > $MKSH/mksh.build.log &&
-	cd $MKSH &&
-	git clean -xdf . &&
+	cd $MKSH
+	rm -fr $MKSH_BUILD
 	mkdir $MKSH_BUILD &&
 	cd $MKSH_BUILD &&
 	TARGET_OS=Jehanne CC=x86_64-jehanne-gcc sh ../src/Build.sh &&
@@ -75,7 +74,7 @@ function failOnError {
 	cp mkshrc $JEHANNE/arch/mksh/lib &&
 	cp mkshrc $JEHANNE/usr/glenda/lib &&
 	echo "mkshrc installed at $JEHANNE/arch/mksh/lib and $JEHANNE/usr/glenda/lib"
-) >> $MKSH/mksh.build.log 2>&1
+) > $MKSH/mksh.build.log 2>&1
 failOnError $? "building mksh"
 
 
