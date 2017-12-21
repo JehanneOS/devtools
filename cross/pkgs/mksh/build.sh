@@ -26,6 +26,9 @@ export CROSS_DIR=$JEHANNE/hacking/cross
 export MKSH=$CROSS_DIR/pkgs/mksh/
 export MKSH_SRC=$MKSH/src/
 export MKSH_BUILD=$MKSH/out/
+export MKSHRC_PATH='~/lib/mkshrc'
+export LIBS="$JEHANNE/arch/$ARCH/lib/newlib/libc.a $JEHANNE/arch/$ARCH/lib/newlib/libm.a $JEHANNE/arch/$ARCH/lib/newlib/libg.a -lposix -lc"
+export CPPFLAGS="-I$JEHANNE/sys/posix/newlib/ '-DMKSHRC_PATH=\"$MKSHRC_PATH\"' '-DARCH=\"$ARCH\"'"
 
 export LD_PRELOAD=
 
@@ -39,9 +42,6 @@ echo -n Building mksh.
 	done
 ) &
 dotter=$!
-
-cd $MKSH
-rm -f $MKSH/mksh.build.log
 
 function failOnError {
 	# $1 -> exit status on a previous command
@@ -61,16 +61,21 @@ function failOnError {
 }
 
 (
+#	rm -f $MKSH/mksh.build.log &&
+	date > $MKSH/mksh.build.log &&
+	cd $MKSH &&
 	git clean -xdf . &&
 	mkdir $MKSH_BUILD &&
 	cd $MKSH_BUILD &&
-	TARGET_OS=Jehanne CC=x86_64-jehanne-gcc MKSHRC_PATH='~/lib/mkshrc' sh ../src/Build.sh &&
-	cp mksh $JEHANNE/arch/amd64/cmd/ &&
+	TARGET_OS=Jehanne CC=x86_64-jehanne-gcc sh ../src/Build.sh &&
+	cp mksh $JEHANNE/arch/amd64/cmd/sh &&
 	sed -e '3,$s/\bbin\b/cmd/g' ../src/dot.mkshrc > mkshrc &&
+	echo "mksh installed at $JEHANNE/arch/amd64/cmd/sh"
 	mkdir -p $JEHANNE/arch/mksh/lib &&
 	cp mkshrc $JEHANNE/arch/mksh/lib &&
-	cp mkshrc $JEHANNE/usr/glenda/lib
-) > mksh.build.log 2>&1
+	cp mkshrc $JEHANNE/usr/glenda/lib &&
+	echo "mkshrc installed at $JEHANNE/arch/mksh/lib and $JEHANNE/usr/glenda/lib"
+) >> $MKSH/mksh.build.log 2>&1
 failOnError $? "building mksh"
 
 
