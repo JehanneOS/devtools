@@ -67,9 +67,9 @@ rm -f $MKSH/mksh.build.log
 	mkdir $MKSH_BUILD &&
 	cd $MKSH_BUILD &&
 	TARGET_OS=Jehanne CC=x86_64-jehanne-gcc sh ../src/Build.sh &&
-	cp mksh $JEHANNE/arch/amd64/cmd/sh &&
+	cp mksh $JEHANNE/arch/amd64/cmd/mksh &&
 	sed -e '3,$s/\bbin\b/cmd/g' ../src/dot.mkshrc > mkshrc &&
-	echo "mksh installed at $JEHANNE/arch/amd64/cmd/sh"
+	echo "mksh installed at $JEHANNE/arch/amd64/cmd/mksh"
 	mkdir -p $JEHANNE/arch/mksh/lib &&
 	cp mkshrc $JEHANNE/arch/mksh/lib &&
 	cp mkshrc $JEHANNE/usr/glenda/lib &&
