@@ -27,7 +27,12 @@ define jhn-print-with-context
 end
 
 define jhn-log-syscalls
-	b syscall
+	if $argc == 0
+		b syscall
+	end
+	if $argc == 1
+		b syscall if up != 0 && $_streq(up->text, $arg0)
+	end
 	commands
 		jhn-print-with-context " pc = 0x%x " ureg->ip
 		c
