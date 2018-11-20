@@ -37,7 +37,11 @@ if [ -d $JEHANNE/hacking/disk-setup/bios/ ]; then
 else
 	mkdir $JEHANNE/hacking/disk-setup/bios/
 fi
-cp $SYSLINUXBIOS/lib* $JEHANNE/hacking/disk-setup/bios/
+if [ -d  $SYSLINUXBIOS/com32/ ]; then
+	cp $SYSLINUXBIOS/com32/lib* $JEHANNE/hacking/disk-setup/bios/
+else
+	cp $SYSLINUXBIOS/lib* $JEHANNE/hacking/disk-setup/bios/
+fi
 cp $SYSLINUXBIOS/elf.c32 $JEHANNE/hacking/disk-setup/bios/
 cp $SYSLINUXBIOS/mboot.c32 $JEHANNE/hacking/disk-setup/bios/
 cp $SYSLINUXBIOS/menu.c32 $JEHANNE/hacking/disk-setup/bios/

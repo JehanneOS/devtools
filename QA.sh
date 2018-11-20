@@ -55,7 +55,7 @@ if [ "$DISK" = "" ]; then
 fi
 
 if [ -a $DISK ]; then
-	bootDisk="-device ahci,id=ahci -drive id=boot,file=$DISK,index=0,cache=writeback,if=none -device ide-drive,drive=boot,bus=ahci.0"
+	bootDisk="-device ahci,id=ahci -drive id=boot,file=$DISK,format=raw,index=0,cache=writeback,if=none -device ide-drive,drive=boot,bus=ahci.0"
 fi
 
 cd $KERNDIR
