@@ -1,0 +1,11 @@
+diff -Naru ../orig/configfsf.sub ./configfsf.sub
+--- ../orig/configfsf.sub	2018-11-26 11:59:08.897396848 +0100
++++ ./configfsf.sub	2018-11-26 12:20:10.079672849 +0100
+@@ -1399,6 +1399,7 @@
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
++	      | -jehanne* \
+ 	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* | -tirtos*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
