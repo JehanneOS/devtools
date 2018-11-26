@@ -30,11 +30,25 @@ failOnError $? "fetching sources"
 
 echo -n Building libgmp...
 (
-	cd libgmp
-	patch -p0 < $WORKING_DIR/patch/libgmp.patch
-	./configure --host=x86_64-jehanne --prefix=/pkgs/libgmp/6.1.2/
-	make
+	cd libgmp &&
+	patch -p0 < $WORKING_DIR/patch/libgmp.patch &&
+	./configure --host=x86_64-jehanne --prefix=/pkgs/libgmp/6.1.2/ &&
+	make &&
 	make DESTDIR=$JEHANNE install
 ) >> $WORKING_DIR/gcc.build.log
 failOnError $? "Building libgmp"
+echo done.
+
+# Copy to /posix (to emulate bind during cross compilation)
+cp $JEHANNE/pkgs/libgmp/6.1.2/* $JEHANNE/posix
+
+echo -n Building libmpfr...
+(
+	cd libmpfr
+	patch -p0 < $WORKING_DIR/patch/libmpfr.patch
+	./configure --host=x86_64-jehanne --prefix=/pkgs/libmpfr/4.0.1/
+	make
+	make DESTDIR=$JEHANNE install
+) >> $WORKING_DIR/gcc.build.log
+failOnError $? "Building libmpfr"
 echo done.

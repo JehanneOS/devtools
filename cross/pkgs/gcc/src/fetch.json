@@ -8,5 +8,17 @@
 		"RemovePrefix": true,
 		"Exclude": [
 		]
+	},
+	
+	"libmpfr" : {
+		"Upstream":"https://www.mpfr.org/mpfr-current/mpfr-4.0.1.tar.bz2",
+		"Digest": {
+			"sha256":"a4d97610ba8579d380b384b225187c250ef88cfe1d5e7226b89519374209b86b"
+		},
+		"Compress":"bzip2",
+		"RemovePrefix": true,
+		"Exclude": [
+		]
 	}
+		
 }
