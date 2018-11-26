@@ -32,23 +32,24 @@ echo -n Building libgmp...
 (
 	cd libgmp &&
 	patch -p0 < $WORKING_DIR/patch/libgmp.patch &&
-	./configure --host=x86_64-jehanne --prefix=/pkgs/libgmp/6.1.2/ &&
+	./configure --host=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE &&
 	make &&
-	make DESTDIR=$JEHANNE install
+	make DESTDIR=$JEHANNE/pkgs/libgmp/6.1.2/ install
 ) >> $WORKING_DIR/gcc.build.log
 failOnError $? "Building libgmp"
 echo done.
 
 # Copy to /posix (to emulate bind during cross compilation)
-cp $JEHANNE/pkgs/libgmp/6.1.2/* $JEHANNE/posix
+cp -fr $JEHANNE/pkgs/libgmp/6.1.2/posix/* $JEHANNE/posix
 
 echo -n Building libmpfr...
 (
-	cd libmpfr
-	patch -p0 < $WORKING_DIR/patch/libmpfr.patch
-	./configure --host=x86_64-jehanne --prefix=/pkgs/libmpfr/4.0.1/
-	make
-	make DESTDIR=$JEHANNE install
+	cd libmpfr &&
+	patch -p0 < $WORKING_DIR/patch/libmpfr.patch &&
+	./configure --host=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --with-gmp=$JEHANNE/pkgs/libgmp/6.1.2/posix/ &&
+	cp ../../../../patch/MakeNothing.in doc/Makefile &&
+	make &&
+	make DESTDIR=$JEHANNE/pkgs/libmpfr/4.0.1/ install
 ) >> $WORKING_DIR/gcc.build.log
 failOnError $? "Building libmpfr"
 echo done.
