@@ -71,7 +71,7 @@ export CC=gcc
 
 # NOTE: we use -O0 because apparently vsprintf functions do not
 #       work with -O2.
-export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION"
+export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION -std=gnu11"
 
 (
 	rm -fr $NEWLIB_BUILD &&
@@ -79,14 +79,12 @@ export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION"
 	mkdir $NEWLIB_BUILD &&
 	mkdir $NEWLIB_PREFIX &&
 	cd $NEWLIB_BUILD &&
-	$NEWLIB_SRC/configure --enable-newlib-mb --disable-newlib-fvwrite-in-streamio --prefix=$NEWLIB_PREFIX --target=x86_64-jehanne &&
-	make all && make install &&
+	$NEWLIB_SRC/configure --enable-newlib-mb --disable-newlib-fvwrite-in-streamio --prefix=/pkgs/newlib --target=x86_64-jehanne &&
+	make all && make DESTDIR=$NEWLIB_PREFIX install &&
 	rm -fr $JEHANNE/sys/posix/newlib &&
 	rm -fr $JEHANNE/arch/amd64/lib/newlib &&
-	mv $NEWLIB_PREFIX/x86_64-jehanne/include/ $JEHANNE/sys/posix/newlib &&
-	echo "Newlib headers installed at $JEHANNE/sys/posix/newlib/" &&
-	mv $NEWLIB_PREFIX/x86_64-jehanne/lib/ $JEHANNE/arch/amd64/lib/newlib/ &&
-	echo "Newlib libraries installed at $JEHANNE/arch/amd64/lib/newlib/"
+	cp -fr $NEWLIB_PREFIX/pkgs/newlib/ $JEHANNE/pkgs/ &&
+	echo "Newlib headers installed at $JEHANNE/pkgs/newlib/"
 ) >> $NEWLIB/newlib.build.log 2>&1
 failOnError $? "building newlib"
 
