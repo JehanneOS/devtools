@@ -49,7 +49,27 @@ echo -n Building libmpfr...
 	./configure --host=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --with-gmp=$JEHANNE/pkgs/libgmp/6.1.2/posix/ &&
 	cp ../../../../patch/MakeNothing.in doc/Makefile &&
 	make &&
-	make DESTDIR=$JEHANNE/pkgs/libmpfr/4.0.1/ install
+	make DESTDIR=$JEHANNE/pkgs//4.0.1/ install
 ) >> $WORKING_DIR/gcc.build.log
 failOnError $? "Building libmpfr"
 echo done.
+
+# Copy to /posix (to emulate bind during cross compilation)
+cp -fr $JEHANNE/pkgs/libmpfr/4.0.1/posix/* $JEHANNE/posix
+
+echo -n Building libmpc...
+(
+	cd libmpc &&
+	chmod u+w config.sub &&
+	patch -p0 < $WORKING_DIR/patch/libmpc.patch &&
+	chmod u-w config.sub &&
+	./configure --host=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --with-gmp=$JEHANNE/pkgs/libgmp/6.1.2/posix/ --with-mpfr=$JEHANNE/pkgs/libmpfr/4.0.1/posix/ &&
+	cp ../../../../patch/MakeNothing.in doc/Makefile &&
+	make &&
+	make DESTDIR=$JEHANNE/pkgs/libmpc/1.1.0/ install
+) >> $WORKING_DIR/gcc.build.log
+failOnError $? "Building libmpc"
+echo done.
+
+# Copy to /posix (to emulate bind during cross compilation)
+cp -fr $JEHANNE/pkgs/libmpc/4.0.1/posix/* $JEHANNE/posix
