@@ -11,14 +11,12 @@ function failOnError {
 	# $1 -> exit status on a previous command
 	# $2 -> task description
 	if [ $1 -ne 0 ]; then
-		kill $dotter
-		wait $dotter 2>/dev/null
 
 		echo "ERROR $2"
 		echo
 		echo BUILD LOG:
 		echo
-		cat cross-toolchain.build.log
+		cat $WORKING_DIR/gcc.build.log
 		exit $1
 	fi
 }
@@ -30,7 +28,7 @@ failOnError $? "fetching sources"
 
 echo -n Building libgmp...
 (
-	cd libgmp &&
+	cd src/libgmp &&
 	patch -p0 < $WORKING_DIR/patch/libgmp.patch &&
 	./configure --host=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE &&
 	make &&
@@ -44,12 +42,12 @@ cp -fr $JEHANNE/pkgs/libgmp/6.1.2/posix/* $JEHANNE/posix
 
 echo -n Building libmpfr...
 (
-	cd libmpfr &&
+	cd src/libmpfr &&
 	patch -p0 < $WORKING_DIR/patch/libmpfr.patch &&
 	./configure --host=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --with-gmp=$JEHANNE/pkgs/libgmp/6.1.2/posix/ &&
 	cp ../../../../patch/MakeNothing.in doc/Makefile &&
 	make &&
-	make DESTDIR=$JEHANNE/pkgs//4.0.1/ install
+	make DESTDIR=$JEHANNE/pkgs/libmpfr/4.0.1/ install
 ) >> $WORKING_DIR/gcc.build.log
 failOnError $? "Building libmpfr"
 echo done.
@@ -59,7 +57,7 @@ cp -fr $JEHANNE/pkgs/libmpfr/4.0.1/posix/* $JEHANNE/posix
 
 echo -n Building libmpc...
 (
-	cd libmpc &&
+	cd src/libmpc &&
 	chmod u+w config.sub &&
 	patch -p0 < $WORKING_DIR/patch/libmpc.patch &&
 	chmod u-w config.sub &&

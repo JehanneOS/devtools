@@ -4,7 +4,7 @@
 
 # Fill these in appropriately:
 export PKG_CONFIG_SYSROOT_DIR=$JEHANNE
-export PKG_CONFIG_LIBDIR=$JEHANNE/lib/pkgconfig
+export PKG_CONFIG_LIBDIR=$JEHANNE/posix
 
 # TODO: If it works this should probably just be set to the empty string.
 export PKG_CONFIG_PATH=$PKG_CONFIG_LIBDIR
