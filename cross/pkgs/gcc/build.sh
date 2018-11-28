@@ -23,6 +23,8 @@ function failOnError {
 
 date > $WORKING_DIR/gcc.build.log
 
+git clean -xdf src
+
 (cd src && fetch) >> $WORKING_DIR/gcc.build.log
 failOnError $? "fetching sources"
 
@@ -38,7 +40,7 @@ failOnError $? "Building libgmp"
 echo done.
 
 # Copy to /posix (to emulate bind during cross compilation)
-cp -fr $JEHANNE/pkgs/libgmp/6.1.2/posix/* $JEHANNE/posix
+cp -pfr $JEHANNE/pkgs/libgmp/6.1.2/posix/* $JEHANNE/posix
 
 echo -n Building libmpfr...
 (
@@ -48,12 +50,12 @@ echo -n Building libmpfr...
 	cp ../../../../patch/MakeNothing.in doc/Makefile &&
 	make &&
 	make DESTDIR=$JEHANNE/pkgs/libmpfr/4.0.1/ install
-) >> $WORKING_DIR/gcc.build.log
+) #>> $WORKING_DIR/gcc.build.log
 failOnError $? "Building libmpfr"
 echo done.
 
 # Copy to /posix (to emulate bind during cross compilation)
-cp -fr $JEHANNE/pkgs/libmpfr/4.0.1/posix/* $JEHANNE/posix
+cp -pfr $JEHANNE/pkgs/libmpfr/4.0.1/posix/* $JEHANNE/posix
 
 echo -n Building libmpc...
 (
@@ -70,4 +72,4 @@ failOnError $? "Building libmpc"
 echo done.
 
 # Copy to /posix (to emulate bind during cross compilation)
-cp -fr $JEHANNE/pkgs/libmpc/4.0.1/posix/* $JEHANNE/posix
+cp -pfr $JEHANNE/pkgs/libmpc/1.1.0/posix/* $JEHANNE/posix
