@@ -28,7 +28,7 @@ git clean -xdf src
 (cd src && fetch) >> $WORKING_DIR/gcc.build.log
 failOnError $? "fetching sources"
 
-echo -n Building libgmp...
+echo -n Building libgmp... | tee -a $WORKING_DIR/gcc.build.log
 (
 	cd src/libgmp &&
 	patch -p0 < $WORKING_DIR/patch/libgmp.patch &&
@@ -42,7 +42,7 @@ echo done.
 # Copy to /posix (to emulate bind during cross compilation)
 cp -pfr $JEHANNE/pkgs/libgmp/6.1.2/posix/* $JEHANNE/posix
 
-echo -n Building libmpfr...
+echo -n Building libmpfr... | tee -a $WORKING_DIR/gcc.build.log
 (
 	cd src/libmpfr &&
 	patch -p0 < $WORKING_DIR/patch/libmpfr.patch &&
@@ -50,14 +50,31 @@ echo -n Building libmpfr...
 	cp ../../../../patch/MakeNothing.in doc/Makefile &&
 	make &&
 	make DESTDIR=$JEHANNE/pkgs/libmpfr/4.0.1/ install
-) #>> $WORKING_DIR/gcc.build.log
+) >> $WORKING_DIR/gcc.build.log
 failOnError $? "Building libmpfr"
 echo done.
 
 # Copy to /posix (to emulate bind during cross compilation)
 cp -pfr $JEHANNE/pkgs/libmpfr/4.0.1/posix/* $JEHANNE/posix
 
-echo -n Building libmpc...
+echo -n Building libmpc... | tee -a $WORKING_DIR/gcc.build.log
+(
+	cd src/libmpc &&
+	chmod u+w config.sub &&
+	patch -p0 < $WORKING_DIR/patch/libmpc.patch &&
+	chmod u-w config.sub &&
+	./configure --host=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --with-gmp=$JEHANNE/pkgs/libgmp/6.1.2/posix/ --with-mpfr=$JEHANNE/pkgs/libmpfr/4.0.1/posix/ &&
+	cp ../../../../patch/MakeNothing.in doc/Makefile &&
+	make &&
+	make DESTDIR=$JEHANNE/pkgs/libmpc/1.1.0/ install
+) >> $WORKING_DIR/gcc.build.log
+failOnError $? "Building libmpc"
+echo done.
+
+# Copy to /posix (to emulate bind during cross compilation)
+cp -pfr $JEHANNE/pkgs/libmpc/1.1.0/posix/* $JEHANNE/posix
+
+echo -n Building binutils... | tee -a $WORKING_DIR/gcc.build.log
 (
 	cd src/libmpc &&
 	chmod u+w config.sub &&
