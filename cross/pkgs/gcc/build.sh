@@ -20,6 +20,15 @@ function failOnError {
 	fi
 }
 
+function dynpatch {
+	# $1 -> path from $WORKING_DIR/src
+	# $2 -> string to search
+	( cd $WORKING_DIR/src &&
+	  grep -q jehanne $1 ||
+	  sed -n -i -e "/$2/r ../patch/$1" -e '1x' -e '2,${x;p}' -e '${x;p}' $1
+	)
+}
+
 date > $WORKING_DIR/gcc.build.log
 
 # verify libtool is installed
@@ -96,13 +105,13 @@ fi
 	(grep 'eelf_x86_64_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_64_EMULATION_SOURCES = \\.*/&\n\teelf_x86_64_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
 	cd src/binutils/ld && automake && cd ../ ) ) &&
 cd $BINUTILS_BUILD_DIR &&
-$CROSS_DIR/src/binutils/configure --prefix=$JEHANNE/hacking/cross/toolchain --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
-cp $CROSS_DIR/patch/MakeNothing.in $CROSS_DIR/src/binutils/bfd/doc/Makefile &&
-cp $CROSS_DIR/patch/MakeNothing.in $CROSS_DIR/src/binutils/bfd/po/Makefile &&
-cp $CROSS_DIR/patch/MakeNothing.in $CROSS_DIR/src/binutils/gas/doc/Makefile &&
-cp $CROSS_DIR/patch/MakeNothing.in $CROSS_DIR/src/binutils/binutils/doc/Makefile &&
+$WORKING_DIR/src/binutils/configure --prefix=/posix --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
+cp $WORKING_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/doc/Makefile &&
+cp $WORKING_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/po/Makefile &&
+cp $WORKING_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/Makefile &&
+cp $WORKING_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/binutils/doc/Makefile &&
 make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true && 
-make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install
+make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true DESTDIR=$JEHANNE/pkgs/binutils/2.31/ install
 ) >> $WORKING_DIR/gcc.build.log 2>&1
 failOnError $? "Building binutils"
 fi
