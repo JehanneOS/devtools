@@ -42,7 +42,7 @@ if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
 			mv $JEHANNE/tmp/toolchain/* $JEHANNE/hacking/cross/toolchain/
 		else
 			echo "Creating cross-compiling toolchain..."
-			(cd $JEHANNE/hacking/cross/; ./init.sh; git clean -xdf $JEHANNE/hacking/cross/tmp $JEHANNE/hacking/cross/src/)
+			(cd $JEHANNE/hacking/cross/; ./init.sh; git clean -q -xdf $JEHANNE/hacking/cross/tmp $JEHANNE/hacking/cross/src/)
 		fi
 	fi
 
