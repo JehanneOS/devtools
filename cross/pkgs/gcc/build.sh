@@ -104,14 +104,14 @@ fi
 	(grep 'eelf_i386_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_EMULATION_SOURCES = \\.*/&\n\teelf_i386_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
 	(grep 'eelf_x86_64_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_64_EMULATION_SOURCES = \\.*/&\n\teelf_x86_64_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
 	cd src/binutils/ld && automake && cd ../ ) ) &&
-mkdir -p $BINUTILS_BUILD_DIR && cd $BINUTILS_BUILD_DIR &&
-$WORKING_DIR/src/binutils/configure --prefix=/posix --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
-cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/doc/Makefile &&
-cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/po/Makefile &&
-cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/Makefile &&
-cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/binutils/doc/Makefile &&
-make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true && 
-make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true DESTDIR=$JEHANNE/pkgs/binutils/2.31/ install
+	mkdir -p $BINUTILS_BUILD_DIR && cd $BINUTILS_BUILD_DIR &&
+	$WORKING_DIR/src/binutils/configure --prefix=/posix --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
+	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/doc/Makefile &&
+	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/po/Makefile &&
+	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/Makefile &&
+	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/binutils/doc/Makefile &&
+	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true && 
+	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true DESTDIR=$JEHANNE/pkgs/binutils/2.31/ install
 ) >> $WORKING_DIR/gcc.build.log 2>&1
 failOnError $? "Building binutils"
 fi
