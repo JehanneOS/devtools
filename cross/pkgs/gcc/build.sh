@@ -94,9 +94,9 @@ if [ "$BINUTILS_BUILD_DIR" = "" ]; then
 fi
 ( ( grep -q jehanne src/binutils/config.sub || (
 	sed -i '/jehanne/b; /ELF_TARGET_ID/,/elf_backend_can_gc_sections/s/0x200000/0x1000 \/\/ jehanne hack/g' src/binutils/bfd/elf64-x86-64.c &&
-	sed -i '/jehanne/b; s/| -tirtos/| -tirtos* | -jehanne/g' src/binutils/config.sub &&
+	sed -i '/jehanne/b; s/| midnightbsd\*/| midnightbsd* | jehanne*/g' src/binutils/config.sub &&
 	dynpatch 'binutils/bfd/config.bfd' '\# END OF targmatch.h' &&
-	dynpatch 'binutils/gas/configure.tgt' '  i860-\*-\*)' &&
+	dynpatch 'binutils/gas/configure.tgt' '  i386-\*-darwin\*)' &&
 	( grep -q jehanne src/binutils/ld/configure.tgt || patch -p1 < patch/binutils/ld/configure.tgt ) &&
 	cp patch/binutils/ld/emulparams/elf_x86_64_jehanne.sh src/binutils/ld/emulparams/ &&
 	cp patch/binutils/ld/emulparams/elf_i386_jehanne.sh src/binutils/ld/emulparams/ &&
@@ -104,12 +104,12 @@ fi
 	(grep 'eelf_i386_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_EMULATION_SOURCES = \\.*/&\n\teelf_i386_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
 	(grep 'eelf_x86_64_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_64_EMULATION_SOURCES = \\.*/&\n\teelf_x86_64_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
 	cd src/binutils/ld && automake && cd ../ ) ) &&
-cd $BINUTILS_BUILD_DIR &&
+mkdir -p $BINUTILS_BUILD_DIR && cd $BINUTILS_BUILD_DIR &&
 $WORKING_DIR/src/binutils/configure --prefix=/posix --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
-cp $WORKING_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/doc/Makefile &&
-cp $WORKING_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/po/Makefile &&
-cp $WORKING_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/Makefile &&
-cp $WORKING_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/binutils/doc/Makefile &&
+cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/doc/Makefile &&
+cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/po/Makefile &&
+cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/Makefile &&
+cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/binutils/doc/Makefile &&
 make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true && 
 make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true DESTDIR=$JEHANNE/pkgs/binutils/2.31/ install
 ) >> $WORKING_DIR/gcc.build.log 2>&1
