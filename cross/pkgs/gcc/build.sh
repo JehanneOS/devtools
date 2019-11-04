@@ -92,7 +92,7 @@ echo -n Building binutils... | tee -a $WORKING_DIR/gcc.build.log
 if [ "$BINUTILS_BUILD_DIR" = "" ]; then
 	export BINUTILS_BUILD_DIR=$WORKING_DIR/build-binutils
 fi
-( ( grep -q jehanne config.sub || (
+( ( grep -q jehanne src/binutils/config.sub || (
 	sed -i '/jehanne/b; /ELF_TARGET_ID/,/elf_backend_can_gc_sections/s/0x200000/0x1000 \/\/ jehanne hack/g' src/binutils/bfd/elf64-x86-64.c &&
 	sed -i '/jehanne/b; s/| -tirtos/| -tirtos* | -jehanne/g' src/binutils/config.sub &&
 	dynpatch 'binutils/bfd/config.bfd' '\# END OF targmatch.h' &&
