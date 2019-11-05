@@ -92,6 +92,9 @@ echo -n Building binutils... | tee -a $WORKING_DIR/gcc.build.log
 if [ "$BINUTILS_BUILD_DIR" = "" ]; then
 	export BINUTILS_BUILD_DIR=$WORKING_DIR/build-binutils
 fi
+if [ ! -d $BINUTILS_BUILD_DIR ]; then
+	mkdir $BINUTILS_BUILD_DIR
+fi
 ( ( grep -q jehanne src/binutils/config.sub || (
 	sed -i '/jehanne/b; /ELF_TARGET_ID/,/elf_backend_can_gc_sections/s/0x200000/0x1000 \/\/ jehanne hack/g' src/binutils/bfd/elf64-x86-64.c &&
 	sed -i '/jehanne/b; s/| midnightbsd\*/| midnightbsd* | jehanne*/g' src/binutils/config.sub &&
@@ -111,11 +114,49 @@ fi
 	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/Makefile &&
 	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/binutils/doc/Makefile &&
 	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true && 
-	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true DESTDIR=$JEHANNE/pkgs/binutils/2.31/ install
+	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true DESTDIR=$JEHANNE/pkgs/binutils/2.33.1/ install
 ) >> $WORKING_DIR/gcc.build.log 2>&1
 failOnError $? "Building binutils"
 fi
 echo done.
 
 # Copy to /posix (to emulate bind during cross compilation)
-cp -pfr $JEHANNE/pkgs/binutils/2.31/posix/* $JEHANNE/posix
+cp -pfr $JEHANNE/pkgs/binutils/2.33.1/posix/* $JEHANNE/posix
+
+
+#echo -n Building gcc... | tee -a $WORKING_DIR/gcc.build.log
+## Patch and build gcc
+#if [ "$GCC_BUILD_DIR" = "" ]; then
+#	export GCC_BUILD_DIR=$WORKING_DIR/build-gcc
+#fi
+#if [ ! -d $GCC_BUILD_DIR ]; then
+#	mkdir $GCC_BUILD_DIR
+#fi
+#(
+#	pwd &&
+#	( grep -q jehanne src/gcc/gcc/config.gcc || patch -p1 < patch/gcc/gcc/config.gcc ) &&
+#	cd src &&
+#	cp ../patch/gcc/contrib/download_prerequisites gcc/contrib/download_prerequisites && 
+#	( cd gcc && ./contrib/download_prerequisites ) &&
+#	dynpatch 'gcc/config.sub' '-none)' &&
+#	cp ../patch/gcc/gcc/config/jehanne.h gcc/gcc/config &&
+#	dynpatch 'gcc/libstdc++-v3/crossconfig.m4' '  \*)' &&
+#	cd gcc/libstdc++-v3 && autoconf -i && cd ../../ &&
+#	( pwd && grep -q jehanne gcc/libgcc/config.host ||
+#	  sed  -i -f ../patch/gcc/libgcc/config.host.sed gcc/libgcc/config.host 
+#	) &&
+#	dynpatch 'gcc/fixincludes/mkfixinc.sh' 'i\?86-\*-cygwin\*' &&
+#	cd $GCC_BUILD_DIR &&
+#	$CROSS_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=$JEHANNE/hacking/cross/toolchain --with-sysroot=$JEHANNE --enable-languages=c,c++ &&
+#	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-gcc all-target-libgcc && 
+#	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-gcc install-target-libgcc
+##	 &&
+##	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-target-libstdc++-v3 &&
+##	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-target-libstdc++-v3
+#) >> cross-toolchain.build.log 2>&1
+#failOnError $? "building gcc"
+#
+## add sh
+#ln -sf /bin/bash $JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-sh
+
+echo "done."

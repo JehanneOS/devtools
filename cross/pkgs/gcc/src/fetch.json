@@ -30,9 +30,9 @@
 		]
 	},
 	"binutils": {
-		"Upstream":"http://ftp.gnu.org/gnu/binutils/binutils-2.31.tar.bz2",
+		"Upstream":"http://ftp.gnu.org/gnu/binutils/binutils-2.33.1.tar.bz2",
 		"Digest": {
-			"sha256":"2c49536b1ca6b8900531b9e34f211a81caf9bf85b1a71f82b81ae32fcd8ffe19"
+			"sha256":"0cb4843da15a65a953907c96bad658283f3c4419d6bcc56bf2789db16306adb2"
 		},
 		"Compress":"bzip2",
 		"RemovePrefix": true,
@@ -40,9 +40,9 @@
 		]
 	},
 	"gcc": {
-		"Upstream":"https://ftp.gnu.org/gnu/gcc/gcc-8.2.0/gcc-8.2.0.tar.gz",
+		"Upstream":"https://ftp.gnu.org/gnu/gcc/gcc-9.2.0/gcc-9.2.0.tar.gz",
 		"Digest": {
-			"sha256":"1b0f36be1045ff58cbb9c83743835367b860810f17f0195a4e093458b372020f"
+			"sha256":"a931a750d6feadacbeecb321d73925cd5ebb6dfa7eff0802984af3aef63759f4"
 		},
 		"Compress":"gzip",
 		"RemovePrefix": true,
