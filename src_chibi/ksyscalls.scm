@@ -1,5 +1,6 @@
-(import (macduffie json)
-        (chibi)
+(import (chibi)
+        (chibi io)
+        (chibi json)
         (srfi 1)
         (srfi 69)
         (srfi 159 base))
@@ -12,7 +13,7 @@
         ((3)    "r10")
         ((4)    "r8")
         ((5)    "r9")
-        (else "")))
+        (else   "")))
 
 (define (sysret x)
   (case x
@@ -80,16 +81,16 @@
     (lambda (x)
       (string-append
         "extern "
-        (car (hash-table-ref x 'Ret))
+        (car (vector->list (cdr (assq 'Ret x))))
         " sys"
-        (hash-table-ref x 'Name)
+        (cdr (assq 'Name x))
         "("
-        (let ((args (hash-table-ref x 'Args)))
+        (let ((args (vector->list (cdr (assq 'Args x)))))
           (if (= 0 (length args))
             "void"
             (apply string-append args)))
         ");\n"))
-    syscalls))
+    (vector->list syscalls)))
 
 (define (generate-wrappers syscalls)
   ;TODO
@@ -159,13 +160,10 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
 
 (define (main args)
   (if (= 2 (length args))
-      (call-with-input-file
-        (cadr args)
-        (lambda (x)
-          (generate-kernel-code (let ((data (json-read x)))
-                                  (if (json-null? data)
-                                      (error "No data in json file")
-                                      (hash-table-ref data 'Syscalls))))))
+      (generate-kernel-code
+        (cdr (assq 'Syscalls
+                   (parse-json
+                     (call-with-input-file (cadr args) port->string)))))
       (error "Usage: ksyscalls path/to/sysconf.json\n")))
 
 (main (command-line))
