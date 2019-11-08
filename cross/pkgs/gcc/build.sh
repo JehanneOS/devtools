@@ -124,39 +124,40 @@ echo done.
 cp -pfr $JEHANNE/pkgs/binutils/2.33.1/posix/* $JEHANNE/posix
 
 
-#echo -n Building gcc... | tee -a $WORKING_DIR/gcc.build.log
-## Patch and build gcc
-#if [ "$GCC_BUILD_DIR" = "" ]; then
-#	export GCC_BUILD_DIR=$WORKING_DIR/build-gcc
-#fi
-#if [ ! -d $GCC_BUILD_DIR ]; then
-#	mkdir $GCC_BUILD_DIR
-#fi
-#(
-#	pwd &&
-#	( grep -q jehanne src/gcc/gcc/config.gcc || patch -p1 < patch/gcc/gcc/config.gcc ) &&
-#	cd src &&
-#	cp ../patch/gcc/contrib/download_prerequisites gcc/contrib/download_prerequisites && 
-#	( cd gcc && ./contrib/download_prerequisites ) &&
-#	dynpatch 'gcc/config.sub' '-none)' &&
-#	cp ../patch/gcc/gcc/config/jehanne.h gcc/gcc/config &&
-#	dynpatch 'gcc/libstdc++-v3/crossconfig.m4' '  \*)' &&
-#	cd gcc/libstdc++-v3 && autoconf -i && cd ../../ &&
-#	( pwd && grep -q jehanne gcc/libgcc/config.host ||
-#	  sed  -i -f ../patch/gcc/libgcc/config.host.sed gcc/libgcc/config.host 
-#	) &&
-#	dynpatch 'gcc/fixincludes/mkfixinc.sh' 'i\?86-\*-cygwin\*' &&
-#	cd $GCC_BUILD_DIR &&
-#	$CROSS_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=$JEHANNE/hacking/cross/toolchain --with-sysroot=$JEHANNE --enable-languages=c,c++ &&
-#	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-gcc all-target-libgcc && 
-#	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-gcc install-target-libgcc
-##	 &&
-##	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-target-libstdc++-v3 &&
-##	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-target-libstdc++-v3
-#) >> cross-toolchain.build.log 2>&1
-#failOnError $? "building gcc"
+echo -n Building gcc... | tee -a $WORKING_DIR/gcc.build.log
+# Patch and build gcc
+if [ "$GCC_BUILD_DIR" = "" ]; then
+	export GCC_BUILD_DIR=$WORKING_DIR/build-gcc
+fi
+if [ ! -d $GCC_BUILD_DIR ]; then
+	mkdir $GCC_BUILD_DIR
+fi
+(
+	pwd &&
+	( grep -q jehanne src/gcc/gcc/config.gcc || patch -p1 < patch/gcc.patch ) &&
+	cp patch/gcc/gcc/config/jehanne.h src/gcc/gcc/config &&
+	cd src &&
+	( cd gcc && ./contrib/download_prerequisites ) &&
+	( cd gcc/libstdc++-v3 && autoconf -i ) &&
+	cd $GCC_BUILD_DIR &&
+	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ &&
+	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-gcc all-target-libgcc && 
+	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc install-target-libgcc
+#	 &&
+#	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-target-libstdc++-v3 &&
+#	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-target-libstdc++-v3
+) >> $WORKING_DIR/gcc.build.log 2>&1
+failOnError $? "building gcc"
 #
 ## add sh
 #ln -sf /bin/bash $JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-sh
+
+
+#cp src/gcc.bkp/gcc/config.gcc src/gcc/gcc/config.gcc
+#cp src/gcc.bkp/config.sub src/gcc/config.sub
+#cp src/gcc.bkp/fixincludes/mkfixinc.sh src/gcc/fixincludes/mkfixinc.sh
+#cp src/gcc.bkp/libgcc/config.host src/gcc/libgcc/config.host
+
+
 
 echo "done."
