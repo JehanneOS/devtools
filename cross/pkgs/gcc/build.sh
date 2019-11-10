@@ -6,6 +6,7 @@ export WORKING_DIR="$JEHANNE/hacking/cross/pkgs/gcc"
 
 # include x86_64-jehanne-pkg-config in PATH
 export PATH="$JEHANNE/hacking/cross/:$PATH"
+unset CPATH #set in $JEHANNE/hacking/devshell.sh
 
 function failOnError {
 	# $1 -> exit status on a previous command
@@ -117,7 +118,7 @@ fi
 	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true DESTDIR=$JEHANNE/pkgs/binutils/2.33.1/ install
 ) >> $WORKING_DIR/gcc.build.log 2>&1
 failOnError $? "Building binutils"
-fi
+
 echo done.
 
 # Copy to /posix (to emulate bind during cross compilation)
@@ -136,6 +137,7 @@ fi
 	pwd &&
 	( grep -q jehanne src/gcc/gcc/config.gcc || patch -p1 < patch/gcc.patch ) &&
 	cp patch/gcc/gcc/config/jehanne.h src/gcc/gcc/config &&
+	sed -i 's/ftp/https/g' src/gcc/contrib/download_prerequisites &&
 	cd src &&
 	( cd gcc && ./contrib/download_prerequisites ) &&
 	( cd gcc/libstdc++-v3 && autoconf -i ) &&
