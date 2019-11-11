@@ -51,7 +51,7 @@ echo -n Building libgmp... | tee -a $WORKING_DIR/gcc.build.log
 failOnError $? "Building libgmp"
 echo done.
 
-#2 Copy to /posix (to emulate bind during cross compilation)
+# Copy to /posix (to emulate bind during cross compilation)
 cp -pfr $JEHANNE/pkgs/libgmp/6.1.2/posix/* $JEHANNE/posix
 
 echo -n Building libmpfr... | tee -a $WORKING_DIR/gcc.build.log
@@ -89,6 +89,8 @@ echo done.
 cp -pfr $JEHANNE/pkgs/libmpc/1.1.0/posix/* $JEHANNE/posix
 
 echo -n Building binutils... | tee -a $WORKING_DIR/gcc.build.log
+export LDFLAGS="-lposix -lc"
+export LDLIBS="$JEHANNE/posix/lib/libc.a $JEHANNE/posix/lib/libm.a $JEHANNE/posix/lib/libg.a"
 # Patch and build binutils
 if [ "$BINUTILS_BUILD_DIR" = "" ]; then
 	export BINUTILS_BUILD_DIR=$WORKING_DIR/build-binutils
@@ -107,9 +109,9 @@ fi
 	dynpatch 'binutils/ld/Makefile.am' 'eelf_x86_64.c: ' &&
 	(grep 'eelf_i386_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_EMULATION_SOURCES = \\.*/&\n\teelf_i386_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
 	(grep 'eelf_x86_64_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_64_EMULATION_SOURCES = \\.*/&\n\teelf_x86_64_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
-	cd src/binutils/ld && automake && cd ../ ) ) &&
+	cd src/binutils/ld && automake-1.15 && cd ../ ) ) &&
 	mkdir -p $BINUTILS_BUILD_DIR && cd $BINUTILS_BUILD_DIR &&
-	$WORKING_DIR/src/binutils/configure --prefix=/posix --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
+	$WORKING_DIR/src/binutils/configure --host=x86_64-jehanne --prefix=/posix --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
 	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/doc/Makefile &&
 	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/po/Makefile &&
 	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/Makefile &&
@@ -142,7 +144,7 @@ fi
 	( cd gcc && ./contrib/download_prerequisites ) &&
 	( cd gcc/libstdc++-v3 && autoconf -i ) &&
 	cd $GCC_BUILD_DIR &&
-	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ &&
+	$WORKING_DIR/src/gcc/configure --host=x86_64-jehanne --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ &&
 	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-gcc all-target-libgcc && 
 	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc install-target-libgcc
 #	 &&
