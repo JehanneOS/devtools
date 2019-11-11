@@ -150,6 +150,9 @@ fi
 #	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-target-libstdc++-v3
 ) >> $WORKING_DIR/gcc.build.log 2>&1
 failOnError $? "building gcc"
+
+cp -pfr $JEHANNE/pkgs/gcc/9.2.0/posix/* $JEHANNE/posix
+
 #
 ## add sh
 #ln -sf /bin/bash $JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-sh
