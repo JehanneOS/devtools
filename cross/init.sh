@@ -215,3 +215,4 @@ ln -sf /bin/bash $JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-sh
 
 kill $dotter
 wait $dotter 2>/dev/null
+echo "done."
