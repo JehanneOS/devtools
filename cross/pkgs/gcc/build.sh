@@ -89,8 +89,11 @@ echo done.
 cp -pfr $JEHANNE/pkgs/libmpc/1.1.0/posix/* $JEHANNE/posix
 
 echo -n Building binutils... | tee -a $WORKING_DIR/gcc.build.log
-export LDFLAGS="-lposix -lc"
-export LDLIBS="$JEHANNE/posix/lib/libc.a $JEHANNE/posix/lib/libm.a $JEHANNE/posix/lib/libg.a"
+
+export LDFLAGS="$JEHANNE/posix/lib/libc.a $JEHANNE/posix/lib/libm.a $JEHANNE/posix/lib/libg.a -lposix -lc"
+export LIBS="$JEHANNE/posix/lib/libc.a $JEHANNE/posix/lib/libm.a $JEHANNE/posix/lib/libg.a -lposix -lc"
+export CPATH=$JEHANNE/posix/include:$CPATH:$JEHANNE/arch/amd64/include/:$JEHANNE/sys/include/apw/:$JEHANNE/sys/include/
+
 # Patch and build binutils
 if [ "$BINUTILS_BUILD_DIR" = "" ]; then
 	export BINUTILS_BUILD_DIR=$WORKING_DIR/build-binutils
