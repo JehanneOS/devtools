@@ -1,3 +1,5 @@
+info:
+	echo "make info does nothing HERE"
 all:
 	echo "make all does nothing HERE"
 install:
