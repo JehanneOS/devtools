@@ -114,10 +114,10 @@ fi
 	cd src/binutils/ld && automake-1.15 && cd ../ ) ) &&
 	mkdir -p $BINUTILS_BUILD_DIR && cd $BINUTILS_BUILD_DIR &&
 	$WORKING_DIR/src/binutils/configure --host=x86_64-jehanne --prefix=/posix --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
-	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/doc/ &&
-	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/po/ &&
-	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/ &&
-	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/binutils/doc/ &&
+	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/doc/Makefile.in &&
+	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/po/Makefile.in &&
+	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/Makefile.in &&
+	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/binutils/doc/Makefile.in &&
 	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true && 
 	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true DESTDIR=$JEHANNE/pkgs/binutils/2.33.1/ install
 ) >> $WORKING_DIR/gcc.build.log 2>&1
