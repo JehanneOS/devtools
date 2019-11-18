@@ -90,8 +90,9 @@ cp -pfr $JEHANNE/pkgs/libmpc/1.1.0/posix/* $JEHANNE/posix
 
 echo -n Building binutils... | tee -a $WORKING_DIR/gcc.build.log
 
-export CPATH="$JEHANNE/posix/include:$JEHANNE/sys/include:$JEHANNE/hacking/cross/toolchain/lib/gcc/x86_64-jehanne/4.9.4/include:$JEHANNE/hacking/cross/toolchain/lib/gcc/x86_64-jehanne/4.9.4/include-fixed"
-export LIBS="-L$JEHANNE/posix/lib $JEHANNE/posix/lib/libc.a $JEHANNE/arch/amd64/lib/libposix.a $JEHANNE/arch/amd64/lib/libc.a"
+export CPATH="$JEHANNE/posix/include:$JEHANNE/sys/include:$JEHANNE/arch/amd64/include:$JEHANNE/hacking/cross/toolchain/lib/gcc/x86_64-jehanne/4.9.4/include:$JEHANNE/hacking/cross/toolchain/lib/gcc/x86_64-jehanne/4.9.4/include-fixed"
+export LIBS="-L$JEHANNE/posix/lib -lnewlibc -lposix -lc"
+export CC_FOR_BUILD='CPATH="" LIBS="" gcc'
 
 # Patch and build binutils
 if [ "$BINUTILS_BUILD_DIR" = "" ]; then
@@ -115,13 +116,13 @@ echo done
 	cd src/binutils/ld && automake-1.15 && cd ../ 
 	) ) &&
 	mkdir -p $BINUTILS_BUILD_DIR && cd $BINUTILS_BUILD_DIR &&
-	$WORKING_DIR/src/binutils/configure --host=x86_64-jehanne --prefix=/posix --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
+	$WORKING_DIR/src/binutils/configure --host=x86_64-jehanne --prefix=/posix --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --enable-newlib-long-time_t --disable-nls --disable-werror &&
 	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/doc/Makefile.in &&
 	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/po/Makefile.in &&
 	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/Makefile.in &&
 	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/binutils/doc/Makefile.in &&
-	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true && 
-	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true DESTDIR=$JEHANNE/pkgs/binutils/2.33.1/ install
+	make && 
+	make DESTDIR=$JEHANNE/pkgs/binutils/2.33.1/ install
 ) >> $WORKING_DIR/gcc.build.log 2>&1
 failOnError $? "Building binutils"
 
