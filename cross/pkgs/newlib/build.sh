@@ -88,6 +88,15 @@ export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION -std=gnu11"
 ) >> $NEWLIB/newlib.build.log 2>&1
 failOnError $? "building newlib"
 
+# emultate bind for the cross compiler
+cp -fr $JEHANNE/pkgs/newlib/x86_64-jehanne/* $JEHANNE/posix
+
+# rename libc to libnewlibc to avoid name clash with Jehanne libc
+mv $JEHANNE/posix/lib/libc.a $JEHANNEposix/lib/libnewlibc.a
+mv $JEHANNE/posix/lib/libm.a $JEHANNEposix/lib/libnewlibm.a
+mv $JEHANNE/posix/lib/libg.a $JEHANNEposix/lib/libnewlibg.a
+
+
 kill $dotter
 wait $dotter 2>/dev/null
 
