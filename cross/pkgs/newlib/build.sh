@@ -92,9 +92,9 @@ failOnError $? "building newlib"
 cp -fr $JEHANNE/pkgs/newlib/x86_64-jehanne/* $JEHANNE/posix
 
 # rename libc to libnewlibc to avoid name clash with Jehanne libc
-mv $JEHANNE/posix/lib/libc.a $JEHANNEposix/lib/libnewlibc.a
-mv $JEHANNE/posix/lib/libm.a $JEHANNEposix/lib/libnewlibm.a
-mv $JEHANNE/posix/lib/libg.a $JEHANNEposix/lib/libnewlibg.a
+mv $JEHANNE/posix/lib/libc.a $JEHANNE/posix/lib/libnewlibc.a
+mv $JEHANNE/posix/lib/libm.a $JEHANNE/posix/lib/libnewlibm.a
+mv $JEHANNE/posix/lib/libg.a $JEHANNE/posix/lib/libnewlibg.a
 
 
 kill $dotter
