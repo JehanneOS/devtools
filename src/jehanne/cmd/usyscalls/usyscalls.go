@@ -104,7 +104,6 @@ func argTypeName(t string) string{
 		return "p"
 	}
 	return " [?? " + t + "]"
-
 }
 
 func argRegister(index int, t string) string{
@@ -144,6 +143,7 @@ func getHeaderData(calls []SyscallConf) *HeaderCode {
 		wcall.AsmClobbers = "\"cc\", \"rcx\", \"r11\""
 		wcall.AsmArgs = fmt.Sprintf("\"0\"(%d)", wcall.Id)
 		for i, a := range(call.Args){
+			typeName := argTypeName(a)
 			if i > 0 {
 				wcall.FuncArgs += ", "
 				wcall.MacroArgs += ", "
@@ -153,7 +153,11 @@ func getHeaderData(calls []SyscallConf) *HeaderCode {
 			}
 			wcall.FuncArgs += fmt.Sprintf("%s a%d", a, i) 
 			wcall.MacroArgs += fmt.Sprintf("/* %s */ a%d", a, i)
-			wcall.VarValues = append(wcall.VarValues, fmt.Sprintf("_sysargs[%d].%s = (a%d); \\\n\t", i, argTypeName(a), i))
+			if typeName == "p" {
+				wcall.VarValues = append(wcall.VarValues, fmt.Sprintf("_sysargs[%d].%s = ((void*)a%d); \\\n\t", i, typeName, i))
+			} else {
+				wcall.VarValues = append(wcall.VarValues, fmt.Sprintf("_sysargs[%d].%s = (a%d); \\\n\t", i, typeName, i))
+			}
 			wcall.Vars = append(wcall.Vars, fmt.Sprintf("register %s __r%d asm(\"%s\") = _sysargs[%d].%s; \\\n\t", a, i, argRegister(i, a), i, argTypeName(a)))
 			wcall.AsmArgs += fmt.Sprintf(", \"r\"(__r%d)", i)
 		}
