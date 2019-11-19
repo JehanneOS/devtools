@@ -59,7 +59,7 @@ echo -n Building libmpfr... | tee -a $WORKING_DIR/gcc.build.log
 	cd src/libmpfr &&
 	( grep -q jehanne config.sub || patch -p0 < $WORKING_DIR/patch/libmpfr.patch ) &&
 	./configure --host=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --with-gmp=$JEHANNE/pkgs/libgmp/6.1.2/posix/ &&
-	cp ../../../../patch/MakeNothing.in doc/Makefile &&
+	cp ../../../../patch/MakeNothing.in doc/Makefile.in &&
 	make &&
 	make DESTDIR=$JEHANNE/pkgs/libmpfr/4.0.1/ install &&
 	libtool --mode=finish $JEHANNE/posix/lib
@@ -77,7 +77,7 @@ echo -n Building libmpc... | tee -a $WORKING_DIR/gcc.build.log
 	patch -p0 < $WORKING_DIR/patch/libmpc.patch &&
 	chmod u-w config.sub ) ) &&
 	./configure --host=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --with-gmp=$JEHANNE/pkgs/libgmp/6.1.2/posix/ --with-mpfr=$JEHANNE/pkgs/libmpfr/4.0.1/posix/ &&
-	cp ../../../../patch/MakeNothing.in doc/Makefile &&
+	cp ../../../../patch/MakeNothing.in doc/Makefile.in &&
 	make &&
 	make DESTDIR=$JEHANNE/pkgs/libmpc/1.1.0/ install &&
 	libtool --mode=finish $JEHANNE/posix/lib
@@ -90,7 +90,7 @@ cp -pfr $JEHANNE/pkgs/libmpc/1.1.0/posix/* $JEHANNE/posix
 
 echo -n Building binutils... | tee -a $WORKING_DIR/gcc.build.log
 
-export CPATH="$JEHANNE/posix/include:$JEHANNE/sys/include:$JEHANNE/hacking/cross/toolchain/lib/gcc/x86_64-jehanne/9.2.0/include:$JEHANNE/hacking/cross/toolchain/lib/gcc/x86_64-jehanne/9.2.0/include-fixed"
+export CPATH="$JEHANNE/posix/include:$JEHANNE/sys/include:$JEHANNE/hacking/cross/toolchain/lib/gcc/x86_64-jehanne/4.9.4/include:$JEHANNE/hacking/cross/toolchain/lib/gcc/x86_64-jehanne/4.9.4/include-fixed"
 export LIBS="-L$JEHANNE/posix/lib $JEHANNE/posix/lib/libc.a $JEHANNE/arch/amd64/lib/libposix.a $JEHANNE/arch/amd64/lib/libc.a"
 
 # Patch and build binutils
@@ -101,6 +101,7 @@ if [ ! -d $BINUTILS_BUILD_DIR ]; then
 	mkdir $BINUTILS_BUILD_DIR
 fi
 ( ( grep -q jehanne src/binutils/config.sub || (
+echo done
 	sed -i '/jehanne/b; /ELF_TARGET_ID/,/elf_backend_can_gc_sections/s/0x200000/0x1000 \/\/ jehanne hack/g' src/binutils/bfd/elf64-x86-64.c &&
 	sed -i '/jehanne/b; s/| midnightbsd\*/| midnightbsd* | jehanne*/g' src/binutils/config.sub &&
 	dynpatch 'binutils/bfd/config.bfd' '\# END OF targmatch.h' &&
@@ -111,7 +112,8 @@ fi
 	dynpatch 'binutils/ld/Makefile.am' 'eelf_x86_64.c: ' &&
 	(grep 'eelf_i386_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_EMULATION_SOURCES = \\.*/&\n\teelf_i386_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
 	(grep 'eelf_x86_64_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_64_EMULATION_SOURCES = \\.*/&\n\teelf_x86_64_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
-	cd src/binutils/ld && automake-1.15 && cd ../ ) ) &&
+	cd src/binutils/ld && automake-1.15 && cd ../ 
+	) ) &&
 	mkdir -p $BINUTILS_BUILD_DIR && cd $BINUTILS_BUILD_DIR &&
 	$WORKING_DIR/src/binutils/configure --host=x86_64-jehanne --prefix=/posix --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
 	cp $WORKING_DIR/../../patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/doc/Makefile.in &&
