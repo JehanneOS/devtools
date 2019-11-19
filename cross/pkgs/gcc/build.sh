@@ -32,6 +32,10 @@ function dynpatch {
 
 date > $WORKING_DIR/gcc.build.log
 
+# mock makeinfo (to avoid it as a dependency)
+rm -f $JEHANNE/hacking/bin/makeinfo
+ln -s `which echo` $JEHANNE/hacking/bin/makeinfo
+
 # verify libtool is installed
 libtool --version >> /dev/null
 failOnError $? "libtool installation check"
