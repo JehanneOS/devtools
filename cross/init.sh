@@ -51,9 +51,9 @@ function dynpatch {
 
 
 # setup Jehanne's headers
-usyscalls header $JEHANNE/sys/src/sysconf.json > $JEHANNE/arch/amd64/include/syscalls.h
+#usyscalls header $JEHANNE/sys/src/sysconf.json > $JEHANNE/arch/amd64/include/syscalls.h
 
-mkdir -p $WORKING_DIR
+#mkdir -p $WORKING_DIR
 date > $LOG
 
 # verify libtool is installed
@@ -67,14 +67,17 @@ fetch >> $LOG
 failOnError $? "fetching sources"
 
 mkdir -p $WORKING_DIR/build
+rm -f $JEHANNE/hacking/bin/makeinfo
+ln -s `which true` $JEHANNE/hacking/bin/makeinfo # don't depend on texinfo
 mkdir -p $WORKING_DIR/cross
 
 # Patch and build binutils
+echo Building binutils...
 export BINUTILS_BUILD_DIR=$WORKING_DIR/build/binutils
 mkdir -p $BINUTILS_BUILD_DIR
 
 ( ( grep -q jehanne $WORKING_DIR/src/binutils/config.sub || (
-	cd $WORKING_DIR
+	cd $WORKING_DIR &&
 	sed -i '/jehanne/b; /ELF_TARGET_ID/,/elf_backend_can_gc_sections/s/0x200000/0x1000 \/\/ jehanne hack/g' src/binutils/bfd/elf64-x86-64.c &&
 	sed -i '/jehanne/b; s/| midnightbsd\*/| midnightbsd* | jehanne*/g' src/binutils/config.sub &&
 	dynpatch 'binutils/bfd/config.bfd' '\# END OF targmatch.h' &&
@@ -97,4 +100,31 @@ mkdir -p $BINUTILS_BUILD_DIR
 	make DESTDIR=$WORKING_DIR/cross install
 ) >> $LOG 2>&1
 failOnError $? "Building binutils"
+echo done.
 
+echo -n Building gcc... | tee -a $WORKING_DIR/gcc.build.log
+# Patch and build gcc
+export GCC_BUILD_DIR=$WORKING_DIR/build/gcc
+mkdir -p $GCC_BUILD_DIR
+
+(
+	cd $WORKING_DIR &&
+	( grep -q jehanne src/gcc/gcc/config.gcc || patch -p1 < $CROSS_DIR/patch/gcc.patch ) &&
+	cp $CROSS_DIR/patch/gcc/gcc/config/jehanne.h src/gcc/gcc/config &&
+	sed -i 's/ftp/https/g' src/gcc/contrib/download_prerequisites &&
+	cd src &&
+	( cd gcc && ./contrib/download_prerequisites ) &&
+#	( cd gcc/libstdc++-v3 && autoconf -i ) &&
+	cd $GCC_BUILD_DIR &&
+	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ --disable-multilib --disable-threads --disable-tls --disable-initfini-array --disable-bootstrap --disable-nls &&
+	make all-gcc && 
+	make DESTDIR=$WORKING_DIR/cross install-gcc 
+#	make all-gcc all-target-libgcc && 
+#	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc install-target-libgcc
+#	 &&
+#	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-target-libstdc++-v3 &&
+#	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-target-libstdc++-v3
+) >> $LOG 2>&1
+failOnError $? "building gcc"
+
+echo done.
