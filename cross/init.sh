@@ -51,9 +51,9 @@ function dynpatch {
 
 
 # setup Jehanne's headers
-#usyscalls header $JEHANNE/sys/src/sysconf.json > $JEHANNE/arch/amd64/include/syscalls.h
+usyscalls header $JEHANNE/sys/src/sysconf.json > $JEHANNE/arch/amd64/include/syscalls.h
 
-#mkdir -p $WORKING_DIR
+mkdir -p $WORKING_DIR
 date > $LOG
 
 # verify libtool is installed
@@ -106,6 +106,7 @@ echo -n Building gcc... | tee -a $WORKING_DIR/gcc.build.log
 # Patch and build gcc
 export GCC_BUILD_DIR=$WORKING_DIR/build/gcc
 mkdir -p $GCC_BUILD_DIR
+export CPATH="$WORKING_DIR/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include:$WORKING_DIR/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include-fixed"
 
 (
 	cd $WORKING_DIR &&
@@ -116,9 +117,9 @@ mkdir -p $GCC_BUILD_DIR
 	( cd gcc && ./contrib/download_prerequisites ) &&
 #	( cd gcc/libstdc++-v3 && autoconf -i ) &&
 	cd $GCC_BUILD_DIR &&
-	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ --disable-multilib --disable-threads --disable-tls --disable-initfini-array --disable-bootstrap --disable-nls &&
-	make all-gcc && 
-	make DESTDIR=$WORKING_DIR/cross install-gcc 
+	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ --disable-multiarch --disable-multilib --disable-threads --disable-tls --disable-initfini-array --disable-bootstrap --disable-nls &&
+	make all-gcc all-target-libgcc && 
+	make DESTDIR=$WORKING_DIR/cross install-gcc  install-target-libgcc
 #	make all-gcc all-target-libgcc && 
 #	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc install-target-libgcc
 #	 &&
