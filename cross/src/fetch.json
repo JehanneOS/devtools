@@ -1,38 +1,28 @@
 {
-	"autoconf" : {
-		"Upstream":"https://ftp.gnu.org/gnu/autoconf/autoconf-2.64.tar.bz2",
+	"libgmp" : {
+		"Upstream":"https://gmplib.org/download/gmp/gmp-6.1.2.tar.bz2",
 		"Digest": {
-			"sha256":"872f4cadf12e7e7c8a2414e047fdff26b517c7f1a977d72433c124d0d3acaa85"
+			"sha256":"5275bb04f4863a13516b2f39392ac5e272f5e1bb8057b18aec1c9b79d73d8fb2"
 		},
 		"Compress":"bzip2",
 		"RemovePrefix": true,
 		"Exclude": [
 		]
 	},
-	"m4": {
-		"Upstream":"https://ftp.gnu.org/gnu/m4/m4-1.4.14.tar.bz2",
+	"libmpfr" : {
+		"Upstream":"https://www.mpfr.org/mpfr-4.0.1/mpfr-4.0.1.tar.bz2",
 		"Digest": {
-			"sha256":"0885ffa93256353a96b1cf0bcbc4d639ed09953b687e6cc412c4048e656f4dd2"
+			"sha256":"a4d97610ba8579d380b384b225187c250ef88cfe1d5e7226b89519374209b86b"
 		},
 		"Compress":"bzip2",
 		"RemovePrefix": true,
 		"Exclude": [
 		]
 	},
-	"automake": {
-		"Upstream":"https://ftp.gnu.org/gnu/automake/automake-1.11.1.tar.bz2",
+	"libmpc" : {
+		"Upstream":"https://ftp.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz",
 		"Digest": {
-			"sha256":"5b159d3c0e0a1f87de71b68bcb9f1a1c49e9e71749c9b723f17e2e1e0295c7ae"
-		},
-		"Compress":"bzip2",
-		"RemovePrefix": true,
-		"Exclude": [
-		]
-	},
-	"libtool": {
-		"Upstream":"https://ftp.gnu.org/gnu/libtool/libtool-2.4.tar.gz",
-		"Digest": {
-			"sha256":"13df57ab63a94e196c5d6e95d64e53262834fe780d5e82c28f177f9f71ddf62e"
+			"sha256":"6985c538143c1208dcb1ac42cedad6ff52e267b47e5f970183a3e75125b43c2e"
 		},
 		"Compress":"gzip",
 		"RemovePrefix": true,
@@ -40,9 +30,9 @@
 		]
 	},
 	"binutils": {
-		"Upstream":"https://ftp.gnu.org/gnu/binutils/binutils-2.26.tar.bz2",
+		"Upstream":"http://ftp.gnu.org/gnu/binutils/binutils-2.33.1.tar.bz2",
 		"Digest": {
-			"sha256":"c2ace41809542f5237afc7e3b8f32bb92bc7bc53c6232a84463c423b0714ecd9"
+			"sha256":"0cb4843da15a65a953907c96bad658283f3c4419d6bcc56bf2789db16306adb2"
 		},
 		"Compress":"bzip2",
 		"RemovePrefix": true,
@@ -50,13 +40,14 @@
 		]
 	},
 	"gcc": {
-		"Upstream":"https://ftp.gnu.org/gnu/gcc/gcc-4.9.4/gcc-4.9.4.tar.bz2",
+		"Upstream":"https://ftp.gnu.org/gnu/gcc/gcc-9.2.0/gcc-9.2.0.tar.gz",
 		"Digest": {
-			"sha256":"6c11d292cd01b294f9f84c9a59c230d80e9e4a47e5c6355f046bb36d4f358092"
+			"sha256":"a931a750d6feadacbeecb321d73925cd5ebb6dfa7eff0802984af3aef63759f4"
 		},
-		"Compress":"bzip2",
+		"Compress":"gzip",
 		"RemovePrefix": true,
 		"Exclude": [
 		]
 	}
+	
 }
