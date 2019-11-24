@@ -28,20 +28,18 @@
 
 #undef MD_STARTFILE_PREFIX
 #define MD_STARTFILE_PREFIX "/arch/amd64/lib/"
-
+/*
 #undef GPLUSPLUS_INCLUDE_DIR
 #define GPLUSPLUS_INCLUDE_DIR "/posix/g++"
 
 #undef GCC_INCLUDE_DIR
 #define GCC_INCLUDE_DIR "/posix/gcc"
-
+*/
 /* Architecture specific header (u.h) goes here (from config.gcc) */
 #define ARCH_INCLUDE_DIR NATIVE_SYSTEM_HEADER_DIR 
 
 /* The default include dir is /sys/include but... */
 #define PORTABLE_INCLUDE_DIR "/sys/include"
-
-#define POSIX_INCLUDE_DIR "/posix/include"
 
 /* ...we have to wrap libc.h and stdio.h with basic POSIX headers */
 #define BASIC_POSIX_INCLUDE_DIR "/sys/include/apw"
@@ -50,12 +48,11 @@
 #define INCLUDE_DEFAULTS				\
   {							\
     { GPLUSPLUS_INCLUDE_DIR, "G++", 1, 1, 1, 0 },	\
-    { GCC_INCLUDE_DIR, 0, 0, 0, 1, 0 },			\
-    { POSIX_INCLUDE_DIR, 0, 0, 0, 1, 0 },		\
+    { GCC_INCLUDE_DIR, "GCC", 0, 0, 1, 0 },		\
     { BASIC_POSIX_INCLUDE_DIR, 0, 0, 0, 1, 0 },		\
-    { ARCH_INCLUDE_DIR, 0, 0, 0, 1, 0 },		\
     { PORTABLE_INCLUDE_DIR, 0, 0, 0, 1, 0 },		\
-    { ".", 0, 0, 0, 1, 0 },				\
+    { ARCH_INCLUDE_DIR, 0, 0, 0, 1, 0 },		\
+    { ".", 0, 0, 0, 0, 0 },				\
     { 0, 0, 0, 0, 0, 0 }				\
   }
 
