@@ -1,7 +1,7 @@
 /*
  * This file is part of Jehanne.
  *
- * Copyright (C) 2016 Giacomo Tesio <giacomo@tesio.it>
+ * Copyright (C) 2016-2019 Giacomo Tesio <giacomo@tesio.it>
  *
  * Jehanne is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -154,7 +154,7 @@ func getHeaderData(calls []SyscallConf) *HeaderCode {
 			wcall.FuncArgs += fmt.Sprintf("%s a%d", a, i) 
 			wcall.MacroArgs += fmt.Sprintf("/* %s */ a%d", a, i)
 			if typeName == "p" {
-				wcall.VarValues = append(wcall.VarValues, fmt.Sprintf("_sysargs[%d].%s = ((void*)a%d); \\\n\t", i, typeName, i))
+				wcall.VarValues = append(wcall.VarValues, fmt.Sprintf("_sysargs[%d].%s = ((volatile void*)(a%d)); \\\n\t", i, typeName, i))
 			} else {
 				wcall.VarValues = append(wcall.VarValues, fmt.Sprintf("_sysargs[%d].%s = (a%d); \\\n\t", i, typeName, i))
 			}
