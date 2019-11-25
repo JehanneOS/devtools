@@ -72,7 +72,7 @@ ln -s `which true` $JEHANNE/hacking/bin/makeinfo # don't depend on texinfo
 mkdir -p $WORKING_DIR/cross
 
 # Patch and build binutils
-echo Building binutils...
+echo -n Building binutils...
 export BINUTILS_BUILD_DIR=$WORKING_DIR/build/binutils
 mkdir -p $BINUTILS_BUILD_DIR
 
@@ -88,7 +88,7 @@ mkdir -p $BINUTILS_BUILD_DIR
 	dynpatch 'binutils/ld/Makefile.am' 'eelf_x86_64.c: ' &&
 	(grep 'eelf_i386_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_EMULATION_SOURCES = \\.*/&\n\teelf_i386_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
 	(grep 'eelf_x86_64_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_64_EMULATION_SOURCES = \\.*/&\n\teelf_x86_64_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
-	cd src/binutils/ld && automake-1.15 && cd ../ 
+	cd src/binutils/ld && automake-1.15 && cd ../
 	) ) &&
 	cd $BINUTILS_BUILD_DIR &&
 	$WORKING_DIR/src/binutils/configure --target=x86_64-jehanne --prefix=/posix --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --enable-newlib-long-time_t --disable-nls --disable-werror &&
@@ -96,7 +96,7 @@ mkdir -p $BINUTILS_BUILD_DIR
 	cp $CROSS_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/po/Makefile.in &&
 	cp $CROSS_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/Makefile.in &&
 	cp $CROSS_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/binutils/doc/Makefile.in &&
-	make && 
+	make &&
 	make DESTDIR=$WORKING_DIR/cross install
 ) >> $LOG 2>&1
 failOnError $? "Building binutils"
@@ -117,9 +117,11 @@ export CPATH="$WORKING_DIR/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include:$WOR
 	( cd gcc && ./contrib/download_prerequisites ) &&
 #	( cd gcc/libstdc++-v3 && autoconf -i ) &&
 	cd $GCC_BUILD_DIR &&
-	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ --disable-multiarch --disable-multilib --disable-threads --disable-tls --disable-initfini-array --disable-bootstrap --disable-nls &&
+	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ &&
 	make all-gcc all-target-libgcc && 
-	make DESTDIR=$WORKING_DIR/cross install-gcc  install-target-libgcc
+	make DESTDIR=$WORKING_DIR/cross install-gcc  install-target-libgcc # &&
+#	make all-target-libstdc++-v3 &&
+#	make DESTDIR=$WORKING_DIR/cross install-target-libstdc++-v3
 #	make all-gcc all-target-libgcc && 
 #	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc install-target-libgcc
 #	 &&
