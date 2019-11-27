@@ -31,7 +31,7 @@ import (
 const gplHeader string = `/*
  * This file is part of Jehanne.
  *
- * Copyright (C) 2016 Giacomo Tesio <giacomo@tesio.it>
+ * Copyright (C) 2016-2019 Giacomo Tesio <giacomo@tesio.it>
  *
  * Jehanne is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -173,7 +173,7 @@ func getHeaderData(calls []SyscallConf) *HeaderCode {
 func generateSyscallTable(calls []SyscallConf){
 	code := getHeaderData(calls)
 	tmpl, err := template.New("tab.c").Parse(`
-{{ range .Wrappers }}"{{ .Name }}", (int(*)()) {{ .Name }},
+{{ range .Wrappers }}"{{ .Name }}", (int(*)()) sys_{{ .Name }},
 {{ end }}
 `)
 	err = tmpl.Execute(os.Stdout, code)
@@ -189,9 +189,9 @@ func generateLibcCode(calls []SyscallConf){
 #include <u.h>
 
 {{ range .Wrappers }}
-#pragma weak {{ .Name }}
+#pragma weak sys_{{ .Name }}
 {{ .RetType }}
-{{ .Name }}({{ .FuncArgs }})
+sys_{{ .Name }}({{ .FuncArgs }})
 {
 	register {{ .RetType }} __ret asm ("rax");
 	__asm__ __volatile__ (
@@ -224,33 +224,9 @@ typedef enum Syscalls
 {{ end }}} Syscalls;
 
 #ifndef KERNEL
-{{ range .Wrappers }}
-#define sys_{{ .Name }}({{ .MacroArgs }}) ({ \
-	{{ range .VarValues }}{{.}}{{end}}{{ range .Vars }}{{.}}{{end}}register {{ .RetType }} __ret asm ("rax"); \
-	__asm__ __volatile__ ( \
-		"syscall" \
-		: "=&r" (__ret) \
-		: {{ .AsmArgs }} \
-		: {{ .AsmClobbers }} \
-	); \
-	__ret; })
+
+{{ range .Wrappers }}extern {{ .RetType }} sys_{{ .Name }}({{ .FuncArgs }});
 {{ end }}
-
-#ifdef PORTABLE_SYSCALLS
-
-{{ range .Wrappers }}extern {{ .RetType }} {{ .Name }}({{ .FuncArgs }});
-{{ end }}
-extern int32_t read(int, void*, int32_t);
-extern int32_t write(int, const void*, int32_t);
-
-#else
-
-{{ range .Wrappers }}# define {{ .Name }}(...) sys_{{ .Name }}(__VA_ARGS__)
-{{ end }}
-#define read(fd, buf, size) pread(fd, buf, size, -1)
-#define write(fd, buf, size) pwrite(fd, buf, size, -1)
-
-#endif
 
 #endif
 `)
