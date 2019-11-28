@@ -69,9 +69,7 @@ fi
 
 export CC=gcc
 
-# NOTE: we use -O0 because apparently vsprintf functions do not
-#       work with -O2.
-export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION -std=gnu11"
+export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION -std=gnu11 -Lposix"
 
 (
 	rm -fr $NEWLIB_BUILD &&
@@ -89,9 +87,10 @@ export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION -std=gnu11"
 failOnError $? "building newlib"
 
 # emultate bind for the cross compiler
+mkdir -p $JEHANNE/posix
 cp -fr $JEHANNE/pkgs/newlib/x86_64-jehanne/* $JEHANNE/posix
 
-# rename libc to libnewlibc to avoid name clash with Jehanne libc
+# rename libc to libnewlibc to avoid name clash with Jehanne's libc
 mv $JEHANNE/posix/lib/libc.a $JEHANNE/posix/lib/libnewlibc.a
 mv $JEHANNE/posix/lib/libm.a $JEHANNE/posix/lib/libnewlibm.a
 mv $JEHANNE/posix/lib/libg.a $JEHANNE/posix/lib/libnewlibg.a
