@@ -69,3 +69,20 @@ index 91abc84..a994e3a 100644
  *)
  	echo "*** Configuration ${host} not supported" 1>&2
  	exit 1
+diff --git a/src/gcc/libstdc++-v3/crossconfig.m4 b/src/gcc/libstdc++-v3/crossconfig.m4
+index 344eec0..cc6eafe 100644
+--- a/src/gcc/libstdc++-v3/crossconfig.m4
++++ b/src/gcc/libstdc++-v3/crossconfig.m4
+@@ -186,6 +186,12 @@ case "${host}" in
+ 	;;
+     esac
+     ;;
++  *-jehanne*)
++    GLIBCXX_CHECK_COMPILER_FEATURES
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    ;;
+   *-linux* | *-uclinux* | *-gnu* | *-kfreebsd*-gnu | *-cygwin* | *-solaris*)
+     GLIBCXX_CHECK_COMPILER_FEATURES
+     GLIBCXX_CHECK_LINKER_FEATURES
