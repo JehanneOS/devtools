@@ -27,8 +27,8 @@ export MKSH=$CROSS_DIR/pkgs/mksh/
 export MKSH_SRC=$MKSH/src/
 export MKSH_BUILD=$MKSH/out/
 export MKSHRC_PATH='~/lib/mkshrc'
-export LIBS="$JEHANNE/posix/lib/libc.a $JEHANNE/posix/lib/libm.a $JEHANNE/posix/lib/libg.a -lposix -lc"
-export CPPFLAGS="'-DMKSHRC_PATH=\"$MKSHRC_PATH\"' '-DARCH=\"$ARCH\"'"
+export LIBS="-L$JEHANNE/posix/lib -lnewlibc -lnewlibm -lnewlibg -lposix"
+export CPPFLAGS="-I$JEHANNE/posix/include '-DMKSHRC_PATH=\"$MKSHRC_PATH\"' '-DARCH=\"$ARCH\"'"
 
 export LD_PRELOAD=
 
