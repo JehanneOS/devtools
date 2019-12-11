@@ -52,7 +52,6 @@
     { BASIC_POSIX_INCLUDE_DIR, 0, 0, 0, 1, 0 },		\
     { PORTABLE_INCLUDE_DIR, 0, 0, 0, 1, 0 },		\
     { ARCH_INCLUDE_DIR, 0, 0, 0, 1, 0 },		\
-    { ".", 0, 0, 0, 0, 0 },				\
     { 0, 0, 0, 0, 0, 0 }				\
   }
 
