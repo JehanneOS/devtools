@@ -102,7 +102,7 @@ mkdir -p $BINUTILS_BUILD_DIR
 failOnError $? "Building binutils"
 echo done.
 
-echo -n Building gcc... | tee -a $WORKING_DIR/gcc.build.log
+echo -n Building gcc... | tee -a $LOG
 # Patch and build gcc
 export GCC_BUILD_DIR=$WORKING_DIR/build/gcc
 mkdir -p $GCC_BUILD_DIR
@@ -115,7 +115,7 @@ export CPATH="$WORKING_DIR/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include:$WOR
 	sed -i 's/ftp/https/g' src/gcc/contrib/download_prerequisites &&
 	cd src &&
 	( cd gcc && ./contrib/download_prerequisites ) &&
-#	( cd gcc/libstdc++-v3 && autoconf -i ) &&
+	( cd gcc/libstdc++-v3 && autoconf -i ) &&
 	cd $GCC_BUILD_DIR &&
 	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ &&
 	make all-gcc all-target-libgcc && 
@@ -129,5 +129,10 @@ export CPATH="$WORKING_DIR/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include:$WOR
 #	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-target-libstdc++-v3
 ) >> $LOG 2>&1
 failOnError $? "building gcc"
+echo done.
 
+echo -n Copying GCC includes into $JEHANNE/posix
+mkdir -p $JEHANNE/posix/lib
+cp -fpr $WORKING_DIR/cross/posix/lib/* $JEHANNE/posix/lib
+cp -fpr $WORKING_DIR/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include-fixed/* $JEHANNE/posix/lib/gcc/x86_64-jehanne/9.2.0/include/
 echo done.
