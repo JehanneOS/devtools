@@ -12,7 +12,7 @@ JEHANNE_TOOLCHAIN="$JEHANNE_TOOLCHAIN/$REPONAME.TOOLCHAIN"
 
 export PATH="$JEHANNE/hacking/bin:$PATH"
 export PATH="$JEHANNE_TOOLCHAIN/cross/posix/bin:$PATH"
-export CPATH="$JEHANNE_TOOLCHAIN/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include:$JEHANNE_TOOLCHAIN/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include-fixed"
+#export CPATH="$JEHANNE_TOOLCHAIN/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include:$JEHANNE_TOOLCHAIN/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include-fixed"
 export ARCH=amd64
 
 export TOOLPREFIX=x86_64-jehanne-
