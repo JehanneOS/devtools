@@ -106,7 +106,6 @@ echo -n Building gcc... | tee -a $LOG
 # Patch and build gcc
 export GCC_BUILD_DIR=$WORKING_DIR/build/gcc
 mkdir -p $GCC_BUILD_DIR
-export CPATH="$WORKING_DIR/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include:$WORKING_DIR/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include-fixed"
 
 (
 	cd $WORKING_DIR &&
@@ -119,19 +118,12 @@ export CPATH="$WORKING_DIR/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include:$WOR
 	cd $GCC_BUILD_DIR &&
 	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ &&
 	make all-gcc all-target-libgcc && 
-	make DESTDIR=$WORKING_DIR/cross install-gcc  install-target-libgcc # &&
-#	make all-target-libstdc++-v3 &&
-#	make DESTDIR=$WORKING_DIR/cross install-target-libstdc++-v3
-#	make all-gcc all-target-libgcc && 
-#	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc install-target-libgcc
-#	 &&
-#	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-target-libstdc++-v3 &&
-#	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-target-libstdc++-v3
+	make DESTDIR=$WORKING_DIR/cross install-gcc  install-target-libgcc
 ) >> $LOG 2>&1
 failOnError $? "building gcc"
 echo done.
 
-echo -n Copying GCC includes into $JEHANNE/posix
+echo -n Copying GCC includes into $JEHANNE/posix...
 mkdir -p $JEHANNE/posix/lib
 cp -fpr $WORKING_DIR/cross/posix/lib/* $JEHANNE/posix/lib
 cp -fpr $WORKING_DIR/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include-fixed/* $JEHANNE/posix/lib/gcc/x86_64-jehanne/9.2.0/include/
