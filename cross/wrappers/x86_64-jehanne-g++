@@ -1,0 +1,27 @@
+#!/bin/sh
+
+ARGS="$@"
+
+REPONAME=`basename $JEHANNE`
+WORKING_DIR=`dirname $JEHANNE`
+WORKING_DIR="$WORKING_DIR/$REPONAME.TOOLCHAIN"
+
+if [ -z "$WRAPPER_LOG" ]; then
+	WRAPPER_LOG="$JEHANNE/hacking/cross/pkgs/gcc/wrappers.log"
+fi
+echo >> $WRAPPER_LOG
+echo >> $WRAPPER_LOG
+
+if echo $ARGS|grep -e '\.cpp\b' -e '\b\-o\b' -e ' -o ' > /dev/null; then
+	TOINCLUDE="-I$JEHANNE/posix/x86_64-jehanne/include/c++/9.2.0/ -I$JEHANNE/posix/x86_64-jehanne/include/c++/9.2.0/x86_64-jehanne -I$JEHANNE/posix/include -I$JEHANNE/sys/include/apw -I$JEHANNE/sys/include -I$JEHANNE/arch/amd64/include"
+	TOLINK="-L$JEHANNE/posix/lib -L$JEHANNE/arch/amd64/lib -lnewlibc -lposix -lc"
+	date --rfc-3339="ns"  |tee -a $WRAPPER_LOG
+	export >> $WRAPPER_LOG
+echo	$WORKING_DIR/cross/posix/bin/x86_64-jehanne-g++ "$@" $TOINCLUDE $TOLINK >> $WRAPPER_LOG
+exec	$WORKING_DIR/cross/posix/bin/x86_64-jehanne-g++ "$@" $TOINCLUDE $TOLINK
+else
+	date --rfc-3339="ns" >> $WRAPPER_LOG
+	export >> $WRAPPER_LOG
+echo	$WORKING_DIR/cross/posix/bin/x86_64-jehanne-g++ "$@"  >> $WRAPPER_LOG
+exec	$WORKING_DIR/cross/posix/bin/x86_64-jehanne-g++ "$@" 
+fi
