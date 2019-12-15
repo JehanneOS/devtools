@@ -46,7 +46,6 @@ failOnError $? "fetching sources"
 
 echo -n Building libstdc++-v3... | tee -a $LOG
 # libstdc++-v3 is part of GCC but must be built after newlib.
-# So we make its build fail and reconfigure it properly after making it fail.
 export GCC_BUILD_DIR=$WORKING_DIR/build/gcc
 mkdir -p $GCC_BUILD_DIR
 (
@@ -63,10 +62,10 @@ mkdir -p $GCC_BUILD_DIR
 	rm -fr $WORKING_DIR/src/gcc/mpc-1.0.3 &&
 	rm -fr $WORKING_DIR/src/gcc/mpc &&
 	cd $GCC_BUILD_DIR &&
-	make all-target-libstdc++-v3 ||
-	cd x86_64-jehanne/libstdc++-v3 &&
-	rm config.cache &&
-	$WORKING_DIR/src/gcc/libstdc++-v3/configure --srcdir=$WORKING_DIR/src/gcc/libstdc++-v3 --cache-file=./config.cache --enable-multilib --with-cross-host=x86_64-pc-linux-gnu --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++,lto --program-transform-name='s&^&x86_64-jehanne-&' --disable-option-checking --with-target-subdir=x86_64-jehanne --build=x86_64-pc-linux-gnu --host=x86_64-jehanne --target=x86_64-jehanne
+	mkdir -p $GCC_BUILD_DIR/x86_64-jehanne/libstdc++-v3 &&
+	cd $GCC_BUILD_DIR/x86_64-jehanne/libstdc++-v3 &&
+	rm -f config.cache &&
+	$WORKING_DIR/src/gcc/libstdc++-v3/configure --srcdir=$WORKING_DIR/src/gcc/libstdc++-v3 --cache-file=./config.cache --enable-multilib --with-cross-host=x86_64-pc-linux-gnu --prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE --enable-languages=c,c++,lto --program-transform-name='s&^&x86_64-jehanne-&' --disable-option-checking --with-target-subdir=x86_64-jehanne --build=x86_64-pc-linux-gnu --host=x86_64-jehanne --target=x86_64-jehanne &&
 	make && 
 	make DESTDIR=$JEHANNE/pkgs/libstdc++-v3/9.2.0/ install
 ) >> $LOG 2>&1
@@ -75,7 +74,7 @@ echo done.
 
 # Copy to /posix (to emulate bind during cross compilation)
 cp -pfr $JEHANNE/pkgs/libstdc++-v3/9.2.0/posix/* $JEHANNE/posix
-find posix/|grep '\.la$'|xargs rm
+find $JEHANNE/posix/|grep '\.la$'|xargs rm
 
 echo -n Building libgmp... | tee -a $LOG
 (
@@ -168,14 +167,21 @@ if [ ! -d $GCC_BUILD_DIR ]; then
 	mkdir $GCC_BUILD_DIR
 fi
 (
+	export CFLAGS="-DHIDE_JEHANNE_APW" &&
+	export CXXFLAGS=$CFLAGS &&
 	cd $GCC_BUILD_DIR &&
-	$WORKING_DIR/src/gcc/configure --host=x86_64-jehanne --without-isl --with-newlib --prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE --enable-languages=c,c++ --with-gmp=$JEHANNE/posix --with-mpfr=$JEHANNE/posix --with-mpc=$JEHANNE/posix --disable-threads --disable-tls --disable-bootstrap --disable-libgomp --disable-werror --disable-nls  &&
+	$WORKING_DIR/src/gcc/configure --host=x86_64-jehanne --without-isl --with-newlib --prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE --enable-languages=c,c++ --with-gmp=$JEHANNE/posix --with-mpfr=$JEHANNE/posix --with-mpc=$JEHANNE/posix --disable-shared --disable-threads --disable-tls --disable-bootstrap --disable-libgomp --disable-werror --disable-nls  &&
 	make all-gcc all-target-libgcc && 
 	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc install-target-libgcc
 ) >> $LOG 2>&1
 failOnError $? "building gcc"
 
 cp -pfr $JEHANNE/pkgs/gcc/9.2.0/posix/* $JEHANNE/posix
+
+# NOTES work in progress
+# in cstdlib replaced #include_next <stdlib.h> with #include.
+# in newlib: preserved libm.a
+# in GCC's src commented ifdef TIOCGWINSZ in gcc/diagnostic.c, function get_terminal_width
 
 #
 ## add sh
