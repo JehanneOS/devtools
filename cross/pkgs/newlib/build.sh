@@ -68,8 +68,7 @@ if [ "$NEWLIB_OPTIMIZATION" = "" ]; then
 fi
 
 export CC=gcc
-
-export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION -std=gnu11 -Lposix"
+export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION -std=gnu11 -I$JEHANNE_TOOLCHAIN/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include -Lposix"
 
 (
 	rm -fr $NEWLIB_BUILD &&
@@ -78,7 +77,8 @@ export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION -std=gnu11 -
 	mkdir $NEWLIB_PREFIX &&
 	cd $NEWLIB_BUILD &&
 	$NEWLIB_SRC/configure --enable-newlib-mb --disable-newlib-fvwrite-in-streamio --prefix=/pkgs/newlib --target=x86_64-jehanne &&
-	make all && make DESTDIR=$NEWLIB_PREFIX install &&
+	make all &&
+	make DESTDIR=$NEWLIB_PREFIX install &&
 	rm -fr $JEHANNE/sys/posix/newlib &&
 	rm -fr $JEHANNE/arch/amd64/lib/newlib &&
 	cp -fr $NEWLIB_PREFIX/pkgs/newlib/ $JEHANNE/pkgs/ &&
@@ -92,8 +92,6 @@ cp -fr $JEHANNE/pkgs/newlib/x86_64-jehanne/* $JEHANNE/posix
 
 # rename libc to libnewlibc to avoid name clash with Jehanne's libc
 mv $JEHANNE/posix/lib/libc.a $JEHANNE/posix/lib/libnewlibc.a
-mv $JEHANNE/posix/lib/libm.a $JEHANNE/posix/lib/libnewlibm.a
-mv $JEHANNE/posix/lib/libg.a $JEHANNE/posix/lib/libnewlibg.a
 
 
 kill $dotter
