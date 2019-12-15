@@ -116,7 +116,7 @@ mkdir -p $GCC_BUILD_DIR
 	( cd gcc && ./contrib/download_prerequisites ) &&
 	( cd gcc/libstdc++-v3 && autoconf -i ) &&
 	cd $GCC_BUILD_DIR &&
-	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ &&
+	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ --without-isl --disable-nls &&
 	make all-gcc all-target-libgcc && 
 	make DESTDIR=$WORKING_DIR/cross install-gcc  install-target-libgcc
 ) >> $LOG 2>&1
