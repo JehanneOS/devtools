@@ -116,15 +116,15 @@ mkdir -p $GCC_BUILD_DIR
 	( cd gcc && ./contrib/download_prerequisites ) &&
 	( cd gcc/libstdc++-v3 && autoconf -i ) &&
 	cd $GCC_BUILD_DIR &&
-	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix/ --with-sysroot=$JEHANNE --enable-languages=c,c++ --without-isl --disable-nls &&
-	make all-gcc all-target-libgcc && 
+	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix --with-sysroot=$JEHANNE --enable-languages=c,c++ --without-isl --disable-nls &&
+	make CFLAGS_FOR_TARGET="-I$JEHANNE/sys/include/apw" all-gcc all-target-libgcc &&
 	make DESTDIR=$WORKING_DIR/cross install-gcc  install-target-libgcc
 ) >> $LOG 2>&1
 failOnError $? "building gcc"
 echo done.
 
-echo -n Copying GCC includes into $JEHANNE/posix...
-mkdir -p $JEHANNE/posix/lib
-cp -fpr $WORKING_DIR/cross/posix/lib/* $JEHANNE/posix/lib
-cp -fpr $WORKING_DIR/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include-fixed/* $JEHANNE/posix/lib/gcc/x86_64-jehanne/9.2.0/include/
-echo done.
+## TODO: get a sense of this... shouldn't we do this after GCC compilation?
+#echo -n Copying GCC includes into $JEHANNE/posix...
+#mkdir -p $JEHANNE/posix/lib
+#cp -fpr $WORKING_DIR/cross/posix/lib/* $JEHANNE/posix/lib
+#echo done.
