@@ -8,7 +8,7 @@ export JEHANNE=`git rev-parse --show-toplevel`
 REPONAME=`basename $JEHANNE`
 JEHANNE_TOOLCHAIN=`dirname $JEHANNE`
 JEHANNE_TOOLCHAIN="$JEHANNE_TOOLCHAIN/$REPONAME.TOOLCHAIN"
-
+export JEHANNE_TOOLCHAIN
 
 export PATH="$JEHANNE/hacking/bin:$PATH"
 export PATH="$JEHANNE_TOOLCHAIN/cross/posix/bin:$PATH"
