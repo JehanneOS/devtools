@@ -2,9 +2,7 @@
 
 echo "Cross compiling GCC and dependencies"
 
-REPONAME=`basename $JEHANNE`
-WORKING_DIR=`dirname $JEHANNE`
-WORKING_DIR="$WORKING_DIR/$REPONAME.TOOLCHAIN"
+WORKING_DIR=$JEHANNE_TOOLCHAIN
 CROSS_DIR="$JEHANNE/hacking/cross"
 LOG="$WORKING_DIR/native.build.log"
 
@@ -46,9 +44,9 @@ failOnError $? "fetching sources"
 
 echo -n Building libstdc++-v3... | tee -a $LOG
 # libstdc++-v3 is part of GCC but must be built after newlib.
-export GCC_BUILD_DIR=$WORKING_DIR/build/gcc
-mkdir -p $GCC_BUILD_DIR
 (
+	export GCC_BUILD_DIR=$WORKING_DIR/build/gcc &&
+	mkdir -p $GCC_BUILD_DIR &&
 	rm -fr $WORKING_DIR/src/gcc/isl-0.18.tar.bz2 &&
 	rm -fr $WORKING_DIR/src/gcc/isl-0.18 &&
 	rm -fr $WORKING_DIR/src/gcc/isl &&
@@ -160,13 +158,9 @@ rm $JEHANNE/posix/lib/*.la
 
 echo -n Building gcc... | tee -a $LOG
 # Patch and build gcc
-if [ "$GCC_BUILD_DIR" = "" ]; then
-	export GCC_BUILD_DIR=$WORKING_DIR/build/gcc-native
-fi
-if [ ! -d $GCC_BUILD_DIR ]; then
-	mkdir $GCC_BUILD_DIR
-fi
 (
+	export GCC_BUILD_DIR=$WORKING_DIR/build/gcc-native &&
+	mkdir -p $GCC_BUILD_DIR &&
 	cd $GCC_BUILD_DIR &&
 	$WORKING_DIR/src/gcc/configure --host=x86_64-jehanne --without-isl --prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE --enable-languages=c,c++ --with-gmp=$JEHANNE/posix --with-mpfr=$JEHANNE/posix --with-mpc=$JEHANNE/posix --disable-shared --disable-threads --disable-tls --disable-bootstrap --disable-libgomp --disable-werror --disable-nls  &&
 	make all-gcc all-target-libgcc && 
