@@ -1,14 +1,16 @@
 diff --git a/src/gcc/gcc/config.gcc b/src/gcc/gcc/config.gcc
-index f02ddbd..e5ebfe0 100644
+index ddd3b8f..702aa59 100644
 --- a/src/gcc/gcc/config.gcc
 +++ b/src/gcc/gcc/config.gcc
-@@ -862,6 +862,16 @@ case ${target} in
+@@ -947,6 +947,18 @@ case ${target} in
      tmake_file="$tmake_file vms/t-vmsnative"
    fi
    ;;
 +*-*-jehanne*)
 +  gas=yes
 +  gnu_ld=yes
++  c_target_objs="${c_target_objs} jehanne.o"
++  cxx_target_objs="${cxx_target_objs} jehanne.o"
 +  default_use_cxa_atexit=yes
 +  case $target in
 +  x86_64-*)
@@ -19,12 +21,12 @@ index f02ddbd..e5ebfe0 100644
  *-*-vxworks*)
    tmake_file=t-vxworks
    xm_defines=POSIX
-@@ -1347,6 +1357,9 @@ x86_64-*-darwin*)
+@@ -1635,6 +1647,9 @@ i[34567]86-*-elfiamcu)
  i[34567]86-*-elf*)
  	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h"
  	;;
 +x86_64-*-jehanne*)
-+	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h glibc-stdint.h i386/i386elf.h i386/x86-64.h jehanne.h"
++	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h i386/x86-64.h jehanne.h"
 +	;;
  x86_64-*-elf*)
  	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h i386/x86-64.h"

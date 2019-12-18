@@ -6,13 +6,10 @@ WORKING_DIR=$JEHANNE_TOOLCHAIN
 CROSS_DIR="$JEHANNE/hacking/cross"
 LOG="$WORKING_DIR/native.build.log"
 
+export LD_PRELOAD=
+
 OPATH=$PATH
 export PATH="$CROSS_DIR/wrappers:$PATH"
-
-# include x86_64-jehanne-pkg-config in PATH
-#export PATH="$JEHANNE/hacking/cross/:$PATH"
-#unset CPATH #set in $JEHANNE/hacking/devshell.sh
-#export CPATH="$JEHANNE/posix/include:$JEHANNE/sys/include/apw:$JEHANNE/sys/include:$JEHANNE/arch/amd64/include:$CPATH"
 
 function failOnError {
 	# $1 -> exit status on a previous command
@@ -140,7 +137,7 @@ date > $LOG
 #	export LIBS="-L$JEHANNE/posix/lib -L$JEHANNE/arch/amd64/lib -lmpc -lmpfr -lgmp -lnewlibc -lposix -lc" &&
 #	export CC_FOR_BUILD='CPATH="" LIBS="" gcc' &&
 #	mkdir -p $BINUTILS_BUILD_DIR && cd $BINUTILS_BUILD_DIR &&
-#	$WORKING_DIR/src/binutils/configure --host=x86_64-jehanne --prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE  --with-gmp=$JEHANNE/posix/ --with-mpfr=$JEHANNE/posix/ --with-mpc=$JEHANNE/posix/ --enable-interwork --enable-multilib --enable-newlib-long-time_t --disable-nls --disable-werror  &&
+#	$WORKING_DIR/src/binutils/configure --host=x86_64-jehanne --with-sysroot=/ --with-build-sysroot=$JEHANNE --prefix=/posix --with-gmp=$JEHANNE/posix/ --with-mpfr=$JEHANNE/posix/ --with-mpc=$JEHANNE/posix/ --enable-interwork --enable-multilib --enable-newlib-long-time_t --disable-nls --disable-werror  &&
 #	cp $CROSS_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/doc/Makefile.in &&
 #	cp $CROSS_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/po/Makefile.in &&
 #	cp $CROSS_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/Makefile.in &&
@@ -162,14 +159,23 @@ echo -n Building gcc... | tee -a $LOG
 	export GCC_BUILD_DIR=$WORKING_DIR/build/gcc-native &&
 	mkdir -p $GCC_BUILD_DIR &&
 	cd $GCC_BUILD_DIR &&
-	$WORKING_DIR/src/gcc/configure --host=x86_64-jehanne --without-isl --prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE --enable-languages=c,c++ --with-gmp=$JEHANNE/posix --with-mpfr=$JEHANNE/posix --with-mpc=$JEHANNE/posix --disable-shared --disable-threads --disable-tls --disable-bootstrap --disable-libgomp --disable-werror --disable-nls  &&
-	make all-gcc &&
-	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc &&
-	mkdir -p $GCC_BUILD_DIR/x86_64-jehanne/libgcc &&
-	cd $GCC_BUILD_DIR/x86_64-jehanne/libgcc &&
-	$WORKING_DIR/src/gcc/libgcc/configure --srcdir=$WORKING_DIR/src/gcc/libgcc --without-isl --prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE --with-gmp=$JEHANNE/posix --with-mpfr=$JEHANNE/posix --with-mpc=$JEHANNE/posix --disable-shared --disable-threads --disable-tls --disable-bootstrap --disable-libgomp --disable-werror --disable-nls --enable-languages=c,c++,lto --program-transform-name=s,y,y, --disable-option-checking --with-target-subdir=x86_64-jehanne --build=x86_64-pc-linux-gnu --host=x86_64-jehanne --target=x86_64-jehanne &&
-	make &&
-	cd $GCC_BUILD_DIR && make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-target-libgcc
+	$WORKING_DIR/src/gcc/configure --host=x86_64-jehanne \
+		--prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE \
+		--enable-languages=c,c++ \
+		--disable-multiarch --with-multilib-list=m64 \
+		--without-isl --with-gmp=$JEHANNE/posix --with-mpfr=$JEHANNE/posix --with-mpc=$JEHANNE/posix \
+		--disable-shared --disable-threads --disable-tls \
+		--disable-libgomp --disable-werror --disable-nls  &&
+	make all-gcc all-target-libgcc &&
+	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc install-target-libgcc
+#	$WORKING_DIR/src/gcc/configure --host=x86_64-jehanne --without-isl --prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE --enable-languages=c,c++ --with-gmp=$JEHANNE/posix --with-mpfr=$JEHANNE/posix --with-mpc=$JEHANNE/posix --disable-shared --disable-threads --disable-tls --disable-bootstrap --disable-libgomp --disable-werror --disable-nls  &&
+#	make all-gcc &&
+#	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc &&
+#	mkdir -p $GCC_BUILD_DIR/x86_64-jehanne/libgcc &&
+#	cd $GCC_BUILD_DIR/x86_64-jehanne/libgcc &&
+#	$WORKING_DIR/src/gcc/libgcc/configure --srcdir=$WORKING_DIR/src/gcc/libgcc --without-isl --prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE --with-gmp=$JEHANNE/posix --with-mpfr=$JEHANNE/posix --with-mpc=$JEHANNE/posix --disable-shared --disable-threads --disable-tls --disable-bootstrap --disable-libgomp --disable-werror --disable-nls --enable-languages=c,c++,lto --program-transform-name=s,y,y, --disable-option-checking --with-target-subdir=x86_64-jehanne --build=x86_64-pc-linux-gnu --host=x86_64-jehanne --target=x86_64-jehanne &&
+#	make &&
+#	cd $GCC_BUILD_DIR && make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-target-libgcc
 ) >> $LOG 2>&1
 failOnError $? "building gcc"
 

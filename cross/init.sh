@@ -21,11 +21,11 @@ if [ "$JEHANNE" = "" ]; then
         exit 1
 fi
 
-REPONAME=`basename $JEHANNE`
-WORKING_DIR=`dirname $JEHANNE`
-WORKING_DIR="$WORKING_DIR/$REPONAME.TOOLCHAIN"
+WORKING_DIR="$JEHANNE_TOOLCHAIN"
 CROSS_DIR="$JEHANNE/hacking/cross"
 LOG="$WORKING_DIR/cross.build.log"
+
+export LD_PRELOAD=
 
 function failOnError {
 	# $1 -> exit status on a previous command
@@ -110,7 +110,7 @@ mkdir -p $GCC_BUILD_DIR
 (
 	cd $WORKING_DIR &&
 	( grep -q jehanne src/gcc/gcc/config.gcc || patch -p1 < $CROSS_DIR/patch/gcc.patch ) &&
-	cp $CROSS_DIR/patch/gcc/gcc/config/jehanne.h src/gcc/gcc/config &&
+	cp $CROSS_DIR/patch/gcc/gcc/config/* src/gcc/gcc/config &&
 	sed -i 's/ftp/https/g' src/gcc/contrib/download_prerequisites &&
 	cd src &&
 	( cd gcc && ./contrib/download_prerequisites ) &&
