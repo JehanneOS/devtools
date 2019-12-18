@@ -2,15 +2,14 @@ diff --git a/src/gcc/gcc/config.gcc b/src/gcc/gcc/config.gcc
 index ddd3b8f..702aa59 100644
 --- a/src/gcc/gcc/config.gcc
 +++ b/src/gcc/gcc/config.gcc
-@@ -947,6 +947,18 @@ case ${target} in
+@@ -947,6 +947,17 @@ case ${target} in
      tmake_file="$tmake_file vms/t-vmsnative"
    fi
    ;;
 +*-*-jehanne*)
 +  gas=yes
 +  gnu_ld=yes
-+  c_target_objs="${c_target_objs} jehanne.o"
-+  cxx_target_objs="${cxx_target_objs} jehanne.o"
++  extra_objs="jehanne.o"
 +  default_use_cxa_atexit=yes
 +  case $target in
 +  x86_64-*)

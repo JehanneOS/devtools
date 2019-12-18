@@ -13,7 +13,7 @@ echo >> $WRAPPER_LOG
 echo >> $WRAPPER_LOG
 
 if echo $ARGS|grep -e '\.c\b' -e '\b\-o\b' -e ' -o ' > /dev/null; then
-	TOINCLUDE="-isystem$JEHANNE/posix/lib/gcc/x86_64-jehanne/9.2.0/include -isystem$JEHANNE/posix/include"
+	TOINCLUDE="-isystem$JEHANNE_TOOLCHAIN/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include -isystem$JEHANNE/posix/include"
 	TOLINK="-L$JEHANNE/posix/lib -lnewlibc -lposix"
 	date --rfc-3339="ns"  |tee -a $WRAPPER_LOG
 	export >> $WRAPPER_LOG

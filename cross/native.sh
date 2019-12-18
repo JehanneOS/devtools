@@ -162,11 +162,12 @@ echo -n Building gcc... | tee -a $LOG
 	$WORKING_DIR/src/gcc/configure --host=x86_64-jehanne \
 		--prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE \
 		--enable-languages=c,c++ \
-		--disable-multiarch --with-multilib-list=m64 \
+		--disable-multiarch --with-multilib-list= \
 		--without-isl --with-gmp=$JEHANNE/posix --with-mpfr=$JEHANNE/posix --with-mpc=$JEHANNE/posix \
 		--disable-shared --disable-threads --disable-tls \
 		--disable-libgomp --disable-werror --disable-nls  &&
-	make all-gcc all-target-libgcc &&
+	make all-gcc &&
+	make all-target-libgcc &&
 	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc install-target-libgcc
 #	$WORKING_DIR/src/gcc/configure --host=x86_64-jehanne --without-isl --prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE --enable-languages=c,c++ --with-gmp=$JEHANNE/posix --with-mpfr=$JEHANNE/posix --with-mpc=$JEHANNE/posix --disable-shared --disable-threads --disable-tls --disable-bootstrap --disable-libgomp --disable-werror --disable-nls  &&
 #	make all-gcc &&
