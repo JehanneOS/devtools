@@ -9,7 +9,7 @@ index ddd3b8f..702aa59 100644
 +*-*-jehanne*)
 +  gas=yes
 +  gnu_ld=yes
-+  extra_objs="jehanne.o"
++  extra_objs="${extra_objs} jehanne.o"
 +  default_use_cxa_atexit=yes
 +  case $target in
 +  x86_64-*)
