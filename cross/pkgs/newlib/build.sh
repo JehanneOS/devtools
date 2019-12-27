@@ -21,10 +21,6 @@ if [ "$JEHANNE" = "" ]; then
         exit 1
 fi
 
-# To create a Jehanne version of newlib, we need specific OUTDATED versions
-# of Autotools that won't compile easily in a modern Linux distro.
-export PATH=$JEHANNE/hacking/cross/tmp/bin:$PATH
-
 export CROSS_DIR=$JEHANNE/hacking/cross
 export NEWLIB=$CROSS_DIR/pkgs/newlib/
 export NEWLIB_SRC=$NEWLIB/src/
