@@ -68,7 +68,7 @@ if [ "$NEWLIB_OPTIMIZATION" = "" ]; then
 fi
 
 export CC=gcc
-export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION -std=gnu11 -I$JEHANNE_TOOLCHAIN/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include -Lposix"
+export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION -std=gnu11 -isystem$JEHANNE_TOOLCHAIN/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include -lposix"
 
 (
 	rm -fr $NEWLIB_BUILD &&
