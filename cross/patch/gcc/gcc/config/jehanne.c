@@ -21,9 +21,11 @@ extern "C" {
 #include <libc.h>
 #include <posix.h>
 
+void __application_newlib_init(int argc, char *argv[]);
+
 }
 
-void
+__attribute__((__used__)) void
 __application_newlib_init(int argc, char *argv[])
 {
 	sys_rfork(RFFDG | RFREND | RFNOTEG);

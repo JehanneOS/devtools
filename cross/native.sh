@@ -153,12 +153,13 @@ echo done.
 cp -pfr $JEHANNE/pkgs/binutils/2.33.1/posix/* $JEHANNE/posix
 rm $JEHANNE/posix/lib/*.la
 
-echo -n Building gcc (and libgcc)... | tee -a $LOG
+echo -n "Building gcc (and libgcc)..." | tee -a $LOG
 (
 	export GCC_BUILD_DIR=$JEHANNE_TOOLCHAIN/build/gcc-native &&
 	mkdir -p $GCC_BUILD_DIR &&
 	cd $GCC_BUILD_DIR &&
-	$JEHANNE_TOOLCHAIN/src/gcc/configure --host=x86_64-jehanne \
+	$JEHANNE_TOOLCHAIN/src/gcc/configure \
+		--build=x86_64-pc-linux-gnu --host=x86_64-jehanne --target=x86_64-jehanne \
 		--enable-languages=c,c++ \
 		--prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE \
 		--without-isl --with-gmp=$JEHANNE/posix --with-mpfr=$JEHANNE/posix --with-mpc=$JEHANNE/posix \

@@ -11,6 +11,7 @@ index ddd3b8f..702aa59 100644
 +  gnu_ld=yes
 +  tmake_file=t-jehanne
 +  extra_objs="${extra_objs} jehanne.o"
++  extra_gcc_objs="${extra_gcc_objs} jehanne.o"
 +  default_use_cxa_atexit=yes
 +  case $target in
 +  x86_64-*)
