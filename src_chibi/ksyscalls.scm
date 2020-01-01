@@ -181,7 +181,7 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
                        `(,(indent 1)
                           "ret->"
                           ,(hash-table-ref wrapper 'sysretfield)
-                          "= sys" ,(hash-table-ref syscall 'Name)
+                          " = sys" ,(hash-table-ref syscall 'Name)
                           "("
                           ,(joined (lambda (x)
                                      (joined displayed `("a" ,(numeric x))))
@@ -196,22 +196,22 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
 
 (define (wrap_ wrapper)
 ;TODO
-  (joined displayed
-          `("static void" ,nl
-            "wrap_" ,(hash-table-ref wrapper 'name) "(ScRet* ret, Ureg* ureg)" ,nl
-            "{ "
-            ,(hash-table-ref wrapper 'vars)
-            ,(hash-table-ref wrapper 'commoncode) ,nl
-            ,(hash-table-ref wrapper 'execcode) ,nl
-            "}"
-
-            )))
+  (joined/suffix displayed
+    `("static void" ,nl
+      "wrap_" ,(hash-table-ref wrapper 'name) "(ScRet* ret, Ureg* ureg)" ,nl
+      "{"
+      ,(hash-table-ref wrapper 'vars) ,nl
+      ,(hash-table-ref wrapper 'commoncode) ,nl
+      ,nl
+      ,(hash-table-ref wrapper 'execcode) ,fl
+      "}"
+      ,nl)))
 
 (define (default_syscall_ret-wrapper wrapper)
   (joined displayed
-    `( "\tcase" ,(hash-table-ref wrapper 'id) ":" ,nl
-      "\t\t",(hash-table-ref wrapper 'defaultret) ,nl
-      "\t\tbreak;")))
+    `( ,(indent 1) "case " ,(hash-table-ref wrapper 'id) ":" ,nl
+       ,(indent 2)   ,(hash-table-ref wrapper 'defaultret) ,nl
+       ,(indent 2)   "break;")))
 
 
 (define (generate-kernel-code syscalls)
@@ -230,22 +230,43 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
             wrappers
             nl)
           (indent 0)"int nsyscall = " (length wrappers) ";" nl
+          nl
           (indent 0)"ScRet" nl
           (indent 0)"default_syscall_ret(int syscall)" nl
           (indent 0) "{" nl
           (indent 1)"static ScRet zero;" nl
           (indent 1)"ScRet ret = zero;"  nl
           (indent 1)"switch(syscall){"   nl
-          (joined
+          (joined/suffix
             displayed
             (map default_syscall_ret-wrapper wrappers)
             nl)
+          nl
           (indent 1)  "default:" nl
           (indent 2)     "ret.vl = -1;" nl
           (indent 2)     "break;" nl
           (indent 1)  "}" nl
           (indent 1)  "return ret;" nl
-          "}")))
+          (indent 0)"}"
+          nl
+          nl
+          (indent 0)"char*" nl
+          (indent 0)"syscall_name(int syscall)" nl
+          (indent 0)"{" nl
+          (indent 1)  "switch(syscall){" nl
+          (joined
+            (lambda (wrapper)
+              (joined displayed
+                `(,(indent 1)"case " ,(hash-table-ref wrapper 'id) ":" ,nl
+                  ,(indent 2)  "return \"" ,(hash-table-ref wrapper 'name) "\";" ,nl
+                  )))
+            wrappers)
+          nl
+          (indent 1)  "default:" nl
+          (indent 2)    "return nil;" nl
+          (indent 1)  "}" nl
+          (indent 0)"}" nl
+          )))
 
 (define (main args)
   (if (= 2 (length args))
