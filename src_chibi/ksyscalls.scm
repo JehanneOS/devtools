@@ -75,46 +75,49 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
     (else          (string-append "[?? " x "]"))))
 
 (define (format-arg i str)
-  (let ((stri (number->string i))
-        (sa string-append))
-    (case (string->symbol str)
-      ((int int32_t)
-       (sa "\tjehanne_fmtprint(fmt, \" %%d\", a" stri ");\n"))
-      ((unsigned int uint32_t)  ; unsigned int is reserved for flags
-       (sa "\tjehanne_fmtprint(fmt, \" %#ux\", a" stri ");\n"))
-      ((long int64_t)
-       (sa "\tjehanne_fmtprint(fmt, \" %lld\", a" stri ");\n"))
-      ((unsigned long uint64_t)
-       (sa "\tjehanne_fmtprint(fmt, \" %#lud\", a" stri ");\n" i))
-      ((void* uint8_t* const void* const uint8_t*)
-       (sa "\tjehanne_fmtprint(fmt, \" %#p\", a" stri");\n"))
-      ((int32_t* int* const int32_t* const int*)
-       (sa "\tjehanne_fmtprint(fmt, \" %#p(%d)\", a" stri ", a" stri ");\n"))
-      ((const char* char*)
-       (sa "\tfmtuserstring(fmt, a" stri ");\n"))
-      ((const char** char**)
-       (sa "\tfmtuserstringlist(fmt, a" stri ");\n"))
+  (let ((sa (lambda args
+              (joined displayed args))))
+    (cond
+      ((member str '("int" "int32_t"))
+       (sa "jehanne_fmtprint(fmt, \" %d\", a" i ");"))
+      ((member str '("unsigned int" "uint32_t"))
+       ; unsigned int is reserved for flags
+       (sa "jehanne_fmtprint(fmt, \" %#ux\", a" i ");"))
+      ((member str '("long" "int64_t"))
+       (sa "jehanne_fmtprint(fmt, \" %lld\", a" i ");"))
+      ((member str '("unsigned long" "uint64_t"))
+       (sa "jehanne_fmtprint(fmt, \" %#lud\", a" i ");"))
+      ((member str '("void*" "uint8_t*" "const void*" "const uint8_t*"))
+       (sa "jehanne_fmtprint(fmt, \" %#p\", a" i");"))
+      ((member str '("int32_t*" "int*" "const int32_t*" "const int*"))
+       (sa "jehanne_fmtprint(fmt, \" %#p(%d)\", a" i ", a" i ");"))
+      ((member str '("const char*" "char*"))
+       (sa "fmtuserstring(fmt, a" i ");"))
+      ((member str '("const char**" "char**"))
+       (sa "fmtuserstringlist(fmt, a" i ");"))
       (else
        (sa "[?? " str "]")))))
 
 (define (format-ret t)
   (let ((sysret (sysret t))
-        (sa string-append))
-    (case (string->symbol t)
-      ((int int32_t)
-       (sa "\tjehanne_fmtprint(fmt, \" %d\", ret->" sysret ");\n"))
-      ((unsigned int uint32_t)  ; unsigned int is reserved for flags
-       (sa "\tjehanne_fmtprint(fmt, \" %#ux\", ret->" sysret ");\n"))
-      ((long int64_t)
-       (sa "\tjehanne_fmtprint(fmt, \" %lld\", ret->" sysret ");\n"))
-      ((unsigned long uint64_t void)
-       (sa "\tjehanne_fmtprint(fmt, \" %#llud\", ret->" sysret ");\n"))
-      ((void* uintptr_t const void* const uintptr_t)
-       (sa "\tjehanne_fmtprint(fmt, \" %#p\", ret->" sysret ");\n"))
-      ((int32_t* int* const int32_t* const int*)
-       (sa "\tjehanne_fmtprint(fmt, \" %#p(%%d)\", ret->" sysret
-           ", *ret->" sysret ");\n"))
-      ((else)
+        (sa (lambda args
+              (joined displayed args))))
+    (case
+      ((member t '("int" "int32_t"))
+       (sa "jehanne_fmtprint(fmt, \" %d\", ret->" sysret ");"))
+      ((member t '("unsigned int" "uint32_t"))
+       ; unsigned int is reserved for flags
+       (sa "jehanne_fmtprint(fmt, \" %#ux\", ret->" sysret ");"))
+      ((member t '("long" "int64_t"))
+       (sa "jehanne_fmtprint(fmt, \" %lld\", ret->" sysret ");"))
+      ((member t '("unsigned long" "uint64_t" "void"))
+       (sa "jehanne_fmtprint(fmt, \" %#llud\", ret->" sysret ");"))
+      ((member t '("void*" "uintptr_t" "const void*" "const uintptr_t"))
+       (sa "jehanne_fmtprint(fmt, \" %#p\", ret->" sysret ");"))
+      ((member t '("int32_t*" "int*" "const int32_t*" "const int*"))
+       (sa "jehanne_fmtprint(fmt, \" %#p(%d)\", ret->" sysret
+           ", *ret->" sysret ");"))
+      (else
        (sa "[?? " t "]")))))
 
 (define (format-extern-block syscalls)
@@ -123,16 +126,13 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
       (let* ((name (cdr (assq 'Name x)))
              (ret  (vector-ref (cdr (assq 'Ret x)) 0))
              (args (vector->list (cdr (assq 'Args x)))))
-        (joined displayed
-                `("extern " ,ret " sys" ,name "("
-                    ,(if (= 0 (length args))
-                         "void"
-                         (joined
-                            displayed
-                            args
-                            ", "))))))
+        (each
+          "extern " ret " sys" name "("
+          (if (= 0 (length args))
+              "void"
+              (joined displayed args ", ")))))
     (vector->list syscalls)
-    ");\n"))
+    (each ");" fl)))
 
 (define (generate-wrapper syscall)
   ;TODO
@@ -140,8 +140,9 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
          (syscall (alist->hash-table syscall))
          (ret0 (vector-ref (hash-table-ref syscall 'Ret) 0))
 
-         (args (vector->list (hash-table-ref syscall 'Args)))
-         (argcount (iota (length args)))
+         (vargs (hash-table-ref syscall 'Args))
+         (args (vector->list vargs))
+         (argcount (iota (vector-length vargs)))
 
          (ret (sysret ret0)))
     (hash-table-set! wrapper 'id (hash-table-ref syscall 'Id))
@@ -155,39 +156,48 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
     (hash-table-set! wrapper 'vars
                       (joined/prefix
                         (lambda (x)
-                          (joined displayed
-                            `(,(indent 1) ,(car x) " a" ,(numeric (cadr x)) ";")))
+                          (each
+                            (indent 1) (car x) " a" (numeric (cadr x)) ";"))
                         (zip args argcount)
                         nl))
-
     (hash-table-set!  wrapper 'commoncode
                       (joined/prefix
                         (lambda (x)
-                          (joined displayed
-                                  `(,(indent 1)
-                                     "a"
-                                     ,(numeric (cadr x))
-                                     " = ("
-                                     ,(car x)
-                                     ")ureg->"
-                                     ,(ureg-arg (cadr x))
-                                     ";")))
+                          (each
+                            (indent 1)
+                            "a"
+                            (numeric (cadr x))
+                            " = ("
+                            (car x)
+                            ")ureg->"
+                            (ureg-arg (cadr x))
+                            ";"))
                         (zip args argcount)
                         nl))
 
     (hash-table-set! wrapper 'execcode
-                     (joined
-                       displayed
-                       `(,(indent 1)
-                          "ret->"
-                          ,(hash-table-ref wrapper 'sysretfield)
-                          " = sys" ,(hash-table-ref syscall 'Name)
-                          "("
-                          ,(joined (lambda (x)
-                                     (joined displayed `("a" ,(numeric x))))
-                                   argcount
-                                   ", ")
-                          ");")))
+                     (each
+                       (indent 1) "ret->" (hash-table-ref wrapper 'sysretfield)
+                       " = sys" (hash-table-ref syscall 'Name) "("
+                       (joined (lambda (x) (each "a" (numeric x)))
+                                argcount
+                                ", ")
+                       ");"))
+    ;TODO
+    ; - EntryPrint
+    ; - ExitPrint
+    ; - 
+    (hash-table-set! wrapper 'entryprint
+                    (if (string=? "pwrite" (hash-table-ref wrapper 'name))
+                        (each
+                          (indent 1)(format-arg 0 (vector-ref vargs 0)) nl
+                          (indent 1)"fmtrwdata(fmt, (char*)a1, MIN(a2, 64));" nl
+                          (indent 1)(format-arg 2 (vector-ref vargs 2)) nl
+                          (indent 1)(format-arg 3 (vector-ref vargs 3)) nl)
+                        (joined
+                          (lambda (x)
+                            (each (indent 1) (format-arg (cadr x) (car x)) nl))
+                          (zip args argcount))))
     wrapper))
 
 (define (generate-wrappers syscalls)
@@ -196,22 +206,22 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
 
 (define (wrap_ wrapper)
 ;TODO
-  (joined/suffix displayed
-    `("static void" ,nl
-      "wrap_" ,(hash-table-ref wrapper 'name) "(ScRet* ret, Ureg* ureg)" ,nl
+  (each
+    "static void" nl
+      "wrap_" (hash-table-ref wrapper 'name) "(ScRet* ret, Ureg* ureg)" nl
       "{"
-      ,(hash-table-ref wrapper 'vars) ,nl
-      ,(hash-table-ref wrapper 'commoncode) ,nl
-      ,nl
-      ,(hash-table-ref wrapper 'execcode) ,fl
+      (hash-table-ref wrapper 'vars) nl
+      (hash-table-ref wrapper 'commoncode) nl
+      nl
+      (hash-table-ref wrapper 'execcode) fl
       "}"
-      ,nl)))
+      nl))
 
 (define (default_syscall_ret-wrapper wrapper)
-  (joined displayed
-    `( ,(indent 1) "case " ,(hash-table-ref wrapper 'id) ":" ,nl
-       ,(indent 2)   ,(hash-table-ref wrapper 'defaultret) ,nl
-       ,(indent 2)   "break;")))
+  (each
+    (indent 1) "case " (hash-table-ref wrapper 'id) ":" nl
+    (indent 2)   (hash-table-ref wrapper 'defaultret) nl
+    (indent 2)   "break;"))
 
 
 (define (generate-kernel-code syscalls)
@@ -256,17 +266,60 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
           (indent 1)  "switch(syscall){" nl
           (joined
             (lambda (wrapper)
-              (joined displayed
-                `(,(indent 1)"case " ,(hash-table-ref wrapper 'id) ":" ,nl
-                  ,(indent 2)  "return \"" ,(hash-table-ref wrapper 'name) "\";" ,nl
-                  )))
+              (each
+                (indent 1)"case " (hash-table-ref wrapper 'id) ":" nl
+                (indent 2)  "return \"" (hash-table-ref wrapper 'name)
+                               "\";" nl))
             wrappers)
           nl
           (indent 1)  "default:" nl
           (indent 2)    "return nil;" nl
           (indent 1)  "}" nl
           (indent 0)"}" nl
-          )))
+          nl
+
+          (indent 0) "void" nl
+          (indent 0) "dispatch_syscall(int syscall, Ureg* ureg, ScRet* ret)" nl
+          (indent 0) "{" nl
+          (indent 1)   "switch(syscall){" nl
+          (joined
+            (lambda (wrapper)
+              (each
+                (indent 1)"case " (hash-table-ref wrapper 'id) ":" nl
+                (indent 2)  "wrap_" (hash-table-ref wrapper 'name)
+                                   "(ret, ureg);" nl
+                (indent 2)  "break;" nl))
+            wrappers)
+          nl
+          (indent 1)   "default:" nl
+          (indent 2)   "panic(\"dispatch_syscall: bad sys call number"
+                               " %d pc %#p\\n\", syscall, ureg->ip);" nl
+          (indent 1)   "}" nl
+          (indent 0) "}" nl
+          nl
+
+          (joined/prefix
+            (lambda (wrapper)
+              (each
+                (indent 0)"static void" nl
+                (indent 0)"enter_" (hash-table-ref wrapper 'name)
+                                   "(Fmt* fmt, Ureg* ureg)" nl
+                (indent 0)"{"
+                (hash-table-ref wrapper 'vars) nl
+                (hash-table-ref wrapper 'commoncode) nl
+                nl
+                (indent 1)"jehanne_fmtprint(fmt, \""
+                            (hash-table-ref wrapper 'name)
+                            " %#p >\", ureg->ip);" nl
+                (indent 1)"if(up->notified)" nl
+                (indent 2)  "jehanne_fmtprint(fmt, \"!\");" nl
+                (hash-table-ref wrapper 'entryprint)
+                nl
+                (indent 1)"jehanne_fmtprint(fmt, \"\\n\");" nl
+                (indent 0)"}" nl
+                ))
+            wrappers
+            nl))))
 
 (define (main args)
   (if (= 2 (length args))
