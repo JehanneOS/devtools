@@ -72,53 +72,49 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
     ((int32_t*)  "v")
     ((uint64_t*) "v")
     ((int64_t*)  "v")
-    (else          (string-append "[?? " x "]"))))
+    (else        (string-append "[?? " x "]"))))
 
 (define (format-arg i str)
-  (let ((sa (lambda args
-              (joined displayed args))))
-    (cond
-      ((member str '("int" "int32_t"))
-       (sa "jehanne_fmtprint(fmt, \" %d\", a" i ");"))
-      ((member str '("unsigned int" "uint32_t"))
-       ; unsigned int is reserved for flags
-       (sa "jehanne_fmtprint(fmt, \" %#ux\", a" i ");"))
-      ((member str '("long" "int64_t"))
-       (sa "jehanne_fmtprint(fmt, \" %lld\", a" i ");"))
-      ((member str '("unsigned long" "uint64_t"))
-       (sa "jehanne_fmtprint(fmt, \" %#lud\", a" i ");"))
-      ((member str '("void*" "uint8_t*" "const void*" "const uint8_t*"))
-       (sa "jehanne_fmtprint(fmt, \" %#p\", a" i");"))
-      ((member str '("int32_t*" "int*" "const int32_t*" "const int*"))
-       (sa "jehanne_fmtprint(fmt, \" %#p(%d)\", a" i ", a" i ");"))
-      ((member str '("const char*" "char*"))
-       (sa "fmtuserstring(fmt, a" i ");"))
-      ((member str '("const char**" "char**"))
-       (sa "fmtuserstringlist(fmt, a" i ");"))
-      (else
-       (sa "[?? " str "]")))))
+  (cond
+    ((member str '("int" "int32_t"))
+     (each "jehanne_fmtprint(fmt, \" %d\", a" i ");"))
+    ((member str '("unsigned int" "uint32_t"))
+     ; unsigned int is reserved for flags
+     (each "jehanne_fmtprint(fmt, \" %#ux\", a" i ");"))
+    ((member str '("long" "int64_t"))
+     (each "jehanne_fmtprint(fmt, \" %lld\", a" i ");"))
+    ((member str '("unsigned long" "uint64_t"))
+     (each "jehanne_fmtprint(fmt, \" %#lud\", a" i ");"))
+    ((member str '("void*" "uint8_t*" "const void*" "const uint8_t*"))
+     (each "jehanne_fmtprint(fmt, \" %#p\", a" i");"))
+    ((member str '("int32_t*" "int*" "const int32_t*" "const int*"))
+     (each "jehanne_fmtprint(fmt, \" %#p(%d)\", a" i ", a" i ");"))
+    ((member str '("const char*" "char*"))
+     (each "fmtuserstring(fmt, a" i ");"))
+    ((member str '("const char**" "char**"))
+     (each "fmtuserstringlist(fmt, a" i ");"))
+    (else
+      (each "[?? " str "]"))))
 
 (define (format-ret t)
-  (let ((sysret (sysret t))
-        (sa (lambda args
-              (joined displayed args))))
-    (case
+  (let ((sysret (sysret t)))
+    (cond
       ((member t '("int" "int32_t"))
-       (sa "jehanne_fmtprint(fmt, \" %d\", ret->" sysret ");"))
+       (each "jehanne_fmtprint(fmt, \" %d\", ret->" sysret ");"))
       ((member t '("unsigned int" "uint32_t"))
        ; unsigned int is reserved for flags
-       (sa "jehanne_fmtprint(fmt, \" %#ux\", ret->" sysret ");"))
+       (each "jehanne_fmtprint(fmt, \" %#ux\", ret->" sysret ");"))
       ((member t '("long" "int64_t"))
-       (sa "jehanne_fmtprint(fmt, \" %lld\", ret->" sysret ");"))
+       (each "jehanne_fmtprint(fmt, \" %lld\", ret->" sysret ");"))
       ((member t '("unsigned long" "uint64_t" "void"))
-       (sa "jehanne_fmtprint(fmt, \" %#llud\", ret->" sysret ");"))
+       (each "jehanne_fmtprint(fmt, \" %#llud\", ret->" sysret ");"))
       ((member t '("void*" "uintptr_t" "const void*" "const uintptr_t"))
-       (sa "jehanne_fmtprint(fmt, \" %#p\", ret->" sysret ");"))
+       (each "jehanne_fmtprint(fmt, \" %#p\", ret->" sysret ");"))
       ((member t '("int32_t*" "int*" "const int32_t*" "const int*"))
-       (sa "jehanne_fmtprint(fmt, \" %#p(%d)\", ret->" sysret
+       (each "jehanne_fmtprint(fmt, \" %#p(%d)\", ret->" sysret
            ", *ret->" sysret ");"))
       (else
-       (sa "[?? " t "]")))))
+       (each "[?? " t "]")))))
 
 (define (format-extern-block syscalls)
   (joined/suffix
