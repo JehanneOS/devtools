@@ -131,7 +131,6 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
     (each ");" fl)))
 
 (define (generate-wrapper syscall)
-  ;TODO
   (let* ((wrapper (make-hash-table))
          (syscall (alist->hash-table syscall))
          (ret0 (vector-ref (hash-table-ref syscall 'Ret) 0))
@@ -146,8 +145,6 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
     (hash-table-set! wrapper 'sysretfield ret)
     (hash-table-set! wrapper 'defaultret
                      (string-append "ret." ret " = (" ret0 ")-1;"))
-
-    ; TODO: Check if using `joined displayed` that much is the way to do it
 
     (hash-table-set! wrapper 'vars
                       (joined/prefix
@@ -210,7 +207,6 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
 
 
 (define (wrap_ wrapper)
-;TODO
   (each
     "static void" nl
       "wrap_" (hash-table-ref wrapper 'name) "(ScRet* ret, Ureg* ureg)" nl
@@ -239,7 +235,6 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
           nl
           nl
 
-          ; TODO
           (joined/suffix
             wrap_
             wrappers
@@ -370,7 +365,40 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
                 ))
             wrappers
             nl)
-          )))
+
+          nl
+          nl
+          (indent 0)"char*" nl
+          (indent 0)"sysretfmt(int syscall, Ureg* ureg, ScRet* ret,"
+                              " uint64_t start, uint64_t stop)" nl
+          (indent 0)"{" nl
+          (indent 1)  "Fmt fmt;" nl
+          (indent 1)  "jehanne_fmtstrinit(&fmt);" nl
+          (indent 1)  "jehanne_fmtprint(&fmt, \"%d %s \", up->pid, up->text);" nl
+          nl
+          (indent 1)  "switch(syscall){" nl
+          (joined (lambda (wrapper)
+                    (each
+                      (indent 1) "case " (hash-table-ref wrapper 'id) ":" nl
+                      (indent 2)   "exit_" (hash-table-ref wrapper 'name)
+                                           "(&fmt, ureg, ret);" nl
+                      (indent 2)   "break;" nl))
+                  wrappers)
+          nl
+          (indent 1)  "default:" nl
+          (indent 2)    "panic(\"sysretfmt: bad sys call number %d pc %#p\\n\","
+                                " syscall, ureg->ip);" nl
+          (indent 1)  "}"
+          nl
+          nl
+          (indent 1)  "if(0 > ret->vl){" nl
+          (indent 2)    "jehanne_fmtprint(&fmt, \" %s %#llud %#llud\\n\", up->syserrstr, start, stop-start);" nl
+          (indent 1)  "} else {" nl
+          (indent 2)  "jehanne_fmtprint(&fmt, \" \\\"\\\" %#llud %#llud\\n\", start, stop-start);" nl
+          (indent 1)  "}" nl
+          nl
+          (indent 1)  "return jehanne_fmtstrflush(&fmt);" nl
+          (indent 0)"}" nl nl)))
 
 (define (main args)
   (if (= 2 (length args))
