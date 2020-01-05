@@ -315,7 +315,32 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
                 (indent 0)"}" nl
                 ))
             wrappers
-            nl))))
+            nl)
+          nl
+
+          nl
+          (indent 0)"char*" nl
+          (indent 0)"syscallfmt(int syscall, Ureg* ureg)" nl
+          (indent 0)"{" nl
+          (indent 1)  "Fmt fmt;" nl
+          (indent 1)  "jehanne_fmtstrinit(&fmt);" nl
+          (indent 1)  "jehanne_fmtprint(&fmt, \"%d %s \", up->pid, up->text);" nl
+          nl
+          (indent 1)  "switch(syscall){" nl
+          (joined (lambda (wrapper)
+                    (each (indent 1) "case " (hash-table-ref wrapper 'id) ":" nl
+                          (indent 2)   "enter_" (hash-table-ref wrapper 'name)
+                                                "(&fmt, ureg);" nl
+                          (indent 2)   "break;" nl))
+                  wrappers)
+          nl
+          (indent 1)  "default:" nl
+          (indent 2)    "panic(\"syscallfmt: bad sys call number %d pc %#p\\n\","
+                                " syscall, ureg->ip);" nl
+          (indent 1)  "}" nl
+          nl
+          (indent 1)  "return jehanne_fmtstrflush(&fmt);" nl
+          (indent 0)"}")))
 
 (define (main args)
   (if (= 2 (length args))
