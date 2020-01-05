@@ -179,10 +179,6 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
                                 argcount
                                 ", ")
                        ");"))
-    ;TODO
-    ; - EntryPrint
-    ; - ExitPrint
-    ; - 
     (hash-table-set! wrapper 'entryprint
                     (if (string=? "pwrite" (hash-table-ref wrapper 'name))
                         (each
@@ -194,6 +190,19 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
                           (lambda (x)
                             (each (indent 1) (format-arg (cadr x) (car x)) nl))
                           (zip args argcount))))
+
+    (hash-table-set! wrapper 'exitprint
+      (let ((name (hash-table-ref wrapper 'name))
+            (base (format-ret ret0)))
+        (cond ((or (string=? "pread" name) (string=? "fd2path" name))
+                (each (indent 1) base nl
+                      (indent 1) "fmtrwdata(fmt, (char*)ureg->" (ureg-arg 1)
+                                 ", MIN(ureg->" (ureg-arg 2) ", 64));" nl))
+              ((or (string=? "await" name) (string=? "errstr" name))
+                (each (indent 1) base nl
+                      (indent 1) "fmtrwdata(fmt, (char*)ureg->" (ureg-arg 0)
+                                 ", MIN(ureg->" (ureg-arg 1) ", 64));" nl))
+              (else (each (indent 1) base nl)))))
     wrapper))
 
 (define (generate-wrappers syscalls)
@@ -340,7 +349,28 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
           (indent 1)  "}" nl
           nl
           (indent 1)  "return jehanne_fmtstrflush(&fmt);" nl
-          (indent 0)"}")))
+          (indent 0)"}"
+          nl
+
+          nl
+          (joined/prefix
+            (lambda (wrapper)
+              (each
+                (indent 0)"static void"nl
+                (indent 0)"exit_" (hash-table-ref wrapper 'name)
+                                  "(Fmt* fmt, Ureg* ureg, ScRet* ret)" nl
+                (indent 0)"{" nl
+                (indent 1)  "jehanne_fmtprint(fmt, \"" (hash-table-ref wrapper 'name)
+                              " %#p <\", ureg->ip);" nl
+                (indent 1)  "if(up->notified)" nl
+                (indent 2)  "jehanne_fmtprint(fmt, \"!\");" nl
+                (hash-table-ref wrapper 'exitprint)
+                nl
+                (indent 0)"}"nl
+                ))
+            wrappers
+            nl)
+          )))
 
 (define (main args)
   (if (= 2 (length args))
