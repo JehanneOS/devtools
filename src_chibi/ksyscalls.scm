@@ -45,7 +45,9 @@ extern void fmtuserstringlist(Fmt* f, const char** argv);
 ")
 
 (define (indent x)
-  (space-to (* x 4)))
+  (if (= 0 x)
+      nothing
+      (joined/range (lambda (x) nothing) 0 (+ 1 x) "\t")))
 
 (define (ureg-arg x)
   (case x
