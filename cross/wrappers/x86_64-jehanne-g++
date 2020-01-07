@@ -15,6 +15,10 @@ echo >> $WRAPPER_LOG
 if echo $ARGS|grep -e '\.cpp\b' -e '\b\-o\b' -e ' -o ' > /dev/null; then
 	TOINCLUDE="-isystem$JEHANNE/posix/x86_64-jehanne/include/c++/9.2.0/ -isystem$JEHANNE/posix/x86_64-jehanne/include/c++/9.2.0/x86_64-jehanne -isystem$JEHANNE/posix/x86_64-jehanne/include/c++/9.2.0/backward -isystem$JEHANNE_TOOLCHAIN/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include -isystem$JEHANNE/posix/include"
 	TOLINK="-L$JEHANNE/posix/lib -lstdc++ -lm -lnewlibc -lposix"
+	if echo $ARGS|grep -e ' -o cc1' -e ' -o xg[c+][c+]' -e ' -o cpp ' -e ' -o lto1' > /dev/null; then
+		TOLINK="jehanne.o $TOLINK"
+		#CXXFLAGS_FOR_WRAPPER="-Wl,--require-defined=__application_newlib_init"
+	fi
 	date --rfc-3339="ns"  |tee -a $WRAPPER_LOG
 	export >> $WRAPPER_LOG
 echo	$WORKING_DIR/cross/posix/bin/x86_64-jehanne-g++ "$@" $TOINCLUDE $TOLINK >> $WRAPPER_LOG
