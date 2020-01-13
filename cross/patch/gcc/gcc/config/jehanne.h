@@ -21,7 +21,7 @@
 
 /* Default arguments you want when running x86_64-jehanne-gcc */
 #undef LIB_SPEC
-#define LIB_SPEC "-lc"
+#define LIB_SPEC "-ljehanne"
 
 #undef STANDARD_STARTFILE_PREFIX
 #define STANDARD_STARTFILE_PREFIX "/arch/amd64/lib/"
