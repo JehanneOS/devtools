@@ -86,10 +86,6 @@ failOnError $? "building newlib"
 mkdir -p $JEHANNE/posix
 cp -fr $JEHANNE/pkgs/newlib/x86_64-jehanne/* $JEHANNE/posix
 
-# rename libc to libnewlibc to avoid name clash with Jehanne's libc
-mv $JEHANNE/posix/lib/libc.a $JEHANNE/posix/lib/libnewlibc.a
-
-
 kill $dotter
 wait $dotter 2>/dev/null
 
