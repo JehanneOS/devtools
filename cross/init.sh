@@ -122,9 +122,3 @@ mkdir -p $GCC_BUILD_DIR
 ) >> $LOG 2>&1
 failOnError $? "building gcc"
 echo done.
-
-## TODO: get a sense of this... shouldn't we do this after GCC compilation?
-#echo -n Copying GCC includes into $JEHANNE/posix...
-#mkdir -p $JEHANNE/posix/lib
-#cp -fpr $WORKING_DIR/cross/posix/lib/* $JEHANNE/posix/lib
-#echo done.
