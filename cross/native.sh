@@ -168,27 +168,11 @@ echo -n "Building gcc (and libgcc)..." | tee -a $LOG
 		--disable-libgomp --disable-werror --disable-nls  &&
 	make all-gcc &&
 	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc &&
-	mkdir -p $GCC_BUILD_DIR/x86_64-jehanne/libgcc &&
-	cd $GCC_BUILD_DIR/x86_64-jehanne/libgcc &&
-	$JEHANNE_TOOLCHAIN/src/gcc/libgcc/configure --srcdir=$JEHANNE_TOOLCHAIN/src/gcc/libgcc \
-		--enable-languages=c,c++,lto \
-		--prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE \
-		--without-isl --with-gmp=$JEHANNE/posix --with-mpfr=$JEHANNE/posix --with-mpc=$JEHANNE/posix \
-		--disable-multiarch --disable-multilib \
-		--disable-shared --disable-threads --disable-tls \
-		--disable-libgomp --disable-werror --disable-nls \
-		--program-transform-name=s,y,y, --disable-option-checking \
-		--with-target-subdir=x86_64-jehanne \
-		--build=x86_64-pc-linux-gnu --host=x86_64-jehanne --target=x86_64-jehanne &&
-	make &&
-	cd $GCC_BUILD_DIR && make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-target-libgcc
+	make all-target-libgcc &&
+	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-target-libgcc
 ) >> $LOG 2>&1
 failOnError $? "building gcc"
 
 cp -pfr $JEHANNE/pkgs/gcc/9.2.0/posix/* $JEHANNE/posix
-
-#
-## add sh
-#ln -sf /bin/bash $JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-sh
 
 echo "done."
