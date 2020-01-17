@@ -14,6 +14,7 @@ fi
 trap : 2
 
 $JEHANNE/hacking/bin/ufs -root=$JEHANNE &
+# To debug ufs add: -d 5 > $JEHANNE/../ufs.log 2>&1
 ufspid=$!
 
 export machineflag=pc
