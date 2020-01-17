@@ -13,7 +13,7 @@ echo >> $WRAPPER_LOG
 echo >> $WRAPPER_LOG
 
 if echo $ARGS|grep -e '\b\-o\b' -e ' -o ' > /dev/null; then
-	TOLINK="-L$JEHANNE/posix/lib -lnewlibc -lposix -lc"
+	TOLINK="-L$JEHANNE/posix/lib -lc"
 	date --rfc-3339="ns"  |tee -a $WRAPPER_LOG
 	export >> $WRAPPER_LOG
 echo	$WORKING_DIR/cross/posix/bin/x86_64-jehanne-ld "$@" $TOLINK >> $WRAPPER_LOG
