@@ -59,6 +59,17 @@ function failOnError {
 	fi
 }
 
+function mergeLibPOSIX {
+	TARGET_LIB=$1
+	echo "Merging $JEHANNE/arch/$ARCH/lib/libposix.a into $TARGET_LIB." &&
+	x86_64-jehanne-ar -M <<EOF
+open $TARGET_LIB
+addlib $JEHANNE/arch/$ARCH/lib/libposix.a
+save
+end
+EOF
+}
+
 if [ "$NEWLIB_OPTIMIZATION" = "" ]; then
 	NEWLIB_OPTIMIZATION=2
 fi
@@ -75,12 +86,15 @@ export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION -std=gnu11 -
 	$NEWLIB_SRC/configure --enable-newlib-mb --disable-newlib-fvwrite-in-streamio --prefix=/pkgs/newlib --target=x86_64-jehanne &&
 	make all &&
 	make DESTDIR=$NEWLIB_PREFIX install &&
-	rm -fr $JEHANNE/sys/posix/newlib &&
-	rm -fr $JEHANNE/arch/amd64/lib/newlib &&
+	cd $NEWLIB_PREFIX/pkgs/newlib/x86_64-jehanne/lib &&
+	mergeLibPOSIX libc.a &&
+	( cmp --silent libc.a libg.a || mergeLibPOSIX libg.a ) &&
 	cp -fr $NEWLIB_PREFIX/pkgs/newlib/ $JEHANNE/pkgs/ &&
 	echo "Newlib headers installed at $JEHANNE/pkgs/newlib/"
 ) >> $NEWLIB/newlib.build.log 2>&1
 failOnError $? "building newlib"
+
+
 
 # emultate bind for the cross compiler
 mkdir -p $JEHANNE/posix
