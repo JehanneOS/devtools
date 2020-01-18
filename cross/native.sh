@@ -134,7 +134,7 @@ if [ ! -d $BINUTILS_BUILD_DIR ]; then
 	mkdir $BINUTILS_BUILD_DIR
 fi
 (
-	export LIBS="-L$JEHANNE/posix/lib -L$JEHANNE/arch/amd64/lib -lmpc -lmpfr -lgmp -lnewlibc -lposix -lc" &&
+	export LIBS="-L$JEHANNE/posix/lib -L$JEHANNE/arch/amd64/lib -lmpc -lmpfr -lgmp" &&
 	export CC_FOR_BUILD='CPATH="" LIBS="" gcc' &&
 	mkdir -p $BINUTILS_BUILD_DIR && cd $BINUTILS_BUILD_DIR &&
 	$JEHANNE_TOOLCHAIN/src/binutils/configure --host=x86_64-jehanne --with-sysroot=/ --with-build-sysroot=$JEHANNE --prefix=/posix --with-gmp=$JEHANNE/posix/ --with-mpfr=$JEHANNE/posix/ --with-mpc=$JEHANNE/posix/ --enable-interwork --enable-multilib --enable-newlib-long-time_t --disable-nls --disable-werror  &&
