@@ -1,8 +1,12 @@
 {
 	"CrossCompiledPackages": {
+		"Env": [
+			"CROSS_PKGS_BUILD=1"
+		],
 		"Pre": [
 			"./newlib/build.sh",
-			"./mksh/build.sh"
+			"./mksh/build.sh",
+			"./gcc/build.sh"
 		]
 	}
 }
