@@ -83,7 +83,7 @@ export CFLAGS_FOR_TARGET="-g -gdwarf-2 -ggdb -O$NEWLIB_OPTIMIZATION -std=gnu11 -
 	mkdir $NEWLIB_BUILD &&
 	mkdir $NEWLIB_PREFIX &&
 	cd $NEWLIB_BUILD &&
-	$NEWLIB_SRC/configure --enable-newlib-mb --disable-newlib-fvwrite-in-streamio --prefix=/pkgs/newlib --target=x86_64-jehanne &&
+	$NEWLIB_SRC/configure --enable-newlib-mb --disable-newlib-fvwrite-in-streamio --disable-newlib-unbuf-stream-opt --prefix=/pkgs/newlib --target=x86_64-jehanne &&
 	make all &&
 	make DESTDIR=$NEWLIB_PREFIX install &&
 	cd $NEWLIB_PREFIX/pkgs/newlib/x86_64-jehanne/lib &&
