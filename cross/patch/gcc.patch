@@ -2,7 +2,7 @@ diff --git a/src/gcc/gcc/config.gcc b/src/gcc/gcc/config.gcc
 index ddd3b8f..702aa59 100644
 --- a/src/gcc/gcc/config.gcc
 +++ b/src/gcc/gcc/config.gcc
-@@ -947,6 +947,16 @@ case ${target} in
+@@ -947,6 +947,18 @@ case ${target} in
      tmake_file="$tmake_file vms/t-vmsnative"
    fi
    ;;
@@ -10,6 +10,7 @@ index ddd3b8f..702aa59 100644
 +  gas=yes
 +  gnu_ld=yes
 +  default_use_cxa_atexit=yes
++  extra_options="$extra_options jehanne.opt"
 +  case $target in
 +  x86_64-*)
 +    native_system_header_dir="/arch/amd64/include"
@@ -19,7 +20,7 @@ index ddd3b8f..702aa59 100644
  *-*-vxworks*)
    tmake_file=t-vxworks
    xm_defines=POSIX
-@@ -1635,6 +1647,9 @@ i[34567]86-*-elfiamcu)
+@@ -1635,6 +1648,9 @@ i[34567]86-*-elfiamcu)
  i[34567]86-*-elf*)
  	tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h"
  	;;

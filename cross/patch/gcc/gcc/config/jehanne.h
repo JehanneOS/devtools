@@ -18,16 +18,30 @@
 
 #undef TARGET_JEHANNE
 #define TARGET_JEHANNE 1
+/*
+#undef DRIVER_SELF_SPECS
+#define DRIVER_SELF_SPECS "%{-posixly}"
+*/
 
-/* Default arguments you want when running x86_64-jehanne-gcc */
+/* GCC on Jehanne includes and link libraries from /sys and /arch.
+ * To ease the port of POSIX applications, we include a --posixly option
+ * to the GCC driver that will be substituted with proper options
+ */
+#undef CPP_SPEC
+#define CPP_SPEC "%{-posixly:-isystem/posix/include}"
+
+#undef LINK_SPEC
+#define LINK_SPEC "%{-posixly:-L/posix/lib}"
+
 #undef LIB_SPEC
-#define LIB_SPEC "-ljehanne"
+#define LIB_SPEC "%{-posixly:%{!shared:%{g*:-lg} %{!p:%{!pg:-lc}}%{p:-lc_p}%{pg:-lc_p}}} -ljehanne"
+
 
 #undef STANDARD_STARTFILE_PREFIX
 #define STANDARD_STARTFILE_PREFIX "/arch/amd64/lib/"
 
-#undef MD_STARTFILE_PREFIX
-#define MD_STARTFILE_PREFIX "/arch/amd64/lib/"
+/* GCC include paths definition START
+ */
 
 /* Architecture specific header (u.h) goes here (from config.gcc) */
 #define ARCH_INCLUDE_DIR NATIVE_SYSTEM_HEADER_DIR 
@@ -35,13 +49,64 @@
 /* The default include dir is /sys/include */
 #define PORTABLE_INCLUDE_DIR "/sys/include"
 
+#ifdef GPLUSPLUS_INCLUDE_DIR
+    /* Pick up GNU C++ generic include files.  */
+# define ID_GPLUSPLUS { GPLUSPLUS_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 0 },
+#else
+# define ID_GPLUSPLUS 
+#endif
+#ifdef GPLUSPLUS_TOOL_INCLUDE_DIR
+    /* Pick up GNU C++ target-dependent include files.  */
+# define ID_GPLUSPLUS_TOOL { GPLUSPLUS_TOOL_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 1 },
+#else
+# define ID_GPLUSPLUS_TOOL
+#endif
+#ifdef GPLUSPLUS_BACKWARD_INCLUDE_DIR
+    /* Pick up GNU C++ backward and deprecated include files.  */
+# define ID_GPLUSPLUS_BACKWARD { GPLUSPLUS_BACKWARD_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 0 },
+#else
+# define ID_GPLUSPLUS_BACKWARD
+#endif
+#ifdef GCC_INCLUDE_DIR
+    /* This is the dir for gcc's private headers.  */
+# define ID_GCC { GCC_INCLUDE_DIR, "GCC", 0, 0, 0, 0 },
+#else
+# define ID_GCC
+#endif
+#ifdef PREFIX_INCLUDE_DIR
+# define ID_PREFIX { PREFIX_INCLUDE_DIR, 0, 0, 1, 0, 0 },
+#else
+# define ID_PREFIX
+#endif
+#if defined (CROSS_INCLUDE_DIR) && defined (CROSS_DIRECTORY_STRUCTURE) && !defined (TARGET_SYSTEM_ROOT)
+# define ID_CROSS { CROSS_INCLUDE_DIR, "GCC", 0, 0, 0, 0 },
+#else
+# define ID_CROSS
+#endif
+#ifdef TOOL_INCLUDE_DIR
+    /* Another place the target system's headers might be.  */
+# define ID_TOOL { TOOL_INCLUDE_DIR, "BINUTILS", 0, 1, 0, 0 },
+#else
+# define ID_TOOL
+#endif
+
 #undef INCLUDE_DEFAULTS
 #define INCLUDE_DEFAULTS				\
   {							\
+    ID_GPLUSPLUS					\
+    ID_GPLUSPLUS_TOOL					\
+    ID_GPLUSPLUS_BACKWARD				\
+    ID_GCC						\
+    ID_PREFIX						\
+    ID_CROSS						\
+    ID_TOOL						\
     { PORTABLE_INCLUDE_DIR, 0, 0, 0, 1, 0 },		\
     { ARCH_INCLUDE_DIR, 0, 0, 0, 1, 0 },		\
     { 0, 0, 0, 0, 0, 0 }				\
   }
+
+/* GCC include paths definition END
+ */
 
 /* Files that are linked before user code.
    The %s tells gcc to look for these files in the library directory. */
