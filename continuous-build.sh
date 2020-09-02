@@ -6,11 +6,19 @@
 
 set -e
 
+cd `dirname $0`
+cd ..
+export JEHANNE=`pwd`
+REPONAME=`basename $JEHANNE`
+export JEHANNE_TOOLCHAIN=`dirname $JEHANNE`
+export JEHANNE_TOOLCHAIN="$JEHANNE_TOOLCHAIN/$REPONAME.TOOLCHAIN"
+CROSS_TOOLCHAIN=$JEHANNE_TOOLCHAIN/cross/posix
+
 function finish {
 	if [ "$TRAVIS_BUILD_DIR" != "" ]; then
 	# ensure that we preserve the toolchain on broken build/test
-	if [ -f "$JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-gcc" ]; then
-		mv $JEHANNE/hacking/cross/toolchain/* $JEHANNE/tmp/toolchain/
+	if [ -f "$CROSS_TOOLCHAIN/bin/x86_64-jehanne-gcc" ]; then
+		mv $CROSS_TOOLCHAIN/* $JEHANNE/tmp/toolchain/
 	fi
 	fi
 	(cd $JEHANNE/hacking; git clean -xdf disk-setup/; git checkout disk-setup/syslinux.cfg)
@@ -18,17 +26,14 @@ function finish {
 trap finish EXIT
 
 if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
-	cd `dirname $0`
-	cd ..
-	export JEHANNE=`pwd`
-	CROSS_TOOLCHAIN=$JEHANNE/hacking/cross/toolchain
+	
 	export PATH="$JEHANNE/hacking/bin:$PATH"
 	export PATH="$CROSS_TOOLCHAIN/bin:$PATH"
 	export ARCH=amd64
 
 	# since our cross compiler is inside the system root, we need this too
 	# as it can't find it's own headers
-	export CPATH=$CROSS_TOOLCHAIN/lib/gcc/x86_64-jehanne/4.9.4/include:$CROSS_TOOLCHAIN/lib/gcc/x86_64-jehanne/4.9.4/include-fixed
+	export CPATH=$CROSS_TOOLCHAIN/lib/gcc/x86_64-jehanne/9.2.0/include:$CROSS_TOOLCHAIN/lib/gcc/x86_64-jehanne/9.2.0/include-fixed
 
 	git clean -xdf arch/ sys/ qa/ usr/
 	if [ ! -f "$JEHANNE/hacking/bin/ufs" ]; then
