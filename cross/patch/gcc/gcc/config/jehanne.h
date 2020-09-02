@@ -18,23 +18,6 @@
 
 #undef TARGET_JEHANNE
 #define TARGET_JEHANNE 1
-/*
-#undef DRIVER_SELF_SPECS
-#define DRIVER_SELF_SPECS "%{-posixly}"
-*/
-
-/* GCC on Jehanne includes and link libraries from /sys and /arch.
- * To ease the port of POSIX applications, we include a --posixly option
- * to the GCC driver that will be substituted with proper options
- */
-#undef CPP_SPEC
-#define CPP_SPEC "%{-posixly:-isystem/posix/include}"
-
-#undef LINK_SPEC
-#define LINK_SPEC "%{-posixly:-L/posix/lib}"
-
-#undef LIB_SPEC
-#define LIB_SPEC "%{-posixly:%{!shared:%{g*:-lg} %{!p:%{!pg:-lc}}%{p:-lc_p}%{pg:-lc_p}}} -ljehanne"
 
 
 #undef STANDARD_STARTFILE_PREFIX
@@ -79,9 +62,13 @@
 # define ID_PREFIX
 #endif
 #if defined (CROSS_INCLUDE_DIR) && defined (CROSS_DIRECTORY_STRUCTURE) && !defined (TARGET_SYSTEM_ROOT)
+# define JEHANNE_POSIX_INCLUDE_DIR "%:getenv(JEHANNE /posix/include/)"
+# define JEHANNE_POSIX_LIB_DIR "%:getenv(JEHANNE /posix/lib/)"
 # define ID_CROSS { CROSS_INCLUDE_DIR, "GCC", 0, 0, 0, 0 },
 #else
 # define ID_CROSS
+# define JEHANNE_POSIX_INCLUDE_DIR "/posix/include/"
+# define JEHANNE_POSIX_LIB_DIR "/posix/lib/"
 #endif
 #ifdef TOOL_INCLUDE_DIR
     /* Another place the target system's headers might be.  */
@@ -107,6 +94,29 @@
 
 /* GCC include paths definition END
  */
+
+/* GCC on Jehanne includes and link libraries from /sys and /arch.
+ * To ease the port of POSIX applications, we include a --posixly option
+ * to the GCC driver that will be substituted with proper options
+ */
+
+#ifdef CROSS_DIRECTORY_STRUCTURE
+# define JEHANNE_POSIX_INCLUDE_DIR "%:getenv(JEHANNE /posix/include/)"
+# define JEHANNE_POSIX_LIB_DIR "%:getenv(JEHANNE /posix/lib/)"
+#else
+# define JEHANNE_POSIX_INCLUDE_DIR "/posix/include/"
+# define JEHANNE_POSIX_LIB_DIR "/posix/lib/"
+#endif
+
+#undef CPP_SPEC
+#define CPP_SPEC "%{-posixly:-isystem" JEHANNE_POSIX_INCLUDE_DIR "}"
+
+#undef LINK_SPEC
+#define LINK_SPEC "%{-posixly:-L" JEHANNE_POSIX_LIB_DIR "}"
+
+#undef LIB_SPEC
+#define LIB_SPEC "%{-posixly:%{!shared:%{g*:-lg} %{!p:%{!pg:-lc}}%{p:-lc_p}%{pg:-lc_p}}} -ljehanne"
+
 
 /* Files that are linked before user code.
    The %s tells gcc to look for these files in the library directory. */
