@@ -18,8 +18,8 @@
 
 ; Please try to keep this file in ASCII collating order.
 
--posixly
-C ObjC C++ ObjC++ Driver RejectNegative
-Lookup for POSIX includes and libraries in /posix
+9
+C Driver RejectNegative
+Do not lookup for POSIX includes and libraries in /posix
 
 ; This comment is to ensure we retain the blank line above.

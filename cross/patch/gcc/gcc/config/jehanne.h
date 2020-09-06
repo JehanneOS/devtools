@@ -19,103 +19,151 @@
 #undef TARGET_JEHANNE
 #define TARGET_JEHANNE 1
 
-
-#undef STANDARD_STARTFILE_PREFIX
-#define STANDARD_STARTFILE_PREFIX "/arch/amd64/lib/"
-
-/* GCC include paths definition START
+/* In Jehanne, GCC has to be able to build two different kind of programs
+ * - native, directly repending on Jehanne's development environment
+ * - posix, based on the mainstream standards
+ *
+ * LibPOSIX exists to enable, together with a standard library
+ * (newlib, so far) the cooperation of these two worlds.
+ *
+ * By default, GCC will compile POSIX software looking for standard
+ * libraries and includes in /posix subfolders.
+ * However, the new option `-9` will enable the compilation of
+ * native programs by REMOVING the POSIX stuffs from the various Specs.
  */
 
 /* Architecture specific header (u.h) goes here (from config.gcc) */
 #define ARCH_INCLUDE_DIR NATIVE_SYSTEM_HEADER_DIR 
 
-/* The default include dir is /sys/include */
 #define PORTABLE_INCLUDE_DIR "/sys/include"
 
+/* C++ : only define values for INCLUDE_DEFAULTS */
 #ifdef GPLUSPLUS_INCLUDE_DIR
-    /* Pick up GNU C++ generic include files.  */
-# define ID_GPLUSPLUS { GPLUSPLUS_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 0 },
+# define JEHANNE_ID_GPLUSPLUS { GPLUSPLUS_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 0 },
 #else
-# define ID_GPLUSPLUS 
+# define JEHANNE_ID_GPLUSPLUS 
 #endif
 #ifdef GPLUSPLUS_TOOL_INCLUDE_DIR
-    /* Pick up GNU C++ target-dependent include files.  */
-# define ID_GPLUSPLUS_TOOL { GPLUSPLUS_TOOL_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 1 },
+# define JEHANNE_ID_GPLUSPLUS_TOOL { GPLUSPLUS_TOOL_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 1 },
 #else
-# define ID_GPLUSPLUS_TOOL
+# define JEHANNE_ID_GPLUSPLUS_TOOL
 #endif
 #ifdef GPLUSPLUS_BACKWARD_INCLUDE_DIR
-    /* Pick up GNU C++ backward and deprecated include files.  */
-# define ID_GPLUSPLUS_BACKWARD { GPLUSPLUS_BACKWARD_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 0 },
+# define JEHANNE_ID_GPLUSPLUS_BACKWARD { GPLUSPLUS_BACKWARD_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 0 },
 #else
-# define ID_GPLUSPLUS_BACKWARD
+# define JEHANNE_ID_GPLUSPLUS_BACKWARD
 #endif
+
+/* GCC's private headers. */
 #ifdef GCC_INCLUDE_DIR
-    /* This is the dir for gcc's private headers.  */
-# define ID_GCC { GCC_INCLUDE_DIR, "GCC", 0, 0, 0, 0 },
+# define JEHANNE_IS_GCC " -isystem" GCC_INCLUDE_DIR
+# define JEHANNE_ID_GCC { GCC_INCLUDE_DIR, "GCC", 1, 0, 0, 0 },
 #else
-# define ID_GCC
+# define JEHANNE_ID_GCC
+# define JEHANNE_IS_GCC
 #endif
+
 #ifdef PREFIX_INCLUDE_DIR
-# define ID_PREFIX { PREFIX_INCLUDE_DIR, 0, 0, 1, 0, 0 },
+# define JEHANNE_IS_PREFIX " -isystem" PREFIX_INCLUDE_DIR
+# define JEHANNE_ID_PREFIX { PREFIX_INCLUDE_DIR, 0, 1, 1, 0, 0 },
 #else
-# define ID_PREFIX
+# define JEHANNE_ID_PREFIX
+# define JEHANNE_IS_PREFIX
 #endif
+
 #if defined (CROSS_INCLUDE_DIR) && defined (CROSS_DIRECTORY_STRUCTURE) && !defined (TARGET_SYSTEM_ROOT)
-# define JEHANNE_POSIX_INCLUDE_DIR "%:getenv(JEHANNE /posix/include/)"
-# define JEHANNE_POSIX_LIB_DIR "%:getenv(JEHANNE /posix/lib/)"
-# define ID_CROSS { CROSS_INCLUDE_DIR, "GCC", 0, 0, 0, 0 },
+# define JEHANNE_IS_CROSS " -isystem" CROSS_INCLUDE_DIR
+# define JEHANNE_ID_CROSS { CROSS_INCLUDE_DIR, "GCC", 1, 0, 0, 0 },
 #else
-# define ID_CROSS
-# define JEHANNE_POSIX_INCLUDE_DIR "/posix/include/"
-# define JEHANNE_POSIX_LIB_DIR "/posix/lib/"
+# define JEHANNE_ID_CROSS
+# define JEHANNE_IS_CROSS
 #endif
+
+/* Binutils headers. */
 #ifdef TOOL_INCLUDE_DIR
-    /* Another place the target system's headers might be.  */
-# define ID_TOOL { TOOL_INCLUDE_DIR, "BINUTILS", 0, 1, 0, 0 },
+# define JEHANNE_IS_TOOL " -isystem" TOOL_INCLUDE_DIR
+# define JEHANNE_ID_TOOL { TOOL_INCLUDE_DIR, "BINUTILS", 1, 1, 0, 0 },
 #else
-# define ID_TOOL
+# define JEHANNE_ID_TOOL
+# define JEHANNE_IS_TOOL
 #endif
 
-#undef INCLUDE_DEFAULTS
-#define INCLUDE_DEFAULTS				\
-  {							\
-    ID_GPLUSPLUS					\
-    ID_GPLUSPLUS_TOOL					\
-    ID_GPLUSPLUS_BACKWARD				\
-    ID_GCC						\
-    ID_PREFIX						\
-    ID_CROSS						\
-    ID_TOOL						\
-    { PORTABLE_INCLUDE_DIR, 0, 0, 0, 1, 0 },		\
-    { ARCH_INCLUDE_DIR, 0, 0, 0, 1, 0 },		\
-    { 0, 0, 0, 0, 0, 0 }				\
-  }
 
-/* GCC include paths definition END
- */
-
-/* GCC on Jehanne includes and link libraries from /sys and /arch.
- * To ease the port of POSIX applications, we include a --posixly option
- * to the GCC driver that will be substituted with proper options
- */
+#define JEHANNE_POSIX_INCLUDE_DIR "/posix/include"
+#define JEHANNE_ID_POSIX { JEHANNE_POSIX_INCLUDE_DIR, 0, 1, 0, 1, 0 },
 
 #ifdef CROSS_DIRECTORY_STRUCTURE
-# define JEHANNE_POSIX_INCLUDE_DIR "%:getenv(JEHANNE /posix/include/)"
-# define JEHANNE_POSIX_LIB_DIR "%:getenv(JEHANNE /posix/lib/)"
+# define JEHANNE_IS_POSIX " -isystem%:getenv(JEHANNE " JEHANNE_POSIX_INCLUDE_DIR ")"
+# define JEHANNE_POSIX_LIB_DIR "%:getenv(JEHANNE /posix/lib)"
 #else
-# define JEHANNE_POSIX_INCLUDE_DIR "/posix/include/"
-# define JEHANNE_POSIX_LIB_DIR "/posix/lib/"
+# define JEHANNE_IS_POSIX " -isystem" JEHANNE_POSIX_INCLUDE_DIR
+# define JEHANNE_POSIX_LIB_DIR "/posix/lib"
 #endif
 
+
+/* INCLUDE_DEFAULTS is used by gcc/cppdefault.c
+ * The struct is defined in gcc/cppdefault.h
+ *
+ * struct default_include
+ * {
+ *   const char *const fname;		// The name of the directory.
+ *   const char *const component;	// The component containing the directory
+ * 					   (see update_path in prefix.c)
+ *   const char cplusplus;		// Only look here if we're compiling C++.
+ *   const char cxx_aware;		// Includes in this directory don't need to
+ * 					   be wrapped in extern "C" when compiling
+ * 					   C++.
+ *   const char add_sysroot;		// FNAME should be prefixed by
+ * 					   cpp_SYSROOT.
+ *   const char multilib;		// FNAME should have appended
+ * 					   - the multilib path specified with -imultilib
+ * 					     when set to 1,
+ * 					   - the multiarch path specified with
+ * 					     -imultiarch, when set to 2.
+ * };
+ *
+ * Since C++ assumes a POSIX environment, we include all of the POSIX
+ * headers but with `cplusplus = 1`, to not mess native C compilation
+ * that have to react to the `-9` option.
+ */
+#undef INCLUDE_DEFAULTS
+#define INCLUDE_DEFAULTS			\
+  {						\
+    JEHANNE_ID_GPLUSPLUS			\
+    JEHANNE_ID_GPLUSPLUS_TOOL			\
+    JEHANNE_ID_GPLUSPLUS_BACKWARD		\
+    JEHANNE_ID_GCC				\
+    JEHANNE_ID_POSIX				\
+    JEHANNE_ID_PREFIX				\
+    JEHANNE_ID_CROSS				\
+    JEHANNE_ID_TOOL				\
+    { PORTABLE_INCLUDE_DIR, 0, 0, 0, 1, 0 },	\
+    { ARCH_INCLUDE_DIR, 0, 0, 0, 1, 0 },	\
+    { 0, 0, 0, 0, 0, 0 }			\
+  }
+
+#undef EXTRA_SPECS
+#define EXTRA_SPECS \
+  { "posixly_isystems",	JEHANNE_IS_GCC		\
+			JEHANNE_IS_POSIX	\
+			JEHANNE_IS_PREFIX	\
+			JEHANNE_IS_CROSS	\
+			JEHANNE_IS_TOOL },	\
+  { "posixly_lib",	"%{!shared:%{g*:-lg} %{!p:%{!pg:-lc}}%{p:-lc_p}%{pg:-lc_p}} -lposix" },
+
+
+/* set  CPLUSPLUS_CPP_SPEC to prevent the default fallback to CPP_SPEC */
+#define CPLUSPLUS_CPP_SPEC ""
+
+/* These Specs reacts `-9` option by removing POSIX stuff */
 #undef CPP_SPEC
-#define CPP_SPEC "%{-posixly:-isystem" JEHANNE_POSIX_INCLUDE_DIR "}"
+#define CPP_SPEC "%{!9:%(posixly_isystems)}"
 
 #undef LINK_SPEC
-#define LINK_SPEC "%{-posixly:-L" JEHANNE_POSIX_LIB_DIR "}"
+#define LINK_SPEC "%{!9:-L" JEHANNE_POSIX_LIB_DIR "}"
 
 #undef LIB_SPEC
-#define LIB_SPEC "%{-posixly:%{!shared:%{g*:-lg} %{!p:%{!pg:-lc}}%{p:-lc_p}%{pg:-lc_p}}} -ljehanne"
+#define LIB_SPEC "%{!9:%(posixly_lib)} -ljehanne"
 
 
 /* Files that are linked before user code.
@@ -126,6 +174,12 @@
 /* Files that are linked after user code. */
 #undef ENDFILE_SPEC
 #define ENDFILE_SPEC "crtend.o%s crtn.o%s"
+
+/* In Jehanne start files will be in /arch/amd64/lib, nearby libjehanne.a
+ */
+#undef STANDARD_STARTFILE_PREFIX
+#define STANDARD_STARTFILE_PREFIX "/arch/amd64/lib/"
+
  
 /* Fix https://gcc.gnu.org/bugzilla/show_bug.cgi?id=67132 */
 #undef	WCHAR_TYPE
