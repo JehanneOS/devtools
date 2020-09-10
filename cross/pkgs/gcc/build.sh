@@ -76,15 +76,25 @@ echo -n Building libstdc++-v3... | tee -a $LOG
 	mkdir -p $GCC_BUILD_DIR/x86_64-jehanne/libstdc++-v3 &&
 	cd $GCC_BUILD_DIR/x86_64-jehanne/libstdc++-v3 &&
 	rm -f config.cache &&
-	$JEHANNE_TOOLCHAIN/src/gcc/libstdc++-v3/configure --srcdir=$JEHANNE_TOOLCHAIN/src/gcc/libstdc++-v3 --cache-file=./config.cache --enable-multilib --with-cross-host=x86_64-pc-linux-gnu --prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE --enable-languages=c,c++,lto --program-transform-name='s&^&x86_64-jehanne-&' --disable-option-checking --with-target-subdir=x86_64-jehanne --build=x86_64-pc-linux-gnu --host=x86_64-jehanne --target=x86_64-jehanne &&
+	$JEHANNE_TOOLCHAIN/src/gcc/libstdc++-v3/configure \
+		--srcdir=$JEHANNE_TOOLCHAIN/src/gcc/libstdc++-v3 \
+		--cache-file=./config.cache \
+		--enable-multilib --with-cross-host=x86_64-pc-linux-gnu \
+		--prefix=/posix --with-sysroot=/ --with-build-sysroot=$JEHANNE \
+		--enable-languages=c,c++,lto --program-transform-name='s&^&x86_64-jehanne-&' \
+		--disable-option-checking --with-target-subdir=x86_64-jehanne \
+		--build=x86_64-pc-linux-gnu --host=x86_64-jehanne --target=x86_64-jehanne &&
 	make &&
 	make DESTDIR=$JEHANNE/pkgs/libstdc++-v3/9.2.0/ install
 ) >> $LOG 2>&1
 failOnError $? "building libstdc++-v3"
 echo done.
 
+export PATH=$OPATH
+
 # Copy to /posix (to emulate bind during cross compilation)
-cp -pfr $JEHANNE/pkgs/libstdc++-v3/9.2.0/posix/* $JEHANNE/posix
+cp -pfr $JEHANNE/pkgs/libstdc++-v3/9.2.0/posix/* $JEHANNE_TOOLCHAIN/cross/posix
+cp -pfr $JEHANNE/pkgs/libstdc++-v3/9.2.0/posix/x86_64-jehanne/* $JEHANNE/posix
 find $JEHANNE/posix/|grep '\.la$'|xargs rm
 
 echo -n Building libgmp... | tee -a $LOG
@@ -182,10 +192,11 @@ echo -n "Building gcc (and libgcc)..." | tee -a $LOG
 		--disable-multiarch --disable-multilib \
 		--disable-shared --disable-threads --disable-tls \
 		--disable-libgomp --disable-werror --disable-nls  &&
+	make all-target-libgcc &&
+	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-target-libgcc &&
 	make all-gcc &&
 	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-gcc &&
-	make all-target-libgcc &&
-	make DESTDIR=$JEHANNE/pkgs/gcc/9.2.0/ install-target-libgcc
+	echo
 ) >> $LOG 2>&1
 failOnError $? "building gcc"
 

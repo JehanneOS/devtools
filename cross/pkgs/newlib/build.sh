@@ -61,13 +61,15 @@ function failOnError {
 
 function mergeLibPOSIX {
 	TARGET_LIB=$1
-	echo "Merging $JEHANNE/arch/$ARCH/lib/libposix.a into $TARGET_LIB." &&
-	x86_64-jehanne-ar -M <<EOF
-open $TARGET_LIB
-addlib $JEHANNE/arch/$ARCH/lib/libposix.a
-save
-end
-EOF
+#	echo "Merging $JEHANNE/arch/$ARCH/lib/libposix.a into $TARGET_LIB." &&
+
+#	x86_64-jehanne-ar -M <<EOF
+#open $TARGET_LIB
+#addlib $JEHANNE/arch/$ARCH/lib/libposix.a
+#save
+#end
+#EOF
+
 }
 
 if [ "$NEWLIB_OPTIMIZATION" = "" ]; then

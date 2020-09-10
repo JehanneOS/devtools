@@ -37,70 +37,6 @@
 
 #define PORTABLE_INCLUDE_DIR "/sys/include"
 
-/* C++ : only define values for INCLUDE_DEFAULTS */
-#ifdef GPLUSPLUS_INCLUDE_DIR
-# define JEHANNE_ID_GPLUSPLUS { GPLUSPLUS_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 0 },
-#else
-# define JEHANNE_ID_GPLUSPLUS 
-#endif
-#ifdef GPLUSPLUS_TOOL_INCLUDE_DIR
-# define JEHANNE_ID_GPLUSPLUS_TOOL { GPLUSPLUS_TOOL_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 1 },
-#else
-# define JEHANNE_ID_GPLUSPLUS_TOOL
-#endif
-#ifdef GPLUSPLUS_BACKWARD_INCLUDE_DIR
-# define JEHANNE_ID_GPLUSPLUS_BACKWARD { GPLUSPLUS_BACKWARD_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 0 },
-#else
-# define JEHANNE_ID_GPLUSPLUS_BACKWARD
-#endif
-
-/* GCC's private headers. */
-#ifdef GCC_INCLUDE_DIR
-# define JEHANNE_IS_GCC " -isystem" GCC_INCLUDE_DIR
-# define JEHANNE_ID_GCC { GCC_INCLUDE_DIR, "GCC", 1, 0, 0, 0 },
-#else
-# define JEHANNE_ID_GCC
-# define JEHANNE_IS_GCC
-#endif
-
-#ifdef PREFIX_INCLUDE_DIR
-# define JEHANNE_IS_PREFIX " -isystem" PREFIX_INCLUDE_DIR
-# define JEHANNE_ID_PREFIX { PREFIX_INCLUDE_DIR, 0, 1, 1, 0, 0 },
-#else
-# define JEHANNE_ID_PREFIX
-# define JEHANNE_IS_PREFIX
-#endif
-
-#if defined (CROSS_INCLUDE_DIR) && defined (CROSS_DIRECTORY_STRUCTURE) && !defined (TARGET_SYSTEM_ROOT)
-# define JEHANNE_IS_CROSS " -isystem" CROSS_INCLUDE_DIR
-# define JEHANNE_ID_CROSS { CROSS_INCLUDE_DIR, "GCC", 1, 0, 0, 0 },
-#else
-# define JEHANNE_ID_CROSS
-# define JEHANNE_IS_CROSS
-#endif
-
-/* Binutils headers. */
-#ifdef TOOL_INCLUDE_DIR
-# define JEHANNE_IS_TOOL " -isystem" TOOL_INCLUDE_DIR
-# define JEHANNE_ID_TOOL { TOOL_INCLUDE_DIR, "BINUTILS", 1, 1, 0, 0 },
-#else
-# define JEHANNE_ID_TOOL
-# define JEHANNE_IS_TOOL
-#endif
-
-
-#define JEHANNE_POSIX_INCLUDE_DIR "/posix/include"
-#define JEHANNE_ID_POSIX { JEHANNE_POSIX_INCLUDE_DIR, 0, 1, 0, 1, 0 },
-
-#ifdef CROSS_DIRECTORY_STRUCTURE
-# define JEHANNE_IS_POSIX " -isystem%:getenv(JEHANNE " JEHANNE_POSIX_INCLUDE_DIR ")"
-# define JEHANNE_POSIX_LIB_DIR "%:getenv(JEHANNE /posix/lib)"
-#else
-# define JEHANNE_IS_POSIX " -isystem" JEHANNE_POSIX_INCLUDE_DIR
-# define JEHANNE_POSIX_LIB_DIR "/posix/lib"
-#endif
-
-
 /* INCLUDE_DEFAULTS is used by gcc/cppdefault.c
  * The struct is defined in gcc/cppdefault.h
  *
@@ -126,6 +62,60 @@
  * headers but with `cplusplus = 1`, to not mess native C compilation
  * that have to react to the `-9` option.
  */
+
+/* C++ : only define values for INCLUDE_DEFAULTS */
+#ifdef GPLUSPLUS_INCLUDE_DIR
+# define JEHANNE_ID_GPLUSPLUS { GPLUSPLUS_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 0 },
+#else
+# define JEHANNE_ID_GPLUSPLUS 
+#endif
+#ifdef GPLUSPLUS_TOOL_INCLUDE_DIR
+# define JEHANNE_ID_GPLUSPLUS_TOOL { GPLUSPLUS_TOOL_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 1 },
+#else
+# define JEHANNE_ID_GPLUSPLUS_TOOL
+#endif
+#ifdef GPLUSPLUS_BACKWARD_INCLUDE_DIR
+# define JEHANNE_ID_GPLUSPLUS_BACKWARD { GPLUSPLUS_BACKWARD_INCLUDE_DIR, "G++", 1, 1, GPLUSPLUS_INCLUDE_DIR_ADD_SYSROOT, 0 },
+#else
+# define JEHANNE_ID_GPLUSPLUS_BACKWARD
+#endif
+
+/* GCC's private headers. */
+#ifdef GCC_INCLUDE_DIR
+# define JEHANNE_ID_GCC { GCC_INCLUDE_DIR, "GCC", 0, 0, 0, 0 },
+#else
+# define JEHANNE_ID_GCC
+#endif
+
+#ifdef PREFIX_INCLUDE_DIR
+# define JEHANNE_ID_PREFIX { PREFIX_INCLUDE_DIR, 0, 0, 1, 0, 0 },
+#else
+# define JEHANNE_ID_PREFIX
+#endif
+
+#if defined (CROSS_INCLUDE_DIR) && defined (CROSS_DIRECTORY_STRUCTURE) && !defined (TARGET_SYSTEM_ROOT)
+# define JEHANNE_ID_CROSS { CROSS_INCLUDE_DIR, "GCC", 0, 0, 0, 0 },
+#else
+# define JEHANNE_ID_CROSS
+#endif
+
+/* Binutils headers. */
+#ifdef TOOL_INCLUDE_DIR
+# define JEHANNE_ID_TOOL { TOOL_INCLUDE_DIR, "BINUTILS", 0, 1, 0, 0 },
+#else
+# define JEHANNE_ID_TOOL
+#endif
+
+#define JEHANNE_POSIX_INCLUDE_DIR "/posix/include"
+#define JEHANNE_ID_POSIX { JEHANNE_POSIX_INCLUDE_DIR, 0, 0, 0, 1, 0 },
+
+#ifdef CROSS_DIRECTORY_STRUCTURE
+# define JEHANNE_POSIX_LIB_DIR "%:getenv(JEHANNE /posix/lib)"
+#else
+# define JEHANNE_POSIX_LIB_DIR "/posix/lib"
+#endif
+
+
 #undef INCLUDE_DEFAULTS
 #define INCLUDE_DEFAULTS			\
   {						\
@@ -144,20 +134,20 @@
 
 #undef EXTRA_SPECS
 #define EXTRA_SPECS \
-  { "posixly_isystems",	JEHANNE_IS_GCC		\
-			JEHANNE_IS_POSIX	\
-			JEHANNE_IS_PREFIX	\
-			JEHANNE_IS_CROSS	\
-			JEHANNE_IS_TOOL },	\
   { "posixly_lib",	"%{!shared:%{g*:-lg} %{!p:%{!pg:-lc}}%{p:-lc_p}%{pg:-lc_p}} -lposix" },
 
 
-/* set  CPLUSPLUS_CPP_SPEC to prevent the default fallback to CPP_SPEC */
-#define CPLUSPLUS_CPP_SPEC ""
-
 /* These Specs reacts `-9` option by removing POSIX stuff */
-#undef CPP_SPEC
-#define CPP_SPEC "%{!9:%(posixly_isystems)}"
+//#undef CPP_SPEC
+//#define CPP_SPEC "%{!9:%(posixly_isystems)}"
+
+/* Since -nostdinc++ doesn't exclude C headers but we have cheated 
+ * marking them as C++ headers, we need to add them back when
+ * this option is provided
+ */
+//#undef CPLUSPLUS_CPP_SPEC
+//#define CPLUSPLUS_CPP_SPEC "%{nostdinc++:%(posixly_isystems)}"
+//#define CPLUSPLUS_CPP_SPEC ""
 
 #undef LINK_SPEC
 #define LINK_SPEC "%{!9:-L" JEHANNE_POSIX_LIB_DIR "}"
