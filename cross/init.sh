@@ -74,6 +74,7 @@ failOnError $? "fetching sources"
 if [ ! -f tmp/bin/m4 ]; then
 (
 	cd src/m4 &&
+	patch -p1 < ../../patch/m4/m4-1.4.14-glibc-change-work-around.patch &&
 	sed -i '/_GL_WARN_ON_USE (gets/d' lib/stdio.in.h &&
 	( grep -q '#include <sys/stat.h>'  src/m4.h || sed -i 's:.*\#include <sys/types\.h>.*:&\n#include <sys/stat.h>:g' src/m4.h ) &&
 	./configure --prefix=$JEHANNE/hacking/cross/tmp &&
