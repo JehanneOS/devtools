@@ -155,6 +155,7 @@
 #undef LIB_SPEC
 #define LIB_SPEC "%{!9:%(posixly_lib)} -ljehanne"
 
+#define DRIVER_SELF_SPECS "%{9:-fno-builtin -fno-omit-frame-pointer -fplan9-extensions -fvar-tracking -fvar-tracking-assignments}"
 
 /* Files that are linked before user code.
    The %s tells gcc to look for these files in the library directory. */
