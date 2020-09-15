@@ -1,7 +1,7 @@
 /*
  * This file is part of Jehanne.
  *
- * Copyright (C) 2016 Giacomo Tesio <giacomo@tesio.it>
+ * Copyright (C) 2016-2019 Giacomo Tesio <giacomo@tesio.it>
  *
  * Jehanne is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import (
 const gplHeader string = `/*
  * This file is part of Jehanne.
  *
- * Copyright (C) 2016 Giacomo Tesio <giacomo@tesio.it>
+ * Copyright (C) 2016-2019 Giacomo Tesio <giacomo@tesio.it>
  *
  * Jehanne is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,7 +104,6 @@ func argTypeName(t string) string{
 		return "p"
 	}
 	return " [?? " + t + "]"
-
 }
 
 func argRegister(index int, t string) string{
@@ -144,6 +143,7 @@ func getHeaderData(calls []SyscallConf) *HeaderCode {
 		wcall.AsmClobbers = "\"cc\", \"rcx\", \"r11\""
 		wcall.AsmArgs = fmt.Sprintf("\"0\"(%d)", wcall.Id)
 		for i, a := range(call.Args){
+			typeName := argTypeName(a)
 			if i > 0 {
 				wcall.FuncArgs += ", "
 				wcall.MacroArgs += ", "
@@ -153,7 +153,11 @@ func getHeaderData(calls []SyscallConf) *HeaderCode {
 			}
 			wcall.FuncArgs += fmt.Sprintf("%s a%d", a, i) 
 			wcall.MacroArgs += fmt.Sprintf("/* %s */ a%d", a, i)
-			wcall.VarValues = append(wcall.VarValues, fmt.Sprintf("_sysargs[%d].%s = (a%d); \\\n\t", i, argTypeName(a), i))
+			if typeName == "p" {
+				wcall.VarValues = append(wcall.VarValues, fmt.Sprintf("_sysargs[%d].%s = ((volatile void*)(a%d)); \\\n\t", i, typeName, i))
+			} else {
+				wcall.VarValues = append(wcall.VarValues, fmt.Sprintf("_sysargs[%d].%s = (a%d); \\\n\t", i, typeName, i))
+			}
 			wcall.Vars = append(wcall.Vars, fmt.Sprintf("register %s __r%d asm(\"%s\") = _sysargs[%d].%s; \\\n\t", a, i, argRegister(i, a), i, argTypeName(a)))
 			wcall.AsmArgs += fmt.Sprintf(", \"r\"(__r%d)", i)
 		}
@@ -169,7 +173,7 @@ func getHeaderData(calls []SyscallConf) *HeaderCode {
 func generateSyscallTable(calls []SyscallConf){
 	code := getHeaderData(calls)
 	tmpl, err := template.New("tab.c").Parse(`
-{{ range .Wrappers }}"{{ .Name }}", (int(*)()) {{ .Name }},
+{{ range .Wrappers }}"{{ .Name }}", (int(*)()) sys_{{ .Name }},
 {{ end }}
 `)
 	err = tmpl.Execute(os.Stdout, code)
@@ -185,9 +189,9 @@ func generateLibcCode(calls []SyscallConf){
 #include <u.h>
 
 {{ range .Wrappers }}
-#pragma weak {{ .Name }}
+#pragma weak sys_{{ .Name }}
 {{ .RetType }}
-{{ .Name }}({{ .FuncArgs }})
+sys_{{ .Name }}({{ .FuncArgs }})
 {
 	register {{ .RetType }} __ret asm ("rax");
 	__asm__ __volatile__ (
@@ -220,33 +224,9 @@ typedef enum Syscalls
 {{ end }}} Syscalls;
 
 #ifndef KERNEL
-{{ range .Wrappers }}
-#define sys_{{ .Name }}({{ .MacroArgs }}) ({ \
-	{{ range .VarValues }}{{.}}{{end}}{{ range .Vars }}{{.}}{{end}}register {{ .RetType }} __ret asm ("rax"); \
-	__asm__ __volatile__ ( \
-		"syscall" \
-		: "=&r" (__ret) \
-		: {{ .AsmArgs }} \
-		: {{ .AsmClobbers }} \
-	); \
-	__ret; })
+
+{{ range .Wrappers }}extern {{ .RetType }} sys_{{ .Name }}({{ .FuncArgs }});
 {{ end }}
-
-#ifdef PORTABLE_SYSCALLS
-
-{{ range .Wrappers }}extern {{ .RetType }} {{ .Name }}({{ .FuncArgs }});
-{{ end }}
-extern int32_t read(int, void*, int32_t);
-extern int32_t write(int, const void*, int32_t);
-
-#else
-
-{{ range .Wrappers }}# define {{ .Name }}(...) sys_{{ .Name }}(__VA_ARGS__)
-{{ end }}
-#define read(fd, buf, size) pread(fd, buf, size, -1)
-#define write(fd, buf, size) pwrite(fd, buf, size, -1)
-
-#endif
 
 #endif
 `)

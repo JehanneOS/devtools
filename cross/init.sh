@@ -2,7 +2,7 @@
 
 # This file is part of Jehanne.
 #
-# Copyright (C) 2016 Giacomo Tesio <giacomo@tesio.it>
+# Copyright (C) 2016-2019 Giacomo Tesio <giacomo@tesio.it>
 #
 # Jehanne is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,198 +21,104 @@ if [ "$JEHANNE" = "" ]; then
         exit 1
 fi
 
-# setup Jehanne's headers
-usyscalls header $JEHANNE/sys/src/sysconf.json > $JEHANNE/arch/amd64/include/syscalls.h
+WORKING_DIR="$JEHANNE_TOOLCHAIN"
+CROSS_DIR="$JEHANNE/hacking/cross"
+LOG="$WORKING_DIR/cross.build.log"
 
-#
-# WELLCOME TO HELL ! ! !
-#
-
-# If you want to understand _WHY_ Jehanne exists, you should try to
-# create a GCC crosscompiler in Debian without requiring root access or Tex.
-# And this despite the extreme quality of Debian GNU/Linux!
-
-# To create a Jehanne version of GCC, we need specific OUTDATED versions
-# of Autotools that won't compile easily in a modern Linux distro.
-
-echo -n please wait.
-(
-	# Inside parentheses, and therefore a subshell . . .
-	while [ 1 ]   # Endless loop.
-	do
-	  echo -n "."
-	  sleep 3
-	done
-) &
-dotter=$!
-date > cross-toolchain.build.log
+export LD_PRELOAD=
 
 function failOnError {
 	# $1 -> exit status on a previous command
 	# $2 -> task description
 	if [ $1 -ne 0 ]; then
-		kill $dotter
-		wait $dotter 2>/dev/null
-
 		echo "ERROR $2"
 		echo
 		echo BUILD LOG:
 		echo
-		cat cross-toolchain.build.log
+		cat $LOG
 		exit $1
 	fi
 }
 
-# fetch all sources
-(cd src && fetch) >> cross-toolchain.build.log 2>&1
-failOnError $? "fetching sources"
-
-# build m4 1.4.14
-# - workaround a bug in lib/stdio.in.h, see http://lists.gnu.org/archive/html/bug-m4/2012-08/msg00008.html
-# - workaround a bug in src/m4.h, see https://bugs.archlinux.org/task/19829
-# both bugs exists thanks to changes in external code
-if [ ! -f tmp/bin/m4 ]; then
-(
-	cd src/m4 &&
-	sed -i '/_GL_WARN_ON_USE (gets/d' lib/stdio.in.h &&
-	( grep -q '#include <sys/stat.h>'  src/m4.h || sed -i 's:.*\#include <sys/types\.h>.*:&\n#include <sys/stat.h>:g' src/m4.h ) &&
-	./configure --prefix=$JEHANNE/hacking/cross/tmp &&
-	make && make install
-) >> cross-toolchain.build.log 2>&1
-failOnError $? "building m4"
-fi
-# build autoconf 2.64
-# - hack git-version-gen to avoid the -dirty flag in version on make
-# - autoreconf
-# - disable doc build
-# - disable man build
-if [ ! -f tmp/bin/autoconf ]; then
-(
-	cd src/autoconf &&
-	cp ../../patch/autoconf/build-aux/git-version-gen build-aux/git-version-gen &&
-	autoreconf &&
-	./configure --prefix=$JEHANNE/hacking/cross/tmp &&
-	cp ../../patch/MakeNothing.in ../autoconf/doc/Makefile.in &&
-	cp ../../patch/MakeNothing.in ../autoconf/man/Makefile.in &&
-	make && make install
-) >> cross-toolchain.build.log 2>&1
-failOnError $? "building autoconf"
-fi
-# build automake 1.11.1
-# - autoreconf to avoid conflicts with installed automake
-# - automake; configure; make (that will fail) and then automake again
-#   to workaround this hell
-# - disable doc build
-# - disable disable tests build
-if [ ! -f tmp/bin/automake ]; then
-(
-	cd src/automake &&
-	echo > doc/Makefile.am &&
-	touch NEWS AUTHORS && autoreconf -i && 
-	automake &&
-	(./configure --prefix=$JEHANNE/hacking/cross/tmp && make; automake) &&
-	./configure --prefix=$JEHANNE/hacking/cross/tmp &&
-	cp ../../patch/MakeNothing.in doc/Makefile.in &&
-	cp ../../patch/MakeNothing.in tests/Makefile.in &&
-	make && make install
-) >> cross-toolchain.build.log 2>&1
-failOnError $? "building automake"
-fi
-# build libtool 2.4
-if [ ! -f tmp/bin/libtool ]; then
-(
-	cd src/libtool &&
-	./configure --prefix=$JEHANNE/hacking/cross/tmp &&
-	make && make install
-) >> cross-toolchain.build.log 2>&1
-failOnError $? "building libtool"
-fi
-
-# FINALLY! We have our OUTDATED autotools in tmp/bin
-export PATH=$JEHANNE/hacking/cross/tmp/bin:$PATH
-export CROSS_DIR=$JEHANNE/hacking/cross
-if [ "$BUILD_DIRS_ROOT" = "" ]; then
-	export BUILD_DIRS_ROOT=$JEHANNE/hacking/cross/src
-fi
-if [ ! -d $BUILD_DIRS_ROOT ]; then
-	mkdir $BUILD_DIRS_ROOT
-fi
-
 function dynpatch {
-	# $1 -> path from cross/src
+	# $1 -> path from $WORKING_DIR/src
 	# $2 -> string to search
-	( cd $JEHANNE/hacking/cross/src &&
+	( cd $WORKING_DIR/src &&
 	  grep -q jehanne $1 ||
-	  sed -n -i -e "/$2/r ../patch/$1" -e '1x' -e '2,${x;p}' -e '${x;p}' $1
+	  sed -n -i -e "/$2/r $CROSS_DIR/patch/$1" -e '1x' -e '2,${x;p}' -e '${x;p}' $1
 	)
 }
 
+
+# setup Jehanne's headers
+usyscalls header $JEHANNE/sys/src/sysconf.json > $JEHANNE/arch/amd64/include/syscalls.h
+
+mkdir -p $WORKING_DIR
+date > $LOG
+
+# verify libtool is installed
+libtool --version >> $LOG
+failOnError $? "libtool installation check"
+
+
+cp -fpr $JEHANNE/hacking/cross/src $WORKING_DIR
+cd $WORKING_DIR/src
+fetch >> $LOG
+failOnError $? "fetching sources"
+
+mkdir -p $WORKING_DIR/build
+rm -f $JEHANNE/hacking/bin/makeinfo
+ln -s `which true` $JEHANNE/hacking/bin/makeinfo # don't depend on texinfo
+mkdir -p $WORKING_DIR/cross
+
 # Patch and build binutils
-if [ "$BINUTILS_BUILD_DIR" = "" ]; then
-	export BINUTILS_BUILD_DIR=$BUILD_DIRS_ROOT/build-binutils
-fi
-if [ ! -d $BINUTILS_BUILD_DIR ]; then
-	mkdir $BINUTILS_BUILD_DIR
-fi
-if [ ! -f toolchain/bin/x86_64-jehanne-ar ]; then
-(
+echo -n Building binutils...
+export BINUTILS_BUILD_DIR=$WORKING_DIR/build/binutils
+mkdir -p $BINUTILS_BUILD_DIR
+
+( ( grep -q jehanne $WORKING_DIR/src/binutils/config.sub || (
+	cd $WORKING_DIR &&
 	sed -i '/jehanne/b; /ELF_TARGET_ID/,/elf_backend_can_gc_sections/s/0x200000/0x1000 \/\/ jehanne hack/g' src/binutils/bfd/elf64-x86-64.c &&
-	sed -i '/jehanne/b; s/| -tirtos/| -tirtos* | -jehanne/g' src/binutils/config.sub &&
+	sed -i '/jehanne/b; s/| midnightbsd\*/| midnightbsd* | jehanne*/g' src/binutils/config.sub &&
 	dynpatch 'binutils/bfd/config.bfd' '\# END OF targmatch.h' &&
-	dynpatch 'binutils/gas/configure.tgt' '  i860-\*-\*)' &&
-	( grep -q jehanne src/binutils/ld/configure.tgt || patch -p1 < patch/binutils/ld/configure.tgt ) &&
-	cp patch/binutils/ld/emulparams/elf_x86_64_jehanne.sh src/binutils/ld/emulparams/ &&
-	cp patch/binutils/ld/emulparams/elf_i386_jehanne.sh src/binutils/ld/emulparams/ &&
+	dynpatch 'binutils/gas/configure.tgt' '  i386-\*-darwin\*)' &&
+	( grep -q jehanne src/binutils/ld/configure.tgt || patch -p1 < $CROSS_DIR/patch/binutils/ld/configure.tgt ) &&
+	cp $CROSS_DIR/patch/binutils/ld/emulparams/elf_x86_64_jehanne.sh src/binutils/ld/emulparams/ &&
+	cp $CROSS_DIR/patch/binutils/ld/emulparams/elf_i386_jehanne.sh src/binutils/ld/emulparams/ &&
 	dynpatch 'binutils/ld/Makefile.am' 'eelf_x86_64.c: ' &&
 	(grep 'eelf_i386_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_EMULATION_SOURCES = \\.*/&\n\teelf_i386_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
 	(grep 'eelf_x86_64_jehanne.c \\' src/binutils/ld/Makefile.am || sed -i 's/.*ALL_64_EMULATION_SOURCES = \\.*/&\n\teelf_x86_64_jehanne.c \\/' src/binutils/ld/Makefile.am) &&
-	cd src/binutils/ld && automake && cd ../ &&
+	cd src/binutils/ld && automake-1.15 && cd ../
+	) ) &&
 	cd $BINUTILS_BUILD_DIR &&
-	$CROSS_DIR/src/binutils/configure --prefix=$JEHANNE/hacking/cross/toolchain --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --disable-nls --disable-werror &&
-	cp $CROSS_DIR/patch/MakeNothing.in $CROSS_DIR/src/binutils/bfd/doc/Makefile &&
-	cp $CROSS_DIR/patch/MakeNothing.in $CROSS_DIR/src/binutils/bfd/po/Makefile &&
-	cp $CROSS_DIR/patch/MakeNothing.in $CROSS_DIR/src/binutils/gas/doc/Makefile &&
-	cp $CROSS_DIR/patch/MakeNothing.in $CROSS_DIR/src/binutils/binutils/doc/Makefile &&
-	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true && 
-	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install
-) >> cross-toolchain.build.log 2>&1
-failOnError $? "building binutils"
-fi
+	$WORKING_DIR/src/binutils/configure --target=x86_64-jehanne --prefix=/posix --with-sysroot=$JEHANNE --target=x86_64-jehanne --enable-interwork --enable-multilib --enable-newlib-long-time_t --disable-nls --disable-werror &&
+	cp $CROSS_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/doc/Makefile.in &&
+	cp $CROSS_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/bfd/po/Makefile.in &&
+	cp $CROSS_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/gas/doc/Makefile.in &&
+	cp $CROSS_DIR/patch/MakeNothing.in $WORKING_DIR/src/binutils/binutils/doc/Makefile.in &&
+	make &&
+	make DESTDIR=$WORKING_DIR/cross install
+) >> $LOG 2>&1
+failOnError $? "Building binutils"
+echo done.
 
+echo -n Building gcc... | tee -a $LOG
 # Patch and build gcc
-if [ "$GCC_BUILD_DIR" = "" ]; then
-	export GCC_BUILD_DIR=$BUILD_DIRS_ROOT/build-gcc
-fi
-if [ ! -d $GCC_BUILD_DIR ]; then
-	mkdir $GCC_BUILD_DIR
-fi
+export GCC_BUILD_DIR=$WORKING_DIR/build/gcc
+mkdir -p $GCC_BUILD_DIR
+
 (
-	pwd &&
-	( grep -q jehanne src/gcc/gcc/config.gcc || patch -p1 < patch/gcc/gcc/config.gcc ) &&
+	cd $WORKING_DIR &&
+	( grep -q jehanne src/gcc/gcc/config.gcc || patch -p1 < $CROSS_DIR/patch/gcc.patch ) &&
+	cp $CROSS_DIR/patch/gcc/gcc/config/* src/gcc/gcc/config &&
+	sed -i 's/ftp/https/g' src/gcc/contrib/download_prerequisites &&
 	cd src &&
-	cp ../patch/gcc/contrib/download_prerequisites gcc/contrib/download_prerequisites && 
 	( cd gcc && ./contrib/download_prerequisites ) &&
-	dynpatch 'gcc/config.sub' '-none)' &&
-	cp ../patch/gcc/gcc/config/jehanne.h gcc/gcc/config &&
-	dynpatch 'gcc/libstdc++-v3/crossconfig.m4' '  \*)' &&
-	cd gcc/libstdc++-v3 && autoconf -i && cd ../../ &&
-	( pwd && grep -q jehanne gcc/libgcc/config.host ||
-	  sed  -i -f ../patch/gcc/libgcc/config.host.sed gcc/libgcc/config.host 
-	) &&
-	dynpatch 'gcc/fixincludes/mkfixinc.sh' 'i\?86-\*-cygwin\*' &&
+	( cd gcc/libstdc++-v3 && autoconf -i ) &&
 	cd $GCC_BUILD_DIR &&
-	$CROSS_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=$JEHANNE/hacking/cross/toolchain --with-sysroot=$JEHANNE --enable-languages=c,c++ &&
-	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-gcc all-target-libgcc && 
-	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-gcc install-target-libgcc
-#	 &&
-#	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true all-target-libstdc++-v3 &&
-#	make MAKEINFO=true MAKEINFOHTML=true TEXI2DVI=true TEXI2PDF=true DVIPS=true install-target-libstdc++-v3
-) >> cross-toolchain.build.log 2>&1
+	$WORKING_DIR/src/gcc/configure --target=x86_64-jehanne --prefix=/posix --with-sysroot=$JEHANNE --enable-languages=c,c++ --without-isl --disable-nls &&
+	make CFLAGS_FOR_TARGET="-I$JEHANNE/sys/include/apw" all-gcc all-target-libgcc &&
+	make DESTDIR=$WORKING_DIR/cross install-gcc  install-target-libgcc
+) >> $LOG 2>&1
 failOnError $? "building gcc"
-
-# add sh
-ln -sf /bin/bash $JEHANNE/hacking/cross/toolchain/bin/x86_64-jehanne-sh
-
-kill $dotter
-wait $dotter 2>/dev/null
-echo "done."
+echo done.

@@ -1,7 +1,0 @@
-gcc
-binutils
-autoconf
-automake
-libtool
-m4
-build-*
