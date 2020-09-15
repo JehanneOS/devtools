@@ -27,9 +27,10 @@ export MKSH=$CROSS_DIR/pkgs/mksh/
 export MKSH_SRC=$MKSH/src/
 export MKSH_BUILD=$MKSH/out/
 export MKSHRC_PATH='~/lib/mkshrc'
-export LIBS="$JEHANNE/arch/$ARCH/lib/newlib/libc.a $JEHANNE/arch/$ARCH/lib/newlib/libm.a $JEHANNE/arch/$ARCH/lib/newlib/libg.a -lposix -lc"
-export CPPFLAGS="-I$JEHANNE/sys/posix/newlib/ '-DMKSHRC_PATH=\"$MKSHRC_PATH\"' '-DARCH=\"$ARCH\"'"
+export LIBS=" -lm -lg"
+export CPPFLAGS="'-DMKSHRC_PATH=\"$MKSHRC_PATH\"' '-DARCH=\"$ARCH\"'"
 
+export PATH="$JEHANNE/hacking/cross/wrappers:$PATH"
 export LD_PRELOAD=
 
 echo -n Building mksh.

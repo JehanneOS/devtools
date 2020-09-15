@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# from https://wiki.osdev.org/Cross-Porting_Software
+
+# Fill these in appropriately:
+export PKG_CONFIG_SYSROOT_DIR=$JEHANNE
+export PKG_CONFIG_LIBDIR=$JEHANNE/posix
+
+# TODO: If it works this should probably just be set to the empty string.
+export PKG_CONFIG_PATH=$PKG_CONFIG_LIBDIR
+
+# Use --static here if your OS only has static linking.
+# TODO: Perhaps it's a bug in the libraries if their pkg-config files
+#       doesn't record that only static libraries were built.
+exec pkg-config --static "$@"

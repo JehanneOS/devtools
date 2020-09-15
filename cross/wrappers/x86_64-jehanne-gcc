@@ -1,0 +1,27 @@
+#!/bin/sh
+
+ARGS="$@"
+
+REPONAME=`basename $JEHANNE`
+WORKING_DIR=`dirname $JEHANNE`
+WORKING_DIR="$WORKING_DIR/$REPONAME.TOOLCHAIN"
+
+if [ -z "$WRAPPER_LOG" ]; then
+	WRAPPER_LOG="$WORKING_DIR/wrappers.log"
+fi
+echo >> $WRAPPER_LOG
+echo >> $WRAPPER_LOG
+
+if echo $ARGS|grep -e '\.c\b' -e '\b\-o\b' -e ' -o ' > /dev/null; then
+	TOINCLUDE="-isystem$JEHANNE_TOOLCHAIN/cross/posix/lib/gcc/x86_64-jehanne/9.2.0/include -isystem$JEHANNE/posix/include"
+	TOLINK="-L$JEHANNE/posix/lib -lc"
+	date --rfc-3339="ns"  |tee -a $WRAPPER_LOG
+	export >> $WRAPPER_LOG
+echo	$WORKING_DIR/cross/posix/bin/x86_64-jehanne-gcc "$@" $TOINCLUDE $TOLINK >> $WRAPPER_LOG
+exec	$WORKING_DIR/cross/posix/bin/x86_64-jehanne-gcc "$@" $TOINCLUDE $TOLINK
+else
+	date --rfc-3339="ns"  >> $WRAPPER_LOG
+	export >> $WRAPPER_LOG
+echo	$WORKING_DIR/cross/posix/bin/x86_64-jehanne-gcc "$@"  >> $WRAPPER_LOG
+exec	$WORKING_DIR/cross/posix/bin/x86_64-jehanne-gcc "$@" 
+fi
